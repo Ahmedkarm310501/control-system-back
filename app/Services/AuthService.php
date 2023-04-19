@@ -4,12 +4,8 @@ namespace App\Services;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use App\Traits\HttpResponses;
-
 class AuthService
 {
-    use HttpResponses;
-
     public function login($userData)
     {
         $user = User::where('email', $userData['email'])->first();
