@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Semester>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Department>
  */
-class SemesterFactory extends Factory
+class DepartmentFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -16,9 +16,9 @@ class SemesterFactory extends Factory
      */
     public function definition(): array
     {
+        $array_dept = ['CS','IS','IT'];
         return [
-            'year' => fake()->year(),
-            'term' => fake()->randomElement(['first', 'second', 'third']),
+            'name' => fake()->unique()->randomElement($array_dept),
         ];
     }
 }
