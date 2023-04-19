@@ -11,13 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('password');
-            $table->boolean('is_admin');
-            $table->rememberToken();
+        Schema::create('course_user', function (Blueprint $table) {
+            $table->foreignId('course_id')->references('id')->on('courses')->constrained();
+            $table->foreignId('user_id')->references('id')->on('users')->constrained();
             $table->timestamps();
         });
     }
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('course_users');
     }
 };
