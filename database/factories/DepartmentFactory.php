@@ -16,9 +16,15 @@ class DepartmentFactory extends Factory
      */
     public function definition(): array
     {
-        $array_dept = ['CS','IS','IT'];
+        $array_dept = [
+            'CS' => 'Computer Science',
+            'IT' => 'Information Technology',
+            'IS' => 'Information Systems',
+        ];
+        $dept_code = fake()->unique()->randomElement(array_keys($array_dept));
         return [
-            'name' => fake()->unique()->randomElement($array_dept),
+            'dept_code' => $dept_code,
+            'name' => $array_dept[$dept_code],
         ];
     }
 }

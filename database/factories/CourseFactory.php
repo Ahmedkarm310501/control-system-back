@@ -18,15 +18,18 @@ class CourseFactory extends Factory
     {
         $department = \App\Models\Department::all()->pluck('id')->toArray();
         $courses = [
-            'Introduction to Computer Science',
-            'Data Structures and Algorithms',
-            'Computer Networks',
-            'Operating Systems',
-            'Database Systems',
-            'Artificial Intelligence',
+            'CS101' => 'Introduction to Computer Science',
+            'CS221' => 'Data Structures and Algorithms',
+            'IT111' => 'Computer Networks',
+            'CS104' => 'Operating Systems',
+            'IS221' => 'Database Systems',
+            'CS106' => 'Artificial Intelligence',
         ];
+        $course_code = fake()->unique()->randomElement(array_keys($courses));
+        
         return [
-            'name' => fake()->unique()->randomElement($courses),
+            'course_code' => $course_code,
+            'name' => $courses[$course_code],
             'course_rule_id' => \App\Models\CourseRule::factory(),
             'department_id' => fake()->randomElement($department),
         ];
