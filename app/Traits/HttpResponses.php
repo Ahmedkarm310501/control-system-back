@@ -11,6 +11,10 @@ trait HttpResponses
             'data' => $data,
         ], $code);
     }
+    public function successMessage($message, $code = 200)
+    {
+        return response()->json(['message' => $message], $code);
+    }
 
     public function error($message, $code)
     {

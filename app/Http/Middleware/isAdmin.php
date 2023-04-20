@@ -5,9 +5,10 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
-
+use App\Traits\HttpResponses;
 class isAdmin
 {
+    use HttpResponses;
     /**
      * Handle an incoming request.
      *
@@ -18,6 +19,6 @@ class isAdmin
         if (auth()->check() && auth()->user()->is_admin) {
             return $next($request);
         }
-        abort(403, 'Unauthorized action.');
+        return $this->error('Unauthorized action.', 403);
     }
 }
