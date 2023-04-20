@@ -15,5 +15,9 @@ class UserService
             return false;
         }
     }
-
+    public function listUsers()
+    {
+        $users = User::select(['id', 'name', 'email'])->get();
+        return $users;
+    }
 }

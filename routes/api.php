@@ -18,5 +18,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
 // miidle ware isadmin for add user
 Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/add-user',[UserController::class,'addUser']);
+    // list all users
+    Route::get('/list-users',[UserController::class,'listUsers']);
 });
+
 
