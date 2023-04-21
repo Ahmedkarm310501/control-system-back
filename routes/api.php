@@ -16,14 +16,16 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+
 });
 // miidle ware isadmin for add user
 Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/add-user',[UserController::class,'addUser']);
     // list all users
     Route::get('/list-users',[UserController::class,'listUsers']);
-
+    
     Route::post('/add-course',[CourseController::class,'addCourse']);
     Route::get('/list-courses',[CourseController::class,'listCourses']);
+    Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
 });
 
