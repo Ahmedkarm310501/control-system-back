@@ -6,6 +6,8 @@ use App\Models\User;
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\CourseController;
+
 
 Route::post('/login', [AuthController::class, 'login']);
 // middle ware for api auth group
@@ -20,6 +22,7 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/add-user',[UserController::class,'addUser']);
     // list all users
     Route::get('/list-users',[UserController::class,'listUsers']);
-});
 
+    Route::post('/add-course',[CourseController::class,'addCourse']);
+});
 
