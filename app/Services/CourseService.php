@@ -23,4 +23,19 @@ class CourseService
         return $course;
     }
 
+    public function listCourses(){
+        $courses = Course::with('department')->get();
+        if(!$courses){
+            return false;
+        }
+        return $courses;
+    }
+
+    public function getCourse($course){
+        $course = Course::with('department')->where('course_code', $course)->first();
+        if(!$course){
+            return false;
+        }
+        return $course;
+    }
 }
