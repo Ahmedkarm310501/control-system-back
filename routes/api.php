@@ -24,5 +24,6 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::get('/list-users',[UserController::class,'listUsers']);
 
     Route::post('/add-course',[CourseController::class,'addCourse']);
+    Route::get('/list-courses',[CourseController::class,'listCourses']);
 });
 

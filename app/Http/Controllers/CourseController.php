@@ -20,4 +20,13 @@ class CourseController extends Controller
         return $this->successMessage('Course added successfully' , 201);
     }
 
+    public function listCourses(CourseService $courseService)
+    {
+        $courses = $courseService->listCourses();
+        if(!$courses){
+            return $this->error('Courses not found', 404);
+        } 
+        return $this->success($courses, 200 , 'all courses');
+    }
+
 }
