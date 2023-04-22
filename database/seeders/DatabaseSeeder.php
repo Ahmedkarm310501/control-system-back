@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
     // ->get();
     public function run(): void
     {
-        \App\Models\User::factory(1)->create();
+        \App\Models\User::factory(4)->create();
         \App\Models\Department::factory(2)->create();
          \App\Models\Course::factory(5)->create();
          \App\Models\Student::factory(20)->create();

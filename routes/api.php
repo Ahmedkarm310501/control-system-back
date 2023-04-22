@@ -20,6 +20,9 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/add-user',[UserController::class,'addUser']);
     // list all users
     Route::get('/list-users',[UserController::class,'listUsers']);
+    // delete user
+    Route::delete('/delete-user',[UserController::class,'deleteUser']);
 });
-
+Route::post('/user-profile', [UserController::class, 'userProfile']);
+Route::post('update-password', [UserController::class, 'updatePassword']);
 
