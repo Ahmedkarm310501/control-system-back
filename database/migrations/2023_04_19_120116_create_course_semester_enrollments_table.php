@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('course_semester_enrollments', function (Blueprint $table) {
             // $table->id();
-            $table->float('course_grade');
+            // $table->float('course_grade');
             $table->foreignId('course_id')->references('id')->on('courses')->constrained();
             $table->foreignId('semester_id')->references('id')->on('semesters')->constrained();
             $table->foreignId('student_id')->references('id')->on('students')->constrained();
+            $table->float('term_work')->nullable();
+            $table->float('exam_work')->nullable();
             $table->timestamps();
         });
     }

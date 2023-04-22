@@ -20,7 +20,9 @@ class CourseSemesterEnrollmentFactory extends Factory
         $semester_id = \App\Models\Semester::all()->pluck('id')->toArray();
         $student_id = \App\Models\Student::all()->pluck('id')->toArray();
         return [
-            'course_grade' => fake()->randomFloat(2, 0, 100),
+            // 'course_grade' => fake()->randomFloat(2, 0, 100),
+            'term_work'=> fake()->randomFloat(2,20,40),
+            'exam_work'=> fake()->randomFloat(2,30,60),
             'course_id' => fake()->randomElement($course_id),
             'semester_id' =>    fake()->randomElement($semester_id),
             'student_id' => fake()->randomElement($student_id),
