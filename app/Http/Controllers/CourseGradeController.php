@@ -11,6 +11,8 @@ use App\Models\Semester;
 use App\Models\Student;
 use App\Http\Requests\AddStudentToCourseRequest;
 use App\Http\Requests\addStudentsToCourseRequest;
+use App\Http\Requests\DeleteStudentFromCourseRequest;
+
 
 use App\Services\CourseGradeService;
 
@@ -51,5 +53,15 @@ class CourseGradeController extends Controller
             return $this->error($e->getMessage(), $e->getCode());
         }
         return $this->success($data['numOfMissingFields'],201,'Students added to course successfully');
+    }
+
+    public function deleteStudentFromCourse(DeleteStudentFromCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        try {
+            $courseGradeService->deleteStudentFromCourse($request->validated());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
+        }
+        return $this->success('Student deleted from course successfully');
     }
 }
