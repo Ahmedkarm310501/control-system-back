@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('student_id')->references('id')->on('students')->constrained();
             $table->float('term_work')->nullable();
             $table->float('exam_work')->nullable();
+            $table->unique(['course_id', 'semester_id', 'student_id'], 'cse_course_semester_student_unique');
             $table->timestamps();
         });
     }
