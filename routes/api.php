@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseGradeController;
 
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -16,6 +17,9 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
         return $request->user();
     });
     Route::post('/logout', [AuthController::class, 'logout']);
+
+    Route::get('/course-grades/{course_code}/{year}', [CourseGradeController::class, 'getCourseGrades']);
+    Route::post('add-student-to-course', [CourseGradeController::class, 'addStudentToCourse']);
 
 });
 // miidle ware isadmin for add user

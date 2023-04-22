@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('level');
-            $table->foreignId('department_id')->references('id')->on('departments')->constrained();
+            $table->string('level')->nullable();
+            // $table->foreignId('department_id')->references('id')->on('departments')->constrained()->nullable();
+            $table->foreignId('department_id')->nullable()->constrained('departments');
             $table->timestamps();
         });
     }

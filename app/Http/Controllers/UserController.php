@@ -19,6 +19,8 @@ class UserController extends Controller
             return $this->error('User not added', 422);
         }
     }
+
+    
     public function listUsers(UserService $userService)
     {
         $users = $userService->listUsers();
