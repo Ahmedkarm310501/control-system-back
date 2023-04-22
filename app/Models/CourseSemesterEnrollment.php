@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class CourseSemesterEnrollment extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'course_id',
+        'semester_id',
+        'student_id',
+        'course_grade',
+    ];
     protected $table = 'course_semester_enrollments';
     public function course()
     {
