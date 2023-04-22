@@ -185,4 +185,47 @@ class CourseGradeService{
         
     }
 
+    public function addOneStudentGrade($data)
+    {
+        $course = Course::find($data['course_id']);
+        if(!$course){
+            throw new \Exception('Course not found', 404);
+        }
+        // check if the user has access to the course
+        $course_user = CourseUser::where('user_id', auth()->user()->id)
+        ->where('course_id', $course->id)->first();
+        if(!$course_user){
+            throw new \Exception('You do not have access to this course', 403);
+        }
+        // get semster id
+        $semester = Semester::find($data['semester_id']);
+        if(!$semester){
+            throw new \Exception('Semester not found', 404);
+        }
+        $student = Student::find($data['student_id']);
+        if(!$student){
+            throw new \Exception('Student not found', 404);
+        }
+        $course_semester_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
+            ->where('semester_id', $semester->id)
+            ->where('student_id', $student->id)
+            ->first();
+        
+        if(!$course_semester_enrollment){
+            throw new \Exception('Student not enrolled in this course', 404);
+        }
+        CourseSemesterEnrollment::where('course_id', $course->id)
+            ->where('semester_id', $semester->id)
+            ->where('student_id', $student->id)
+            ->update([
+                'term_work' => $data['term_work'],
+                'exam_work' => $data['exam_work'],
+            ]);
+        if($course_semester_enrollment){
+            return $course_semester_enrollment;
+        }
+        throw new \Exception('Error updating student grade', 500);
+        
+    }
+
 }

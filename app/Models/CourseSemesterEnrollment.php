@@ -12,9 +12,11 @@ class CourseSemesterEnrollment extends Model
         'course_id',
         'semester_id',
         'student_id',
-        'course_grade',
+        'term_work',
+        'exam_work',
     ];
     protected $table = 'course_semester_enrollments';
+    protected $primaryKey =null;
     public function course()
     {
         return $this->belongsTo(Course::class);
