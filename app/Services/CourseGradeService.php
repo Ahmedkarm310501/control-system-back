@@ -6,7 +6,7 @@ use App\Models\CourseSemesterEnrollment;
 use App\Models\Course;
 use App\Models\Semester;
 use App\Models\Student;
-
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class CourseGradeService{
@@ -34,8 +34,13 @@ class CourseGradeService{
             ->where('semester_id', $semester->id)
             ->get()
             ->map(function ($enrollment) {
-                $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
-                $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+                if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                    $enrollment->total_grade = null;
+                    $enrollment->grade = null;
+                } else {
+                    $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+                    $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+                }
                 return $enrollment;
             });
 
@@ -91,7 +96,6 @@ class CourseGradeService{
                 'id' => $data['student_id'],
             ]);
         }
-
         $course_semester_enrollment = CourseSemesterEnrollment::firstOrCreate([
             'course_id' => $course->id,
             'semester_id' => $data['semester_id'],
@@ -101,6 +105,126 @@ class CourseGradeService{
             return $course_semester_enrollment;
         }
         throw new \Exception('Error adding student to course', 500);
+        
+    }
+
+    public function addStudentsToCourseExcel($data , $user)
+    {
+        $course = Course::find($data['course_id']);
+        if(!$course){
+            throw new \Exception('Course not found', 404);
+        }
+        // check if the user has access to the course
+        $course_user = CourseUser::where('user_id', $user->id)
+        ->where('course_id', $course->id)->first();
+        if(!$course_user){
+            throw new \Exception('You do not have access to this course', 403);
+        }
+        // get semster id
+        $semester = Semester::find($data['semester_id']);
+        if(!$semester){
+            throw new \Exception('Semester not found', 404);
+        }
+        $students = Excel::toArray([], $data['students'])[0];
+        $students = array_slice($students, 1);
+        $numOfMissingFields = 0;
+        foreach($students as $student){
+            if(!isset($student[0]) || !isset($student[1])){
+                $numOfMissingFields++;
+                continue;
+            }
+            $student = Student::firstOrCreate([
+                'id' => $student[0],
+                'name' => $student[1],
+            ]);
+            $course_semester_enrollment = CourseSemesterEnrollment::firstOrCreate([
+                'course_id' => $course->id,
+                'semester_id' => $data['semester_id'],
+                'student_id' => $student->id,
+            ]);
+        }
+        if($course_semester_enrollment){
+            return [
+                'course_semester_enrollment' => $course_semester_enrollment,
+                'numOfMissingFields' => $numOfMissingFields,
+            ];
+        }
+        throw new \Exception('Error adding student to course', 500);
+        
+    }
+
+    public function deleteStudentFromCourse($data )
+    {
+        $course = Course::find($data['course_id']);
+        if(!$course){
+            throw new \Exception('Course not found', 404);
+        }
+        // check if the user has access to the course
+        $course_user = CourseUser::where('user_id', auth()->user()->id)
+        ->where('course_id', $course->id)->first();
+        if(!$course_user){
+            throw new \Exception('You do not have access to this course', 403);
+        }
+        // get semster id
+        $semester = Semester::find($data['semester_id']);
+        if(!$semester){
+            throw new \Exception('Semester not found', 404);
+        }
+        $student = Student::find($data['student_id']);
+        if(!$student){
+            throw new \Exception('Student not found', 404);
+        }
+        $course_semester_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
+            ->where('semester_id', $semester->id)
+            ->where('student_id', $student->id)
+            ->delete();
+        if($course_semester_enrollment){
+            return $course_semester_enrollment;
+        }
+        throw new \Exception('Error deleting student from course', 500);
+        
+    }
+
+    public function addOneStudentGrade($data)
+    {
+        $course = Course::find($data['course_id']);
+        if(!$course){
+            throw new \Exception('Course not found', 404);
+        }
+        // check if the user has access to the course
+        $course_user = CourseUser::where('user_id', auth()->user()->id)
+        ->where('course_id', $course->id)->first();
+        if(!$course_user){
+            throw new \Exception('You do not have access to this course', 403);
+        }
+        // get semster id
+        $semester = Semester::find($data['semester_id']);
+        if(!$semester){
+            throw new \Exception('Semester not found', 404);
+        }
+        $student = Student::find($data['student_id']);
+        if(!$student){
+            throw new \Exception('Student not found', 404);
+        }
+        $course_semester_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
+            ->where('semester_id', $semester->id)
+            ->where('student_id', $student->id)
+            ->first();
+        
+        if(!$course_semester_enrollment){
+            throw new \Exception('Student not enrolled in this course', 404);
+        }
+        CourseSemesterEnrollment::where('course_id', $course->id)
+            ->where('semester_id', $semester->id)
+            ->where('student_id', $student->id)
+            ->update([
+                'term_work' => $data['term_work'],
+                'exam_work' => $data['exam_work'],
+            ]);
+        if($course_semester_enrollment){
+            return $course_semester_enrollment;
+        }
+        throw new \Exception('Error updating student grade', 500);
         
     }
 
