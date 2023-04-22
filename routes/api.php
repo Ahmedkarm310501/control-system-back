@@ -29,6 +29,8 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::get('/list-users',[UserController::class,'listUsers']);
     // delete user
     Route::delete('/delete-user',[UserController::class,'deleteUser']);
+
+    
     Route::post('/add-course',[CourseController::class,'addCourse']);
     Route::get('/list-courses',[CourseController::class,'listCourses']);
     Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
