@@ -10,6 +10,7 @@ use App\Models\Course;
 use App\Models\Semester;
 use App\Models\Student;
 use App\Http\Requests\AddStudentToCourseRequest;
+use App\Http\Requests\addStudentsToCourseRequest;
 
 use App\Services\CourseGradeService;
 
@@ -39,5 +40,16 @@ class CourseGradeController extends Controller
             return $this->error($e->getMessage(), $e->getCode());
         }
         return $this->success('Student added to course successfully');
+    }
+
+    public function addStudentsToCourseExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+           $data=  $courseGradeService->addStudentsToCourseExcel($data, $request->user());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
+        }
+        return $this->success($data['numOfMissingFields'],201,'Students added to course successfully');
     }
 }
