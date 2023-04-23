@@ -10,9 +10,8 @@ use App\Models\Course;
 use App\Models\Semester;
 use App\Models\Student;
 use App\Http\Requests\AddStudentToCourseRequest;
-
-
-
+use App\Http\Requests\NumberStudentsRequest;
+use App\Services\CourseGradeService;
 
 class CourseGradeController extends Controller
 {
@@ -35,7 +34,7 @@ class CourseGradeController extends Controller
         if(!$semester){
             return $this->error('Semester not found', 404);
         }
-        // get course semester enrollment with the semester id and course id 
+        // get course semester enrollment with the semester id and course id
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
         ->where('course_id', $course->id)
         ->where('semester_id', $semester->id)
@@ -49,8 +48,8 @@ class CourseGradeController extends Controller
         }
 
         return $this->success($course_semester_enrollment);
-        
-        
+
+
     }
 
 
@@ -89,5 +88,37 @@ class CourseGradeController extends Controller
         }else{
             return $this->error('Student not added to course', 422);
         }
+    }
+    public function getNumberOfStudents(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
+    {
+        $course_semester = $request->validated();
+        $number_of_students = $courseGradeService->getNumberOfStudents($course_semester);
+        if($number_of_students){
+            return $this->success($number_of_students,200,'Number of students');
+        }else{
+            return $this->error('Number of students not found', 404);
+        }
+    }
+    public function getAverageGrade(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
+    {
+        $course_semester = $request->validated();
+        $average_grade = $courseGradeService->getAverageGrade($course_semester);
+        if($average_grade){
+            return $this->success($average_grade,200,'Average grade');
+        }else{
+            return $this->error('Average grade not found', 404);
+        }
+    }
+    public function getNumberOfPassedStudents(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
+    {
+        $course_semester = $request->validated();
+        $number_of_passed_students = $courseGradeService->getNumberOfPassedStudents($course_semester);
+        return $this->success($number_of_passed_students,200,'Number of passed students');
+    }
+    public function getNumberOfFailedStudents(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
+    {
+        $course_semester = $request->validated();
+        $number_of_failed_students = $courseGradeService->getNumberOfFailedStudents($course_semester);
+        return $this->success($number_of_failed_students,200,'Number of failed students');
     }
 }

@@ -34,4 +34,5 @@ class Course extends Model
         return $this->belongsToMany(Semester::class, 'course_semester_enrollments', 'course_id', 'semester_id')
             ->withPivot('course_grade', 'student_id');
     }
+    
 }
