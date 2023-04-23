@@ -17,6 +17,7 @@ class CourseSemesterEnrollment extends Model
     ];
     protected $table = 'course_semester_enrollments';
     protected $primaryKey =null;
+    public $incrementing = false;
     public function course()
     {
         return $this->belongsTo(Course::class);
