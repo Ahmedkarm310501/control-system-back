@@ -88,4 +88,15 @@ class CourseGradeController extends Controller
         }
         return $this->success('Course grades deleted successfully');
     }
+
+    public function addStudentsGradesExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+            $data = $courseGradeService->addStudentsGradesExcel($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        return $this->successMessage($data['wrongFormat'],201);
+    }
 }

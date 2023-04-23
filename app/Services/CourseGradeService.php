@@ -182,7 +182,7 @@ class CourseGradeService{
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting student from course', 500);
-        
+
     }
 
     public function addOneStudentGrade($data)
@@ -256,6 +256,52 @@ class CourseGradeService{
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting course grades', 500);
+        
+    }
+
+    public function addStudentsGradesExcel($data)
+    {
+        $course = Course::find($data['course_id']);
+        if(!$course){
+            throw new \Exception('Course not found', 404);
+        }
+        // check if the user has access to the course
+        $course_user = CourseUser::where('user_id', auth()->user()->id)
+        ->where('course_id', $course->id)->first();
+        if(!$course_user){
+            throw new \Exception('You do not have access to this course', 403);
+        }
+        // get semster id
+        $semester = Semester::find($data['semester_id']);
+        if(!$semester){
+            throw new \Exception('Semester not found', 404);
+        }
+        $students = Excel::toArray([], $data['students'])[0];
+        $students = array_slice($students, 1);
+        $wrongFormat = [];
+        $index = 1;
+        foreach($students as $student){
+            if(!isset($student[0]) || !isset($student[1]) || !isset($student[2])){
+                $wrongFormat[] = $index;
+                continue;
+            }
+            $course_semester_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
+            ->where('semester_id', $semester->id)
+            ->where('student_id', $student[0])
+            ->update([
+                'term_work' => $student[1],
+                'exam_work' => $student[2],
+            ]);
+            $index++;
+        }
+        print_r($wrongFormat);
+        if($course_semester_enrollment){
+            return [
+                'course_semester_enrollment' => $course_semester_enrollment,
+                'wrongFormat' => 'Wrong format at index: '.implode(', ', $wrongFormat).'. Please check the excel file and try again',
+            ];
+        }
+        throw new \Exception('Error adding student to course', 500);
         
     }
 

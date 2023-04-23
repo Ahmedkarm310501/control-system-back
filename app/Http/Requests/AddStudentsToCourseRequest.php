@@ -27,7 +27,6 @@ class AddStudentsToCourseRequest extends FormRequest
             'course_id' => 'required|integer',
             'semester_id' => 'required|integer',
         ];
-        
     }
 
     public function messages(){
