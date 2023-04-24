@@ -29,6 +29,11 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/graph-one', [CourseGradeController::class, 'graphOne']);
     //graph two
     Route::post('/graph-two', [CourseGradeController::class, 'graphTwo']);
+    Route::post('add-students-to-course-excel', [CourseGradeController::class, 'addStudentsToCourseExcel']);
+    Route::post('delete-student-from-course', [CourseGradeController::class, 'deleteStudentFromCourse']);
+    Route::post('add-one-student-grade', [CourseGradeController::class, 'addOneStudentGrade']);
+    Route::post('add-students-grades-excel', [CourseGradeController::class, 'addStudentsGradesExcel']);
+    Route::post('delete-course-grades', [CourseGradeController::class, 'deleteCourseGrades']);
 
 
 });
@@ -47,6 +52,8 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/edit-user',[UserController::class,'editUser']);
     // delete user
     Route::delete('/delete-user',[UserController::class,'deleteUser']);
+
+
     Route::post('/add-course',[CourseController::class,'addCourse']);
     Route::get('/list-courses',[CourseController::class,'listCourses']);
     Route::get('/courses/{course}', [CourseController::class, 'getCourse']);

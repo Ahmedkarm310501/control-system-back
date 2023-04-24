@@ -12,12 +12,18 @@ use App\Models\Student;
 use App\Http\Requests\AddStudentToCourseRequest;
 use App\Http\Requests\NumberStudentsRequest;
 use App\Services\CourseGradeService;
+use App\Http\Requests\addStudentsToCourseRequest;
+use App\Http\Requests\DeleteStudentFromCourseRequest;
+use App\Http\Requests\AddStudGradeRequest;
+use App\Http\Requests\DeleteCourseGradesRequest;
+
+
 
 class CourseGradeController extends Controller
 {
     use HttpResponses;
 
-    public function getCourseGrades($course_code,$year, Request $request)
+    public function getCourseGrades($course_code, $year, CourseGradeService $courseGradeService, Request $request)
     {
         $course = Course::where('course_code', $course_code)->first();
         if(!$course){
@@ -52,42 +58,75 @@ class CourseGradeController extends Controller
 
     }
 
-
-    public function addStudentToCourse(addStudentToCourseRequest $request)
+    public function addStudentToCourse(AddStudentToCourseRequest $request, CourseGradeService $courseGradeService)
     {
         $data = $request->validated();
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            return $this->error('Course not found', 404);
+        try {
+            $courseGradeService->addStudentToCourse($data, $request->user());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
         }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', $request->user()->id)
-        ->where('course_id', $course->id)->first();
-        if(!$course_user){
-            return $this->error('You do not have access to this course', 403);
+        return $this->success('Student added to course successfully');
+    }
+
+    public function addStudentsToCourseExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+           $data=  $courseGradeService->addStudentsToCourseExcel($data, $request->user());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
         }
-        // get semster id
-        $semester = Semester::find($data['semester_id']);
-        if(!$semester){
-            return $this->error('Semester not found', 404);
+        return $this->success($data['numOfMissingFields'],201,'Students added to course successfully');
+    }
+
+    public function deleteStudentFromCourse(DeleteStudentFromCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        try {
+            $courseGradeService->deleteStudentFromCourse($request->validated());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
         }
-        $student = Student::find($data['student_id']);
-        if(!$student){
-            $student= Student::create([
-                'name' => $data['student_name'],
-                'id' => $data['student_id'],
-            ]);
+        return $this->success('Student deleted from course successfully');
+    }
+
+    public function addOneStudentGrade(AddStudGradeRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+            $courseGradeService->addOneStudentGrade($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
         }
-        $course_semester_enrollment = CourseSemesterEnrollment::create([
-            'course_id' => $course->id,
-            'semester_id' => $data['semester_id'],
-            'student_id' => $student->id,
-        ]);
-        if($course_semester_enrollment){
-            return $this->successMessage('Student added to course successfully');
-        }else{
-            return $this->error('Student not added to course', 422);
+        return $this->success('Student grade added successfully');
+    }
+
+    public function deleteCourseGrades(DeleteCourseGradesRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+            $courseGradeService->deleteCourseGrades($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
         }
+        return $this->success('Course grades deleted successfully');
+    }
+
+    public function addStudentsGradesExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+            $data = $courseGradeService->addStudentsGradesExcel($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        if (count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] ==false )
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
+        else if(count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] ==true)
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is some students with no grade');
+        else
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).' and there is some students with no grade');
+
     }
 
     public function graphTwo(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
@@ -103,3 +142,7 @@ class CourseGradeController extends Controller
         return $this->success($graph_one,200,'Graph one');
     }
 }
+// if (count($data['wrongFormat']) == 0)
+//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
+//         else
+//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).'');
