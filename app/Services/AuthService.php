@@ -12,7 +12,11 @@ class AuthService
         if (! $user || ! Hash::check($userData['password'], $user->password)) {
             return null;
         }else{
-            return $user->createToken($userData['email'])->plainTextToken;
+            $token = $user->createToken($userData['email'])->plainTextToken;
+            return [
+                'user' => $user,
+                'token' => $token
+            ];
         }
     }
 }

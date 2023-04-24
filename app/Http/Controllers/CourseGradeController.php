@@ -13,6 +13,7 @@ use App\Http\Requests\AddStudentToCourseRequest;
 use App\Http\Requests\addStudentsToCourseRequest;
 use App\Http\Requests\DeleteStudentFromCourseRequest;
 use App\Http\Requests\AddStudGradeRequest;
+use App\Http\Requests\DeleteCourseGradesRequest;
 
 
 use App\Services\CourseGradeService;
@@ -76,4 +77,36 @@ class CourseGradeController extends Controller
         }
         return $this->success('Student grade added successfully');
     }
+
+    public function deleteCourseGrades(DeleteCourseGradesRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+            $courseGradeService->deleteCourseGrades($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        return $this->success('Course grades deleted successfully');
+    }
+
+    public function addStudentsGradesExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+            $data = $courseGradeService->addStudentsGradesExcel($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        if (count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] ==false )
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
+        else if(count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] ==true)
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is some students with no grade');
+        else
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).' and there is some students with no grade');
+        
+    }
 }
+// if (count($data['wrongFormat']) == 0)
+//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
+//         else
+//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).'');

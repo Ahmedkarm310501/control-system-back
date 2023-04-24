@@ -12,11 +12,11 @@ class AuthController extends Controller
     use HttpResponses;
 
     public function login(LoginRequest $request , AuthService $authService) {
-        $token = $authService->login($request->validated());
-        if (!$token) {
+        $data = $authService->login($request->validated());
+        if (!$data) {
             return $this->error('invalid credentials', 401);
         }
-        return $this->success($token, 200, 'login successful');
+        return $this->success($data, 200, 'login successful');
     }
 
     public function logout(Request $request) {
