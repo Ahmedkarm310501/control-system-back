@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddUserRequest;
+use App\Http\Requests\AssignUserToCourseRequest;
 use App\Http\Requests\DeleteUserRequest;
+use App\Http\Requests\EditUserRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use App\Http\Requests\UserProfileRequest;
 use App\Services\UserService;
@@ -25,7 +27,7 @@ class UserController extends Controller
         }
     }
 
-    
+
     public function listUsers(UserService $userService)
     {
         $users = $userService->listUsers();
@@ -42,11 +44,10 @@ class UserController extends Controller
             return $this->error('User not found', 404);
         }
     }
-    public function userProfile(UserService $userService,UserProfileRequest $request)
+    public function userProfile(UserService $userService)
     {
-        $userData = $request->validated();
-        $id = $userData['id'];
-        $user = $userService->userProfile($id);
+        $user_id = auth()->user()->id;
+        $user = $userService->userProfile($user_id);
         if ($user) {
             return $this->success($user,200,'User Profile');
         } else {
@@ -61,6 +62,26 @@ class UserController extends Controller
             return $this->successMessage('Password updated successfully');
         } else {
             return $this->error('Password not updated may be current password not correct or new_password not match with confirmation_password', 403);
+        }
+    }
+    public function editUser(EditUserRequest $request, UserService $userService)
+    {
+        $userData = $request->validated();
+        $user = $userService->editUser($userData);
+        if ($user) {
+            return $this->successMessage('User edit successfully');
+        } else {
+            return $this->error('User not found', 404);
+        }
+    }
+    public function assignUserToCourse(AssignUserToCourseRequest $request, UserService $userService)
+    {
+        $userData = $request->validated();
+        $user = $userService->assignUserToCourse($userData);
+        if ($user) {
+            return $this->successMessage('User assigned to course successfully');
+        } else {
+            return $this->error('user not assign', 404);
         }
     }
 }

@@ -1,8 +1,11 @@
 <?php
 
 namespace App\Services;
-use App\Models\CourseUser;
 use App\Models\CourseSemesterEnrollment;
+
+
+
+use App\Models\CourseUser;
 use App\Models\Course;
 use App\Models\Semester;
 use App\Models\Student;
@@ -10,8 +13,30 @@ use Maatwebsite\Excel\Facades\Excel;
 
 
 class CourseGradeService{
-
-    public function getCourseGrades($course_code, $year, $user) 
+    public function graphOne($course_semester){
+        $enrollements = CourseSemesterEnrollment::where('course_id', $course_semester['course_id'])->where('semester_id',$course_semester['semester_id'])->get();
+        $number_of_students = count($enrollements);
+        $total_grade = 0;
+        $passed_students = 0;
+        $failed_students = 0;
+        foreach($enrollements as $enroll){
+            $total_grade += $enroll->term_work + $enroll->exam_work;
+            if($enroll->term_work + $enroll->exam_work >= 50){
+                $passed_students++;
+            }else{
+                $failed_students++;
+            }
+        }
+        $average_grade = $total_grade / count($enrollements);
+        $graph_one = [
+            'number_of_students' => $number_of_students,
+            'average_grade' => $average_grade,
+            'passed_students' => $passed_students,
+            'failed_students' => $failed_students,
+        ];
+        return $graph_one;
+    }
+    public function getCourseGrades($course_code, $year, $user)
     {
         $course = Course::where('course_code', $course_code)->first();
         if(!$course){
@@ -28,7 +53,7 @@ class CourseGradeService{
         if(!$semester){
             throw new \Exception('Semester not found', 404);
         }
-        // get course semester enrollment with the semester id and course id 
+        // get course semester enrollment with the semester id and course id
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
             ->where('course_id', $course->id)
             ->where('semester_id', $semester->id)
@@ -56,9 +81,9 @@ class CourseGradeService{
             return 'A+';
         elseif($grade >= 85)
             return 'A';
-        elseif($grade >= 80)    
+        elseif($grade >= 80)
             return 'B+';
-        elseif($grade >= 75)    
+        elseif($grade >= 75)
             return 'B';
         elseif($grade >= 70)
             return 'C+';
@@ -71,7 +96,7 @@ class CourseGradeService{
         else
             return 'F';
     }
-    
+
     public function addStudentToCourse($data , $user)
     {
         $course = Course::find($data['course_id']);
@@ -105,7 +130,7 @@ class CourseGradeService{
             return $course_semester_enrollment;
         }
         throw new \Exception('Error adding student to course', 500);
-        
+
     }
 
     public function addStudentsToCourseExcel($data , $user)
@@ -150,7 +175,7 @@ class CourseGradeService{
             ];
         }
         throw new \Exception('Error adding student to course', 500);
-        
+
     }
 
     public function deleteStudentFromCourse($data )
@@ -210,7 +235,7 @@ class CourseGradeService{
             ->where('semester_id', $semester->id)
             ->where('student_id', $student->id)
             ->first();
-        
+
         if(!$course_semester_enrollment){
             throw new \Exception('Student not enrolled in this course', 404);
         }
@@ -225,7 +250,7 @@ class CourseGradeService{
             return $course_semester_enrollment;
         }
         throw new \Exception('Error updating student grade', 500);
-        
+
     }
 
 
@@ -256,7 +281,7 @@ class CourseGradeService{
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting course grades', 500);
-        
+
     }
 
     public function addStudentsGradesExcel($data)
@@ -313,7 +338,7 @@ class CourseGradeService{
         foreach($course_semester_enrollment as $enrollment){
             if ($enrollment->term_work === null || $enrollment->exam_work === null) {
                 $studWithNoGrade = true;
-            } 
+            }
         }
         // print($course_semester_enrollment);
         if($course_semester_enrollment){
@@ -324,7 +349,72 @@ class CourseGradeService{
             ];
         }
         throw new \Exception('Error adding student to course', 500);
-        
-    }
 
+    }
+    public function graphTwo($course_semester){
+        $enrollements = CourseSemesterEnrollment::where('course_id', $course_semester['course_id'])->where('semester_id',$course_semester['semester_id'])->get();
+        $passed_students = 0;
+        $failed_students = 0;
+        $grade_A_plus = 0;
+        $grade_A = 0;
+        $grade_B_plus = 0;
+        $grade_B = 0;
+        $grade_C_plus = 0;
+        $grade_C = 0;
+        $grade_D_plus = 0;
+        $grade_D = 0;
+        $grade_F = 0;
+        foreach($enrollements as $enroll){
+            if($enroll->term_work + $enroll->exam_work >= 90){
+                $passed_students++;
+                $grade_A_plus++;
+            }else if($enroll->term_work + $enroll->exam_work >= 85){
+                $passed_students++;
+                $grade_A++;
+            }else if($enroll->term_work + $enroll->exam_work >= 80){
+                $passed_students++;
+                $grade_B_plus++;
+            }else if($enroll->term_work + $enroll->exam_work >= 75){
+                $passed_students++;
+                $grade_B++;
+            }else if($enroll->term_work + $enroll->exam_work >= 70){
+                $passed_students++;
+                $grade_C_plus++;
+            }else if($enroll->term_work + $enroll->exam_work >= 65){
+                $passed_students++;
+                $grade_C++;
+            }else if($enroll->term_work + $enroll->exam_work >= 60){
+                $passed_students++;
+                $grade_D_plus++;
+            }else if($enroll->term_work + $enroll->exam_work >= 50){
+                $passed_students++;
+                $grade_D++;
+            }else{
+                $failed_students++;
+                $grade_F++;
+            }
+        }
+        $perecentage_passed = ($passed_students / count($enrollements)) * 100;
+        $perecentage_failed = ($failed_students / count($enrollements)) * 100;
+        // make it 2 decimal
+        $perecentage_passed = number_format((float)$perecentage_passed, 2, '.', '');
+        $perecentage_failed = number_format((float)$perecentage_failed, 2, '.', '');
+        // turn it to float
+        $perecentage_passed = (float)$perecentage_passed;
+        $perecentage_failed = (float)$perecentage_failed;
+        $graph_two = [
+            'perecentage_passed' => $perecentage_passed,
+            'perecentage_failed' => $perecentage_failed,
+            'grade_A_plus' => $grade_A_plus,
+            'grade_A' => $grade_A,
+            'grade_B_plus' => $grade_B_plus,
+            'grade_B' => $grade_B,
+            'grade_C_plus' => $grade_C_plus,
+            'grade_C' => $grade_C,
+            'grade_D_plus' => $grade_D_plus,
+            'grade_D' => $grade_D,
+            'grade_F' => $grade_F,
+        ];
+        return $graph_two;
+    }
 }

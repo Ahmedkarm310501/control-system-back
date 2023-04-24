@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Services;
+
+use App\Models\Course;
+use App\Models\CourseUser;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -33,7 +36,7 @@ class UserService
     }
     public function userProfile($id)
     {
-        $user = User::where('id', $id)->first();
+        $user = User::find($id);
         if (!$user) {
             return false;
         }
@@ -46,7 +49,7 @@ class UserService
     }
     public function updatePassword($user_pass)
     {
-        $user = User::find($user_pass['id']);
+        $user = User::find(auth()->user()->id);
         if (!Hash::check($user_pass['current_password'], $user->password)) {
             return false;
         }
@@ -56,5 +59,33 @@ class UserService
         $user->password = Hash::make($user_pass['new_password']);
         $user->save();
         return true;
+    }
+    public function editUser($userData)
+    {
+        $user = User::find($userData['id']);
+        if (!$user) {
+            return false;
+        }
+        $user->name = $userData['name'];
+        $user->email = $userData['email'];
+        $user->national_id = $userData['national_id'];
+        $user->is_admin = $userData['is_admin'];
+        $user->is_active = $userData['is_active'];
+        $user->save();
+        return true;
+    }
+    public function getCoursesInDepartment($department_id)
+    {
+        $courses = Course::where('department_id',$department_id)->select('course_code')->get();
+        if(!$courses){
+            return false;
+        }
+        return $courses;
+
+    }
+    public function assignUserToCourse($user_course)
+    {
+        $user_c = CourseUser::create($user_course);
+        return $user_c;
     }
 }

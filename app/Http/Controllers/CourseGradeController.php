@@ -10,13 +10,12 @@ use App\Models\Course;
 use App\Models\Semester;
 use App\Models\Student;
 use App\Http\Requests\AddStudentToCourseRequest;
+use App\Http\Requests\NumberStudentsRequest;
+use App\Services\CourseGradeService;
 use App\Http\Requests\addStudentsToCourseRequest;
 use App\Http\Requests\DeleteStudentFromCourseRequest;
 use App\Http\Requests\AddStudGradeRequest;
 use App\Http\Requests\DeleteCourseGradesRequest;
-
-
-use App\Services\CourseGradeService;
 
 
 
@@ -24,17 +23,41 @@ class CourseGradeController extends Controller
 {
     use HttpResponses;
 
-    public function getCourseGrades($course_code, $year, CourseGradeService $courseGradeService, Request $request) 
+    public function getCourseGrades($course_code, $year, CourseGradeService $courseGradeService, Request $request)
     {
-        try {
-            $grades = $courseGradeService->getCourseGrades($course_code, $year, $request->user());
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), $e->getCode());
+        $course = Course::where('course_code', $course_code)->first();
+        if(!$course){
+            return $this->error('Course not found', 404);
+        }
+        // check if the user has access to the course
+        $course_user = CourseUser::where('user_id', $request->user()->id)
+        ->where('course_id', $course->id)->first();
+        if(!$course_user){
+            return $this->error('You do not have access to this course', 403);
+        }
+        // get semster id
+        $semester = Semester::where('year', $year)->first();
+        if(!$semester){
+            return $this->error('Semester not found', 404);
+        }
+        // get course semester enrollment with the semester id and course id
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+        ->where('course_id', $course->id)
+        ->where('semester_id', $semester->id)
+        ->get()
+        ->map(function ($enrollment) {
+            $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+            return $enrollment;
+        });
+        if(!$course_semester_enrollment){
+            return $this->error('Course semester enrollment not found', 404);
         }
 
-        return $this->success($grades);
+        return $this->success($course_semester_enrollment);
+
+
     }
-    
+
     public function addStudentToCourse(AddStudentToCourseRequest $request, CourseGradeService $courseGradeService)
     {
         $data = $request->validated();
@@ -103,7 +126,20 @@ class CourseGradeController extends Controller
             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is some students with no grade');
         else
             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).' and there is some students with no grade');
-        
+
+    }
+
+    public function graphTwo(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
+    {
+        $course_semester = $request->validated();
+        $graph_two = $courseGradeService->graphTwo($course_semester);
+        return $this->success($graph_two,200,'Graph two');
+    }
+    public function graphOne(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
+    {
+        $course_semester = $request->validated();
+        $graph_one = $courseGradeService->graphOne($course_semester);
+        return $this->success($graph_one,200,'Graph one');
     }
 }
 // if (count($data['wrongFormat']) == 0)
