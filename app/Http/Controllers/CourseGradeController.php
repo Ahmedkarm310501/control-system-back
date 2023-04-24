@@ -16,7 +16,9 @@ use App\Http\Requests\addStudentsToCourseRequest;
 use App\Http\Requests\DeleteStudentFromCourseRequest;
 use App\Http\Requests\AddStudGradeRequest;
 use App\Http\Requests\DeleteCourseGradesRequest;
-
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\GradesExport;
+use App\Http\Requests\ExportCourseGradesRequest;
 
 
 class CourseGradeController extends Controller
@@ -118,8 +120,16 @@ class CourseGradeController extends Controller
         $graph_one = $courseGradeService->graphOne($course_semester);
         return $this->success($graph_one,200,'Graph one');
     }
+    public function exportCourseGrades(CourseGradeService $courseGradeService,ExportCourseGradesRequest $request)
+    {
+        $data = $request->validated();
+        try {
+            $grades = $courseGradeService->exportCourseGrades($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        // dd($grades);
+        return Excel::download(new GradesExport($data), 'course.xlsx');
+        // return $this->success($grades,200,'Course grades exported successfully');
+    }
 }
-// if (count($data['wrongFormat']) == 0)
-//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
-//         else
-//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).'');
