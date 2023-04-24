@@ -23,40 +23,17 @@ class CourseGradeController extends Controller
 {
     use HttpResponses;
 
-    public function getCourseGrades($course_code, $year, CourseGradeService $courseGradeService, Request $request)
+    public function getCourseGrades($course_code, $year, CourseGradeService $courseGradeService, Request $request) 
     {
-        $course = Course::where('course_code', $course_code)->first();
-        if(!$course){
-            return $this->error('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', $request->user()->id)
-        ->where('course_id', $course->id)->first();
-        if(!$course_user){
-            return $this->error('You do not have access to this course', 403);
-        }
-        // get semster id
-        $semester = Semester::where('year', $year)->first();
-        if(!$semester){
-            return $this->error('Semester not found', 404);
-        }
-        // get course semester enrollment with the semester id and course id
-        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
-        ->where('course_id', $course->id)
-        ->where('semester_id', $semester->id)
-        ->get()
-        ->map(function ($enrollment) {
-            $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
-            return $enrollment;
-        });
-        if(!$course_semester_enrollment){
-            return $this->error('Course semester enrollment not found', 404);
+        try {
+            $grades = $courseGradeService->getCourseGrades($course_code, $year, $request->user());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
         }
 
-        return $this->success($course_semester_enrollment);
-
-
+        return $this->success($grades);
     }
+
 
     public function addStudentToCourse(AddStudentToCourseRequest $request, CourseGradeService $courseGradeService)
     {
