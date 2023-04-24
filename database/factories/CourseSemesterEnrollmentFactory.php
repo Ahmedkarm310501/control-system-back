@@ -21,8 +21,8 @@ class CourseSemesterEnrollmentFactory extends Factory
         $student_id = \App\Models\Student::all()->pluck('id')->toArray();
         return [
             // 'course_grade' => fake()->randomFloat(2, 0, 100),
-            'term_work'=> fake()->randomFloat(2,20,40),
-            'exam_work'=> fake()->randomFloat(2,30,60),
+            'term_work'=> fake()->randomFloat(2,5,40),
+            'exam_work'=> fake()->randomFloat(2,5,60),
             'course_id' => fake()->randomElement($course_id),
             'semester_id' =>    fake()->randomElement($semester_id),
             'student_id' => fake()->randomElement($student_id),

@@ -89,36 +89,17 @@ class CourseGradeController extends Controller
             return $this->error('Student not added to course', 422);
         }
     }
-    public function getNumberOfStudents(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
+
+    public function graphTwo(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
     {
         $course_semester = $request->validated();
-        $number_of_students = $courseGradeService->getNumberOfStudents($course_semester);
-        if($number_of_students){
-            return $this->success($number_of_students,200,'Number of students');
-        }else{
-            return $this->error('Number of students not found', 404);
-        }
+        $graph_two = $courseGradeService->graphTwo($course_semester);
+        return $this->success($graph_two,200,'Graph two');
     }
-    public function getAverageGrade(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
+    public function graphOne(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
     {
         $course_semester = $request->validated();
-        $average_grade = $courseGradeService->getAverageGrade($course_semester);
-        if($average_grade){
-            return $this->success($average_grade,200,'Average grade');
-        }else{
-            return $this->error('Average grade not found', 404);
-        }
-    }
-    public function getNumberOfPassedStudents(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
-    {
-        $course_semester = $request->validated();
-        $number_of_passed_students = $courseGradeService->getNumberOfPassedStudents($course_semester);
-        return $this->success($number_of_passed_students,200,'Number of passed students');
-    }
-    public function getNumberOfFailedStudents(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
-    {
-        $course_semester = $request->validated();
-        $number_of_failed_students = $courseGradeService->getNumberOfFailedStudents($course_semester);
-        return $this->success($number_of_failed_students,200,'Number of failed students');
+        $graph_one = $courseGradeService->graphOne($course_semester);
+        return $this->success($graph_one,200,'Graph one');
     }
 }

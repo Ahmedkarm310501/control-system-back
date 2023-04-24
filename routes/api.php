@@ -25,15 +25,10 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/course-grades/{course_code}/{year}', [CourseGradeController::class, 'getCourseGrades']);
     Route::post('add-student-to-course', [CourseGradeController::class, 'addStudentToCourse']);
     //////////////////////////graph one routes///////////////////////////////
-    // get number of students in a course
-    Route::post('/number-of-students', [CourseGradeController::class, 'getNumberOfStudents']);
-    // get average grade in a course
-    Route::post('/average-grade', [CourseGradeController::class, 'getAverageGrade']);
-    // get number of passed students in a course
-    Route::post('/number-of-passed-students', [CourseGradeController::class, 'getNumberOfPassedStudents']);
-    // get number of failed students in a course
-    Route::post('/number-of-failed-students', [CourseGradeController::class, 'getNumberOfFailedStudents']);
-    ////////////////////////////////////////////////////////////////////////////////
+    // graph one
+    Route::post('/graph-one', [CourseGradeController::class, 'graphOne']);
+    //graph two
+    Route::post('/graph-two', [CourseGradeController::class, 'graphTwo']);
 
 
 });
