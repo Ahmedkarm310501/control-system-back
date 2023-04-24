@@ -97,6 +97,16 @@ class CourseGradeController extends Controller
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 500);
         }
-        return $this->successMessage($data['wrongFormat'],201);
+        if (count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] ==false )
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
+        else if(count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] ==true)
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is some students with no grade');
+        else
+            return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).' and there is some students with no grade');
+        
     }
 }
+// if (count($data['wrongFormat']) == 0)
+//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
+//         else
+//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).'');

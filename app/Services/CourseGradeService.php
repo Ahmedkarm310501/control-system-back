@@ -283,9 +283,10 @@ class CourseGradeService{
         foreach($students as $student){
             if(!isset($student[0]) || !isset($student[1]) || !isset($student[2])){
                 $wrongFormat[] = $index;
+                $index++;
                 continue;
             }
-            $course_semester_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
+            $course_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
             ->where('semester_id', $semester->id)
             ->where('student_id', $student[0])
             ->update([
@@ -294,11 +295,32 @@ class CourseGradeService{
             ]);
             $index++;
         }
-        print_r($wrongFormat);
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+        ->where('course_id', $course->id)
+        ->where('semester_id', $semester->id)
+        ->get()
+        ->map(function ($enrollment) {
+            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                $enrollment->total_grade = null;
+                $enrollment->grade = null;
+            } else {
+                $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+                $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+            }
+            return $enrollment;
+        });
+        $studWithNoGrade = false;
+        foreach($course_semester_enrollment as $enrollment){
+            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                $studWithNoGrade = true;
+            } 
+        }
+        // print($course_semester_enrollment);
         if($course_semester_enrollment){
             return [
                 'course_semester_enrollment' => $course_semester_enrollment,
-                'wrongFormat' => 'Wrong format at index: '.implode(', ', $wrongFormat).'. Please check the excel file and try again',
+                'studWithNoGrade' => $studWithNoGrade,
+                'wrongFormat' => $wrongFormat,
             ];
         }
         throw new \Exception('Error adding student to course', 500);
