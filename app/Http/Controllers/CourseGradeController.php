@@ -107,19 +107,6 @@ class CourseGradeController extends Controller
             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).' and there is some students with no grade');
 
     }
-
-    public function graphTwo(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
-    {
-        $course_semester = $request->validated();
-        $graph_two = $courseGradeService->graphTwo($course_semester);
-        return $this->success($graph_two,200,'Graph two');
-    }
-    public function graphOne(NumberStudentsRequest $request,CourseGradeService $courseGradeService)
-    {
-        $course_semester = $request->validated();
-        $graph_one = $courseGradeService->graphOne($course_semester);
-        return $this->success($graph_one,200,'Graph one');
-    }
     public function exportCourseGrades(CourseGradeService $courseGradeService,ExportCourseGradesRequest $request)
     {
         $data = $request->validated();

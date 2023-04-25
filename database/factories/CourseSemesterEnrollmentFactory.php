@@ -42,8 +42,8 @@ class CourseSemesterEnrollmentFactory extends Factory
         }
         return [
             // 'course_grade' => fake()->randomFloat(2, 0, 100),
-            'term_work'=> fake()->randomFloat(2,20,40),
-            'exam_work'=> fake()->randomFloat(2,30,60),
+            'term_work'=> fake()->randomFloat(2,0,40),
+            'exam_work'=> fake()->randomFloat(2,0,60),
             'course_id' => $uniqueCompination['course_id'],
             'semester_id' => $uniqueCompination['semester_id'],
             'student_id' => $uniqueCompination['student_id'],
