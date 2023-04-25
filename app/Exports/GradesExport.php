@@ -14,8 +14,6 @@ class GradesExport implements FromCollection, WithHeadings
     {
         $this->data = $data;
     }
-
-
     public function collection()
     {
         return collect($this->data);

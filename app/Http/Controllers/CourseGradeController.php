@@ -116,7 +116,15 @@ class CourseGradeController extends Controller
             return $this->error($e->getMessage(), 500);
         }
         // dd($grades);
-        return Excel::download(new GradesExport($data), 'course.xlsx');
+        // $data = [
+        //     [9, 'john@example.com', 3, 'john', 'john', 'john'],
+        //     [9, 'john@example.com', 'john', 'john', 'john', 'john'],
+        //     [9, 'john@example.com', 'john', 'john', 'john', 'john'],
+        //     [9, 'john@example.com', null, null, null, 'john'],
+        //     [9, 'john@example.com', 'john', 'john', 'john', 'john'],
+        //     [9, 'john@example.com', 'john', 'john', 9, 'john'],
+        // ];
+        return Excel::download(new GradesExport($grades), 'course.xlsx');
         // return $this->success($grades,200,'Course grades exported successfully');
     }
 }
