@@ -20,7 +20,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     ///////////////////////////user routes///////////////////////////
     // list courses assigned to user
     Route::get('/list-courses-assigned-to-user', [UserController::class, 'listCoursesAssignedToUser']);
-    Route::post('/user-profile', [UserController::class, 'userProfile']);
+    Route::get('/user-profile', [UserController::class, 'userProfile']);
     Route::post('/update-password', [UserController::class, 'updatePassword']);
     /////////////////////////////////////////////////////////////////
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -46,6 +46,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('add-one-student-grade', [CourseGradeController::class, 'addOneStudentGrade']);
     Route::post('add-students-grades-excel', [CourseGradeController::class, 'addStudentsGradesExcel']);
     Route::post('delete-course-grades', [CourseGradeController::class, 'deleteCourseGrades']);
+    Route::post('export-course-grades', [CourseGradeController::class, 'exportCourseGrades']);
 
 
 });

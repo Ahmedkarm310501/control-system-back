@@ -16,47 +16,26 @@ use App\Http\Requests\addStudentsToCourseRequest;
 use App\Http\Requests\DeleteStudentFromCourseRequest;
 use App\Http\Requests\AddStudGradeRequest;
 use App\Http\Requests\DeleteCourseGradesRequest;
-
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\GradesExport;
+use App\Http\Requests\ExportCourseGradesRequest;
 
 
 class CourseGradeController extends Controller
 {
     use HttpResponses;
 
-    public function getCourseGrades($course_code, $year, CourseGradeService $courseGradeService, Request $request)
+    public function getCourseGrades($course_code, $year, CourseGradeService $courseGradeService, Request $request) 
     {
-        $course = Course::where('course_code', $course_code)->first();
-        if(!$course){
-            return $this->error('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', $request->user()->id)
-        ->where('course_id', $course->id)->first();
-        if(!$course_user){
-            return $this->error('You do not have access to this course', 403);
-        }
-        // get semster id
-        $semester = Semester::where('year', $year)->first();
-        if(!$semester){
-            return $this->error('Semester not found', 404);
-        }
-        // get course semester enrollment with the semester id and course id
-        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
-        ->where('course_id', $course->id)
-        ->where('semester_id', $semester->id)
-        ->get()
-        ->map(function ($enrollment) {
-            $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
-            return $enrollment;
-        });
-        if(!$course_semester_enrollment){
-            return $this->error('Course semester enrollment not found', 404);
+        try {
+            $grades = $courseGradeService->getCourseGrades($course_code, $year, $request->user());
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), $e->getCode());
         }
 
-        return $this->success($course_semester_enrollment);
-
-
+        return $this->success($grades);
     }
+
 
     public function addStudentToCourse(AddStudentToCourseRequest $request, CourseGradeService $courseGradeService)
     {
@@ -128,8 +107,16 @@ class CourseGradeController extends Controller
             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).' and there is some students with no grade');
 
     }
+    public function exportCourseGrades(CourseGradeService $courseGradeService,ExportCourseGradesRequest $request)
+    {
+        $data = $request->validated();
+        try {
+            $grades = $courseGradeService->exportCourseGrades($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        // dd($grades);
+        return Excel::download(new GradesExport($data), 'course.xlsx');
+        // return $this->success($grades,200,'Course grades exported successfully');
+    }
 }
-// if (count($data['wrongFormat']) == 0)
-//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
-//         else
-//             return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).'');

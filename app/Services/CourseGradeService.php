@@ -330,4 +330,56 @@ class CourseGradeService{
 
     }
 
+
+    public function exportCourseGrades($data)
+    {
+        $course = Course::find($data['course_id']);
+        if(!$course){
+            throw new \Exception('Course not found', 404);
+        }
+        // check if the user has access to the course
+        $course_user = CourseUser::where('user_id', auth()->user()->id)
+        ->where('course_id', $course->id)->first();
+        if(!$course_user){
+            throw new \Exception('You do not have access to this course', 403);
+        }
+        // get semster id
+        $semester = Semester::find($data['semester_id']);
+        if(!$semester){
+            throw new \Exception('Semester not found', 404);
+        }
+        $courseGrades = [];
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+        ->where('course_id', $course->id)
+        ->where('semester_id', $semester->id)
+        ->get()
+        ->map(function ($enrollment) {
+            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                $enrollment->total_grade = null;
+                $enrollment->grade = null;
+            } else {
+                $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+                $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+            }
+            return $enrollment;
+        });
+        foreach($course_semester_enrollment as $enrollment){
+            $courseGrade = [];
+            $courseGrade[] = $enrollment->student->id;
+            $courseGrade[] = $enrollment->student->name;
+            $courseGrade[] = $enrollment->term_work;
+            $courseGrade[] = $enrollment->exam_work;
+            $courseGrade[] = $enrollment->total_grade;
+            $courseGrade[] = $enrollment->grade;
+            $courseGrades[] = $courseGrade;
+        }
+        // print($courseGrades);
+
+        if(count ($courseGrades) > 0){
+            return $courseGrades;
+        }
+        throw new \Exception('Error exporting course grades', 500);
+
+    }
+
 }
