@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\Models\Course;
+use App\Models\CourseSemesterEnrollment;
 use App\Models\CourseUser;
 use App\Models\User;
+use Database\Factories\CourseSemesterEnrollmentFactory;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
@@ -88,4 +90,24 @@ class UserService
         $user_c = CourseUser::create($user_course);
         return $user_c;
     }
+    public function listCoursesAssignedToUser($user_id){
+        $courses = CourseUser::where('user_id',$user_id)->get('course_id');
+        $course_data = [];
+        foreach ($courses as $course){
+            $course_data[] = Course::find($course->course_id);
+            // get number of students in course
+            $number_of_students = CourseSemesterEnrollment::where('course_id',$course->course_id)->count();
+            $course_data[count($course_data)-1]['number_of_students'] = $number_of_students;
+        }
+        $course_data = collect($course_data)->map(function ($course) {
+            return [
+                'course_id' => $course->id,
+                'course_code' => $course->course_code,
+                'course_name' => $course->name,
+                'number_of_students' => $course['number_of_students'],
+            ];
+        });
+        return $course_data;
+    }
+
 }

@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseGradeController;
 use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\GraphController;
 
 Route::post('/login', [AuthController::class, 'login']);
 // middle ware for api auth group
@@ -17,6 +18,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
         return $request->user();
     });
     ///////////////////////////user routes///////////////////////////
+    // list courses assigned to user
+    Route::get('/list-courses-assigned-to-user', [UserController::class, 'listCoursesAssignedToUser']);
     Route::post('/user-profile', [UserController::class, 'userProfile']);
     Route::post('/update-password', [UserController::class, 'updatePassword']);
     /////////////////////////////////////////////////////////////////
@@ -26,9 +29,12 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('add-student-to-course', [CourseGradeController::class, 'addStudentToCourse']);
     //////////////////////////graph one routes///////////////////////////////
     // graph one
-    Route::post('/graph-one', [CourseGradeController::class, 'graphOne']);
+    Route::post('/graph-one', [GraphController::class, 'graphOne']);
     //graph two
-    Route::post('/graph-two', [CourseGradeController::class, 'graphTwo']);
+    Route::post('/graph-two', [GraphController::class, 'graphTwo']);
+    //graph three
+    Route::post('/graph-three', [GraphController::class, 'graphThree']);
+
     Route::post('add-students-to-course-excel', [CourseGradeController::class, 'addStudentsToCourseExcel']);
     Route::post('delete-student-from-course', [CourseGradeController::class, 'deleteStudentFromCourse']);
     Route::post('add-one-student-grade', [CourseGradeController::class, 'addOneStudentGrade']);

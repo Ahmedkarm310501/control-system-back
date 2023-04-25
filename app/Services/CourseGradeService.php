@@ -13,29 +13,7 @@ use Maatwebsite\Excel\Facades\Excel;
 
 
 class CourseGradeService{
-    public function graphOne($course_semester){
-        $enrollements = CourseSemesterEnrollment::where('course_id', $course_semester['course_id'])->where('semester_id',$course_semester['semester_id'])->get();
-        $number_of_students = count($enrollements);
-        $total_grade = 0;
-        $passed_students = 0;
-        $failed_students = 0;
-        foreach($enrollements as $enroll){
-            $total_grade += $enroll->term_work + $enroll->exam_work;
-            if($enroll->term_work + $enroll->exam_work >= 50){
-                $passed_students++;
-            }else{
-                $failed_students++;
-            }
-        }
-        $average_grade = $total_grade / count($enrollements);
-        $graph_one = [
-            'number_of_students' => $number_of_students,
-            'average_grade' => $average_grade,
-            'passed_students' => $passed_students,
-            'failed_students' => $failed_students,
-        ];
-        return $graph_one;
-    }
+
     public function getCourseGrades($course_code, $year, $user)
     {
         $course = Course::where('course_code', $course_code)->first();
@@ -135,46 +113,46 @@ class CourseGradeService{
 
     public function addStudentsToCourseExcel($data , $user)
     {
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', $user->id)
-        ->where('course_id', $course->id)->first();
-        if(!$course_user){
-            throw new \Exception('You do not have access to this course', 403);
-        }
-        // get semster id
-        $semester = Semester::find($data['semester_id']);
-        if(!$semester){
-            throw new \Exception('Semester not found', 404);
-        }
-        $students = Excel::toArray([], $data['students'])[0];
-        $students = array_slice($students, 1);
-        $numOfMissingFields = 0;
-        foreach($students as $student){
-            if(!isset($student[0]) || !isset($student[1])){
-                $numOfMissingFields++;
-                continue;
-            }
-            $student = Student::firstOrCreate([
-                'id' => $student[0],
-                'name' => $student[1],
-            ]);
-            $course_semester_enrollment = CourseSemesterEnrollment::firstOrCreate([
-                'course_id' => $course->id,
-                'semester_id' => $data['semester_id'],
-                'student_id' => $student->id,
-            ]);
-        }
-        if($course_semester_enrollment){
-            return [
-                'course_semester_enrollment' => $course_semester_enrollment,
-                'numOfMissingFields' => $numOfMissingFields,
-            ];
-        }
-        throw new \Exception('Error adding student to course', 500);
+        // $course = Course::find($data['course_id']);
+        // if(!$course){
+        //     throw new \Exception('Course not found', 404);
+        // }
+        // // check if the user has access to the course
+        // $course_user = CourseUser::where('user_id', $user->id)
+        // ->where('course_id', $course->id)->first();
+        // if(!$course_user){
+        //     throw new \Exception('You do not have access to this course', 403);
+        // }
+        // // get semster id
+        // $semester = Semester::find($data['semester_id']);
+        // if(!$semester){
+        //     throw new \Exception('Semester not found', 404);
+        // }
+        // $students = Excel::toArray([], $data['students'])[0];
+        // $students = array_slice($students, 1);
+        // $numOfMissingFields = 0;
+        // foreach($students as $student){
+        //     if(!isset($student[0]) || !isset($student[1])){
+        //         $numOfMissingFields++;
+        //         continue;
+        //     }
+        //     $student = Student::firstOrCreate([
+        //         'id' => $student[0],
+        //         'name' => $student[1],
+        //     ]);
+        //     $course_semester_enrollment = CourseSemesterEnrollment::firstOrCreate([
+        //         'course_id' => $course->id,
+        //         'semester_id' => $data['semester_id'],
+        //         'student_id' => $student->id,
+        //     ]);
+        // }
+        // if($course_semester_enrollment){
+        //     return [
+        //         'course_semester_enrollment' => $course_semester_enrollment,
+        //         'numOfMissingFields' => $numOfMissingFields,
+        //     ];
+        // }
+        // throw new \Exception('Error adding student to course', 500);
 
     }
 
@@ -286,135 +264,70 @@ class CourseGradeService{
 
     public function addStudentsGradesExcel($data)
     {
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->first();
-        if(!$course_user){
-            throw new \Exception('You do not have access to this course', 403);
-        }
-        // get semster id
-        $semester = Semester::find($data['semester_id']);
-        if(!$semester){
-            throw new \Exception('Semester not found', 404);
-        }
-        $students = Excel::toArray([], $data['students'])[0];
-        $students = array_slice($students, 1);
-        $wrongFormat = [];
-        $index = 1;
-        foreach($students as $student){
-            if(!isset($student[0]) || !isset($student[1]) || !isset($student[2])){
-                $wrongFormat[] = $index;
-                $index++;
-                continue;
-            }
-            $course_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
-            ->where('semester_id', $semester->id)
-            ->where('student_id', $student[0])
-            ->update([
-                'term_work' => $student[1],
-                'exam_work' => $student[2],
-            ]);
-            $index++;
-        }
-        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
-        ->where('course_id', $course->id)
-        ->where('semester_id', $semester->id)
-        ->get()
-        ->map(function ($enrollment) {
-            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
-                $enrollment->total_grade = null;
-                $enrollment->grade = null;
-            } else {
-                $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
-                $enrollment->grade = $this->calcGrade($enrollment->total_grade);
-            }
-            return $enrollment;
-        });
-        $studWithNoGrade = false;
-        foreach($course_semester_enrollment as $enrollment){
-            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
-                $studWithNoGrade = true;
-            }
-        }
-        // print($course_semester_enrollment);
-        if($course_semester_enrollment){
-            return [
-                'course_semester_enrollment' => $course_semester_enrollment,
-                'studWithNoGrade' => $studWithNoGrade,
-                'wrongFormat' => $wrongFormat,
-            ];
-        }
-        throw new \Exception('Error adding student to course', 500);
+        // $course = Course::find($data['course_id']);
+        // if(!$course){
+        //     throw new \Exception('Course not found', 404);
+        // }
+        // // check if the user has access to the course
+        // $course_user = CourseUser::where('user_id', auth()->user()->id)
+        // ->where('course_id', $course->id)->first();
+        // if(!$course_user){
+        //     throw new \Exception('You do not have access to this course', 403);
+        // }
+        // // get semster id
+        // $semester = Semester::find($data['semester_id']);
+        // if(!$semester){
+        //     throw new \Exception('Semester not found', 404);
+        // }
+        // $students = Excel::toArray([], $data['students'])[0];
+        // $students = array_slice($students, 1);
+        // $wrongFormat = [];
+        // $index = 1;
+        // foreach($students as $student){
+        //     if(!isset($student[0]) || !isset($student[1]) || !isset($student[2])){
+        //         $wrongFormat[] = $index;
+        //         $index++;
+        //         continue;
+        //     }
+        //     $course_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
+        //     ->where('semester_id', $semester->id)
+        //     ->where('student_id', $student[0])
+        //     ->update([
+        //         'term_work' => $student[1],
+        //         'exam_work' => $student[2],
+        //     ]);
+        //     $index++;
+        // }
+        // $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+        // ->where('course_id', $course->id)
+        // ->where('semester_id', $semester->id)
+        // ->get()
+        // ->map(function ($enrollment) {
+        //     if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+        //         $enrollment->total_grade = null;
+        //         $enrollment->grade = null;
+        //     } else {
+        //         $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+        //         $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+        //     }
+        //     return $enrollment;
+        // });
+        // $studWithNoGrade = false;
+        // foreach($course_semester_enrollment as $enrollment){
+        //     if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+        //         $studWithNoGrade = true;
+        //     }
+        // }
+        // // print($course_semester_enrollment);
+        // if($course_semester_enrollment){
+        //     return [
+        //         'course_semester_enrollment' => $course_semester_enrollment,
+        //         'studWithNoGrade' => $studWithNoGrade,
+        //         'wrongFormat' => $wrongFormat,
+        //     ];
+        // }
+        // throw new \Exception('Error adding student to course', 500);
 
     }
-    public function graphTwo($course_semester){
-        $enrollements = CourseSemesterEnrollment::where('course_id', $course_semester['course_id'])->where('semester_id',$course_semester['semester_id'])->get();
-        $passed_students = 0;
-        $failed_students = 0;
-        $grade_A_plus = 0;
-        $grade_A = 0;
-        $grade_B_plus = 0;
-        $grade_B = 0;
-        $grade_C_plus = 0;
-        $grade_C = 0;
-        $grade_D_plus = 0;
-        $grade_D = 0;
-        $grade_F = 0;
-        foreach($enrollements as $enroll){
-            if($enroll->term_work + $enroll->exam_work >= 90){
-                $passed_students++;
-                $grade_A_plus++;
-            }else if($enroll->term_work + $enroll->exam_work >= 85){
-                $passed_students++;
-                $grade_A++;
-            }else if($enroll->term_work + $enroll->exam_work >= 80){
-                $passed_students++;
-                $grade_B_plus++;
-            }else if($enroll->term_work + $enroll->exam_work >= 75){
-                $passed_students++;
-                $grade_B++;
-            }else if($enroll->term_work + $enroll->exam_work >= 70){
-                $passed_students++;
-                $grade_C_plus++;
-            }else if($enroll->term_work + $enroll->exam_work >= 65){
-                $passed_students++;
-                $grade_C++;
-            }else if($enroll->term_work + $enroll->exam_work >= 60){
-                $passed_students++;
-                $grade_D_plus++;
-            }else if($enroll->term_work + $enroll->exam_work >= 50){
-                $passed_students++;
-                $grade_D++;
-            }else{
-                $failed_students++;
-                $grade_F++;
-            }
-        }
-        $perecentage_passed = ($passed_students / count($enrollements)) * 100;
-        $perecentage_failed = ($failed_students / count($enrollements)) * 100;
-        // make it 2 decimal
-        $perecentage_passed = number_format((float)$perecentage_passed, 2, '.', '');
-        $perecentage_failed = number_format((float)$perecentage_failed, 2, '.', '');
-        // turn it to float
-        $perecentage_passed = (float)$perecentage_passed;
-        $perecentage_failed = (float)$perecentage_failed;
-        $graph_two = [
-            'perecentage_passed' => $perecentage_passed,
-            'perecentage_failed' => $perecentage_failed,
-            'grade_A_plus' => $grade_A_plus,
-            'grade_A' => $grade_A,
-            'grade_B_plus' => $grade_B_plus,
-            'grade_B' => $grade_B,
-            'grade_C_plus' => $grade_C_plus,
-            'grade_C' => $grade_C,
-            'grade_D_plus' => $grade_D_plus,
-            'grade_D' => $grade_D,
-            'grade_F' => $grade_F,
-        ];
-        return $graph_two;
-    }
+
 }

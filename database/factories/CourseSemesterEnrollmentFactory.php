@@ -42,19 +42,11 @@ class CourseSemesterEnrollmentFactory extends Factory
         }
         return [
             // 'course_grade' => fake()->randomFloat(2, 0, 100),
-<<<<<<< HEAD
-            'term_work'=> fake()->randomFloat(2,5,40),
-            'exam_work'=> fake()->randomFloat(2,5,60),
-            'course_id' => fake()->randomElement($course_id),
-            'semester_id' =>    fake()->randomElement($semester_id),
-            'student_id' => fake()->randomElement($student_id),
-=======
-            'term_work'=> fake()->randomFloat(2,20,40),
-            'exam_work'=> fake()->randomFloat(2,30,60),
+            'term_work'=> fake()->randomFloat(2,0,40),
+            'exam_work'=> fake()->randomFloat(2,0,60),
             'course_id' => $uniqueCompination['course_id'],
             'semester_id' => $uniqueCompination['semester_id'],
             'student_id' => $uniqueCompination['student_id'],
->>>>>>> 54679a0487711e52a133c9b3e7aadc29b8f1661c
         ];
     }
 }
