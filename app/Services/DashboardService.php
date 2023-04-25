@@ -6,8 +6,8 @@ use App\Models\CourseSemesterEnrollment;
 
 class DashboardService
 {
-    public function graphOne($course_semester){
-        $enrollements = CourseSemesterEnrollment::where('course_id', $course_semester['course_id'])->where('semester_id',$course_semester['semester_id'])->get();
+    public function part_one($course_id, $semester_id){
+        $enrollements = CourseSemesterEnrollment::where('course_id', $course_id)->where('semester_id',$semester_id)->get();
         $number_of_students = count($enrollements);
         $total_grade = 0;
         $passed_students = 0;
@@ -29,8 +29,8 @@ class DashboardService
         ];
         return $graph_one;
     }
-    public function graphTwo($course_semester){
-        $enrollements = CourseSemesterEnrollment::where('course_id', $course_semester['course_id'])->where('semester_id',$course_semester['semester_id'])->get();
+    public function part_two($course_id,$semester_id){
+        $enrollements = CourseSemesterEnrollment::where('course_id', $course_id)->where('semester_id',$semester_id)->get();
         $passed_students = 0;
         $failed_students = 0;
         $grade_A_plus = 0;
@@ -95,9 +95,8 @@ class DashboardService
         ];
         return $graph_two;
     }
-    public function graphThree($course_semester){
-        // get number of students that need one grade to pass
-        $enrollements = CourseSemesterEnrollment::where('course_id', $course_semester['course_id'])->where('semester_id',$course_semester['semester_id'])->whereRaw('term_work + exam_work < 50')->get();
+    public function part_three($course_id,$semester_id){
+        $enrollements = CourseSemesterEnrollment::where('course_id', $course_id)->where('semester_id',$semester_id)->whereRaw('term_work + exam_work < 50')->get();
         $need_one_grade = 0;
         $need_two_grade = 0;
         $need_three_grade = 0;
@@ -116,14 +115,102 @@ class DashboardService
                 $need_five_grade++;
             }
         }
+        $number_of_students_40 = 0;
+        $number_of_students_41 = 0;
+        $number_of_students_42 = 0;
+        $number_of_students_43 = 0;
+        $number_of_students_44 = 0;
+        $number_of_students_45 = 0;
+        $number_of_students_46 = 0;
+        $number_of_students_47 = 0;
+        $number_of_students_48 = 0;
+        $number_of_students_49 = 0;
+        // get number of students in range of 40-49
+        $enrollements_range = CourseSemesterEnrollment::where('course_id',$course_id)->where('semester_id',$semester_id)->whereRaw('term_work + exam_work >= 40')->whereRaw('term_work + exam_work < 50')->get();
+        foreach($enrollements_range as $enroll){
+            $enroll_grade = $enroll->term_work + $enroll->exam_work;
+            // turn it to int
+            $enroll_grade = (int)$enroll_grade;
+            if($enroll_grade == 40){
+                $number_of_students_40++;
+            }else if($enroll_grade == 41){
+                $number_of_students_41++;
+            }else if($enroll_grade == 42){
+                $number_of_students_42++;
+            }else if($enroll_grade == 43){
+                $number_of_students_43++;    
+            }else if($enroll_grade == 44){
+                $number_of_students_44++;
+            }else if($enroll_grade == 45){
+                $number_of_students_45++;
+            }else if($enroll_grade == 46){
+                $number_of_students_46++;
+            }else if($enroll_grade == 47){
+                $number_of_students_47++;
+            }else if($enroll_grade == 48){
+                $number_of_students_48++;
+            }else if($enroll_grade == 49){
+                $number_of_students_49++;
+            }   
+        }
+
+
         $graph_three = [
             'need_one_grade' => $need_one_grade,
             'need_two_grade' => $need_two_grade,
             'need_three_grade' => $need_three_grade,
             'need_four_grade' => $need_four_grade,
             'need_five_grade' => $need_five_grade,
+            'number_of_students_40' => $number_of_students_40,
+            'number_of_students_41' => $number_of_students_41,
+            'number_of_students_42' => $number_of_students_42,
+            'number_of_students_43' => $number_of_students_43,
+            'number_of_students_44' => $number_of_students_44,
+            'number_of_students_45' => $number_of_students_45,
+            'number_of_students_46' => $number_of_students_46,
+            'number_of_students_47' => $number_of_students_47,
+            'number_of_students_48' => $number_of_students_48,
+            'number_of_students_49' => $number_of_students_49,
         ];
         return $graph_three;
     }
-
+    public function graphOne($course_semester){
+        $graph_one = $this->part_one($course_semester['course_id'], $course_semester['semester_id']);
+        return $graph_one;
+    }
+    public function graphTwo($course_semester){
+        $graph_two = $this->part_two($course_semester['course_id'], $course_semester['semester_id']);
+        return $graph_two;
+    }
+    public function graphThree($course_semester){
+        $graph_three = $this->part_three($course_semester['course_id'], $course_semester['semester_id']);
+        return $graph_three;
+    }
+    public function graphCompareOne($course_semester){
+        $first_semester = $this->part_one($course_semester['course_id'], $course_semester['semester_id_one']);
+        $second_semester = $this->part_one($course_semester['course_id'], $course_semester['semester_id_two']);
+        $graph_compare_one = [
+            'first_semester' => $first_semester,
+            'second_semester' => $second_semester,
+        ];
+        return $graph_compare_one;
+    }
+    public function graphCompareTwo($course_semester){
+        $first_semester = $this->part_two($course_semester['course_id'], $course_semester['semester_id_one']);
+        $second_semester = $this->part_two($course_semester['course_id'], $course_semester['semester_id_two']);
+        $graph_compare_two = [
+            'first_semester' => $first_semester,
+            'second_semester' => $second_semester,
+        ];
+        return $graph_compare_two;
+    }
+    public function graphCompareThree($course_semester){
+        $first_semester = $this->part_three($course_semester['course_id'], $course_semester['semester_id_one']);
+        $second_semester = $this->part_three($course_semester['course_id'], $course_semester['semester_id_two']);
+        $graph_compare_three = [
+            'first_semester' => $first_semester,
+            'second_semester' => $second_semester,
+        ];
+        return $graph_compare_three;
+    }
 }

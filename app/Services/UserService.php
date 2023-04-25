@@ -95,7 +95,6 @@ class UserService
         $course_data = [];
         foreach ($courses as $course){
             $course_data[] = Course::find($course->course_id);
-            // get number of students in course
             $number_of_students = CourseSemesterEnrollment::where('course_id',$course->course_id)->count();
             $course_data[count($course_data)-1]['number_of_students'] = $number_of_students;
         }

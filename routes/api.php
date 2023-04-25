@@ -34,6 +34,12 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/graph-two', [GraphController::class, 'graphTwo']);
     //graph three
     Route::post('/graph-three', [GraphController::class, 'graphThree']);
+    // graph comapare one courses in two semesters
+    Route::post('/graph-one-compare', [GraphController::class, 'graphCompareOne']);
+    // graph comapare two courses in two semesters
+    Route::post('/graph-two-compare', [GraphController::class, 'graphCompareTwo']);
+    // graph comapare three courses in two semesters
+    Route::post('/graph-three-compare', [GraphController::class, 'graphCompareThree']);
 
     Route::post('add-students-to-course-excel', [CourseGradeController::class, 'addStudentsToCourseExcel']);
     Route::post('delete-student-from-course', [CourseGradeController::class, 'deleteStudentFromCourse']);
