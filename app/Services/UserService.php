@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\CourseSemesterEnrollment;
 use App\Models\CourseUser;
+use App\Models\Department;
 use App\Models\User;
 use Database\Factories\CourseSemesterEnrollmentFactory;
 use Illuminate\Support\Facades\Hash;
@@ -78,11 +79,20 @@ class UserService
     }
     public function getCoursesInDepartment($department_id)
     {
-        $courses = Course::where('department_id',$department_id)->select('course_code')->get();
+        $courses = Course::where('department_id',$department_id)->select('name','course_code')->get();
+        $dept_name = Department::where('id',$department_id)->select('name')->get();
+        $courses = collect($courses)->map(function ($course) use ($dept_name) {
+            return [
+                'course_code' => $course->course_code,
+                'course_name' => $course->name,
+                'department_name' => $dept_name[0]->name,
+            ];
+        });
         if(!$courses){
             return false;
         }
         return $courses;
+
 
     }
     public function assignUserToCourse($user_course)

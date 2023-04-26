@@ -19,7 +19,7 @@ class DepartmentController extends Controller
     }
     public function getCoursesInDepartment(Request $request,UserService $userService)
     {
-        $department_id = $request->department_id;
+        $department_id = $request->dept_id;
         $courses = $userService->getCoursesInDepartment($department_id);
         if(!$courses){
             return $this->error('No Courses Found',404);
