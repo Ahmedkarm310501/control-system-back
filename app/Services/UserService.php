@@ -79,21 +79,13 @@ class UserService
     }
     public function getCoursesInDepartment($department_id)
     {
-        $courses = Course::where('department_id',$department_id)->select('name','course_code')->get();
-        $dept_name = Department::where('id',$department_id)->select('name')->get();
-        $courses = collect($courses)->map(function ($course) use ($dept_name) {
-            return [
-                'course_code' => $course->course_code,
-                'course_name' => $course->name,
-                'department_name' => $dept_name[0]->name,
-            ];
-        });
-        if(!$courses){
-            return false;
+        $courses = Course::where('department_id',$department_id)->get();
+        $department = Department::where('id',$department_id)->get();
+        // put department details in courses array
+        foreach ($courses as $course){
+            $course['department'] = $department;
         }
         return $courses;
-
-
     }
     public function assignUserToCourse($user_course)
     {
