@@ -93,7 +93,7 @@ class CourseGradeController extends Controller
 
     public function addStudentsGradesExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
     {
-        $data = $request->validated();
+        $data = $request->validated(); 
         try {
             $data = $courseGradeService->addStudentsGradesExcel($data);
         } catch (\Exception $e) {
