@@ -80,7 +80,7 @@ class UserService
     public function getCoursesInDepartment($department_id)
     {
         $courses = Course::where('department_id',$department_id)->get();
-        $department = Department::where('id',$department_id)->get();
+        $department = Department::where('id',$department_id)->first();
         // put department details in courses array
         foreach ($courses as $course){
             $course['department'] = $department;
