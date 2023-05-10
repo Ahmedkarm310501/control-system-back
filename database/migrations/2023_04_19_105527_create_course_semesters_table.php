@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('course_id')->references('id')->on('courses')->constrained();
             $table->foreignId('semester_id')->references('id')->on('semesters')->constrained();
+            $table->unique(['course_id', 'semester_id'], 'course_semester_unique');
             $table->timestamps();
         });
     }
