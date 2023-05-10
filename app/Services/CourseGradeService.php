@@ -14,20 +14,20 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class CourseGradeService{
 
-    public function getCourseGrades($course_code, $year, $user)
+    public function getCourseGrades($courseId, $termId)
     {
-        $course = Course::where('course_code', $course_code)->first();
+        $course = Course::find($courseId);
         if(!$course){
             throw new \Exception('Course not found', 404);
         }
         // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', $user->id)
+        $course_user = CourseUser::where('user_id', auth()->user()->id)
             ->where('course_id', $course->id)->first();
         if(!$course_user){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semester id
-        $semester = Semester::where('year', $year)->first();
+        $semester = Semester::find($termId);
         if(!$semester){
             throw new \Exception('Semester not found', 404);
         }

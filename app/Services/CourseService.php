@@ -32,11 +32,14 @@ class CourseService
     }
 
     public function getCourse($course){
-        $course = Course::with('department')->find($course);
+        $course = Course::find($course);
+        $department = Department::find($course->department_id)->select('name')->first();
+        // dd($department);
         // $course = Course::with('department')->where('course_code', $course)->first();
         if(!$course){
             return false;
         }
+        $course['deptName']  = $department->name;
         return $course;
     }
 }

@@ -25,10 +25,10 @@ class CourseGradeController extends Controller
 {
     use HttpResponses;
 
-    public function getCourseGrades($course_code, $year, CourseGradeService $courseGradeService, Request $request) 
+    public function getCourseGrades($courseId, $termId, CourseGradeService $courseGradeService, Request $request) 
     {
         try {
-            $grades = $courseGradeService->getCourseGrades($course_code, $year, $request->user());
+            $grades = $courseGradeService->getCourseGrades($courseId, $termId);
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), $e->getCode());
         }

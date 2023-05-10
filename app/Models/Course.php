@@ -14,25 +14,29 @@ class Course extends Model
         'course_rule_id',
     ];
     use HasFactory;
-    function users(){
-        return $this->belongsToMany(User::class);
-    }
+    // function users(){
+    //     return $this->belongsToMany(User::class);
+    // }
     function rule(){
         return $this->belongsTo(CourseRule::class, 'course_rule_id');
     }
     function department(){
         return $this->belongsTo(Department::class);
     }
-    public function students()
-    {
-        return $this->belongsToMany(Student::class, 'course_semester_enrollments', 'course_id', 'student_id')
-            ->withPivot('course_grade', 'semester_id');
-    }
+    // public function students()
+    // {
+    //     return $this->belongsToMany(Student::class, 'course_semester_enrollments', 'course_id', 'student_id')
+    //         ->withPivot('course_grade', 'semester_id');
+    // }
 
-    public function semesters()
-    {
-        return $this->belongsToMany(Semester::class, 'course_semester_enrollments', 'course_id', 'semester_id')
-            ->withPivot('course_grade', 'student_id');
+    // public function semesters()
+    // {
+    //     return $this->belongsToMany(Semester::class, 'course_semester_enrollments', 'course_id', 'semester_id')
+    //         ->withPivot('course_grade', 'student_id');
+    // }
+
+    function semesters(){
+        return $this->belongsToMany(Semester::class, 'course_semesters', 'course_id', 'semester_id');
     }
     
 }
