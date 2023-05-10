@@ -84,10 +84,10 @@ class UserController extends Controller
             return $this->error('user not assign', 404);
         }
     }
-    public function listCoursesAssignedToUser(UserService $userService)
+    public function listCoursesAssignedToUser($termId,UserService $userService)
     {
         $user_id = auth()->user()->id;
-        $user = $userService->listCoursesAssignedToUser($user_id);
+        $user = $userService->listCoursesAssignedToUser($user_id,$termId);
         if ($user) {
             return $this->success($user,200,'User Courses');
         } else {

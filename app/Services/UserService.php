@@ -92,13 +92,14 @@ class UserService
         $user_c = CourseUser::create($user_course);
         return $user_c;
     }
-    public function listCoursesAssignedToUser($user_id){
+    public function listCoursesAssignedToUser($user_id , $termId){
         $courses = CourseUser::where('user_id',$user_id)->get('course_id');
         $course_data = [];
         foreach ($courses as $course){
             $course_data[] = Course::find($course->course_id);
-            $number_of_students = CourseSemesterEnrollment::where('course_id',$course->course_id)->count();
+            $number_of_students = CourseSemesterEnrollment::where('course_id',$course->course_id)->where('semester_id' , $termId)->count();
             $course_data[count($course_data)-1]['number_of_students'] = $number_of_students;
+            
         }
         $course_data = collect($course_data)->map(function ($course) {
             return [
