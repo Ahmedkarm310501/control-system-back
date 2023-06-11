@@ -3,11 +3,12 @@
 namespace App\Services;
 
 use App\Models\Course;
+use App\Models\CourseSemester;
 use App\Models\CourseSemesterEnrollment;
 use App\Models\CourseUser;
 use App\Models\Department;
-use App\Models\User;
 use App\Models\Semester;
+use App\Models\User;
 use Database\Factories\CourseSemesterEnrollmentFactory;
 use Illuminate\Support\Facades\Hash;
 
@@ -81,7 +82,7 @@ class UserService
     public function getCoursesInDepartment($department_id)
     {
         $courses = Course::where('department_id',$department_id)->get();
-        $department = Department::where('id',$department_id)->first();
+        $department = Department::where('id',$department_id)->get();
         // put department details in courses array
         foreach ($courses as $course){
             $course['department'] = $department;
@@ -90,8 +91,21 @@ class UserService
     }
     public function assignUserToCourse($user_course)
     {
-        $user_c = CourseUser::create($user_course);
-        return $user_c;
+        // get the leatest semester from table semesters
+        $semester = Semester::orderBy('id','desc')->first();
+        // get the id from course semester by course id and semester id
+        $course_semester = CourseSemester::where('course_id',$user_course['course_id'])
+            ->where('semester_id',$semester->id)->first();
+        // add to course user table the user id and course semester id
+        $course_user = CourseUser::create([
+            'user_id' => $user_course['user_id'],
+            'course_semester_id' => $course_semester->id,
+        ]);
+        if($course_user){
+            return true;
+        }else{
+            return false;
+        }
     }
     public function listCoursesAssignedToUser($user_id ){
         $termId = Semester::latest()->first()->id;
