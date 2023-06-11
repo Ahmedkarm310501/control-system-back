@@ -9,6 +9,7 @@ use App\Models\CourseUser;
 use App\Models\Course;
 use App\Models\Semester;
 use App\Models\Student;
+use App\Models\CourseSemester;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -17,24 +18,26 @@ class CourseGradeService{
     public function getCourseGrades($courseId, $termId)
     {
         $course = Course::find($courseId);
+        
         if(!$course){
             throw new \Exception('Course not found', 404);
         }
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
             ->where('course_id', $course->id)->first();
+        
         if(!$course_user){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semester id
-        $semester = Semester::find($termId);
+        $semester = CourseSemester::where('course_id', $course->id)
+            ->where('semester_id', $termId)->first();
         if(!$semester){
             throw new \Exception('Semester not found', 404);
         }
         // get course semester enrollment with the semester id and course id
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
-            ->where('course_id', $course->id)
-            ->where('semester_id', $semester->id)
+            ->where('course_semester_id', $semester->id)
             ->get()
             ->map(function ($enrollment) {
                 if ($enrollment->term_work === null || $enrollment->exam_work === null) {
