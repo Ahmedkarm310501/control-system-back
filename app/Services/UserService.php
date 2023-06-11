@@ -103,6 +103,7 @@ class UserService
             $c['course_code'] = $course->course->course_code;
             $c['course_name'] = $course->course->name;
             $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id',$course->course_semester_id)->count();
+            $c['term_id']= $termId;
             $new_courses[] = $c;
         }
         return $new_courses;
