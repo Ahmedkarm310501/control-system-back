@@ -26,13 +26,10 @@ class CourseSemesterFactory extends Factory
         ];
         while (true) {
             if (!in_array($uniqueCompination, $this->taken)) {
-                // add the unique combination to the taken array
                 $this->taken[] = $uniqueCompination;
                 break;
             }
             $uniqueCompination = [
-                // 'course_id' => fake()->randomElement($course_id),
-                // 'semester_id' => fake()->randomElement($semester_id),
                 'course_id' => fake()->randomElement($course_id),
                 'semester_id' => fake()->randomElement($semester_id),
             ];
