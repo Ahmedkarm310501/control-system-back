@@ -7,6 +7,7 @@ use App\Models\CourseSemesterEnrollment;
 use App\Models\CourseUser;
 use App\Models\Department;
 use App\Models\User;
+use App\Models\Semester;
 use Database\Factories\CourseSemesterEnrollmentFactory;
 use Illuminate\Support\Facades\Hash;
 
@@ -92,16 +93,19 @@ class UserService
         $user_c = CourseUser::create($user_course);
         return $user_c;
     }
-    public function listCoursesAssignedToUser($user_id , $termId){
-        $courses = CourseUser::where('user_id',$user_id)->where('term_id',$termId)->get();
+    public function listCoursesAssignedToUser($user_id ){
+        $termId = Semester::latest()->first()->id;
+        $courses = CourseUser::where('user_id',$user_id)->where('semester_id',$termId)->with('course')->get();
+        // return for each course the course_id, course_code, course_name, number_of_students
+        $new_courses = [];
         foreach ($courses as $course){
-            $course['course'] = Course::where('id',$course->course_id)->first();
+            $c['course_id'] = $course->course->id;
+            $c['course_code'] = $course->course->course_code;
+            $c['course_name'] = $course->course->name;
+            $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id',$course->course_semester_id)->count();
+            $new_courses[] = $c;
         }
-        return $courses;
+        return $new_courses;
     }
 
 }
-// 'course_id' => $course->id,
-//                 'course_code' => $course->course_code,
-//                 'course_name' => $course->name,
-//                 'number_of_students' => $course['number_of_students'],

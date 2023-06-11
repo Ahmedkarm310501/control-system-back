@@ -19,7 +19,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     });
     ///////////////////////////user routes///////////////////////////
     // list courses assigned to user
-    Route::get('/list-courses-assigned-to-user/{termId}', [UserController::class, 'listCoursesAssignedToUser']);
+    Route::get('/list-courses-assigned-to-user', [UserController::class, 'listCoursesAssignedToUser']);
     Route::get('/user-profile', [UserController::class, 'userProfile']);
     Route::post('/update-password', [UserController::class, 'updatePassword']);
     /////////////////////////////////////////////////////////////////
