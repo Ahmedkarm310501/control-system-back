@@ -107,23 +107,20 @@ class UserService
             return false;
         }
     }
-    public function listCoursesAssignedToUser($user_id){
-        $courses = CourseUser::where('user_id',$user_id)->get('course_id');
-        $course_data = [];
+    public function listCoursesAssignedToUser($user_id ){
+        $termId = Semester::latest()->first()->id;
+        $courses = CourseUser::where('user_id',$user_id)->where('semester_id',$termId)->with('course')->get();
+        // return for each course the course_id, course_code, course_name, number_of_students
+        $new_courses = [];
         foreach ($courses as $course){
-            $course_data[] = Course::find($course->course_id);
-            $number_of_students = CourseSemesterEnrollment::where('course_id',$course->course_id)->count();
-            $course_data[count($course_data)-1]['number_of_students'] = $number_of_students;
+            $c['course_id'] = $course->course->id;
+            $c['course_code'] = $course->course->course_code;
+            $c['course_name'] = $course->course->name;
+            $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id',$course->course_semester_id)->count();
+            $c['term_id']= $termId;
+            $new_courses[] = $c;
         }
-        $course_data = collect($course_data)->map(function ($course) {
-            return [
-                'course_id' => $course->id,
-                'course_code' => $course->course_code,
-                'course_name' => $course->name,
-                'number_of_students' => $course['number_of_students'],
-            ];
-        });
-        return $course_data;
+        return $new_courses;
     }
 
 }

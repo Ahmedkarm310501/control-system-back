@@ -15,7 +15,7 @@ class CourseSemester extends Model
     }
 
     function users(){
-        return $this->belongsToMany(User::class, 'course_user');
+        return $this->belongsToMany(User::class, 'course_user', 'course_semester_id', 'user_id');
             // ->withPivot('term_work', 'exam_work');
     }
 }
