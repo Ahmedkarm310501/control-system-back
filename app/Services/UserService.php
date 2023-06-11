@@ -92,14 +92,18 @@ class UserService
     public function assignUserToCourse($user_course)
     {
         // get the leatest semester from table semesters
-        $semester = Semester::orderBy('id','desc')->first();
+        $semester = Semester::latest()->first();
+        
         // get the id from course semester by course id and semester id
         $course_semester = CourseSemester::where('course_id',$user_course['course_id'])
             ->where('semester_id',$semester->id)->first();
+        
         // add to course user table the user id and course semester id
         $course_user = CourseUser::create([
             'user_id' => $user_course['user_id'],
             'course_semester_id' => $course_semester->id,
+            'course_id' => $user_course['course_id'],
+            'semester_id' => $semester->id,
         ]);
         if($course_user){
             return true;
