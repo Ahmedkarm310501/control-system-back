@@ -209,7 +209,7 @@ class CourseGradeService{
         }
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->first();
+        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
         if(!$course_user){
             throw new \Exception('You do not have access to this course', 403);
         }
@@ -222,16 +222,21 @@ class CourseGradeService{
         if(!$student){
             throw new \Exception('Student not found', 404);
         }
-        $course_semester_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
-            ->where('semester_id', $semester->id)
+        $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
+        $course_semester_enrollment = CourseSemesterEnrollment::
+            where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->first();
 
         if(!$course_semester_enrollment){
             throw new \Exception('Student not enrolled in this course', 404);
         }
-        CourseSemesterEnrollment::where('course_id', $course->id)
-            ->where('semester_id', $semester->id)
+        // check if stud term work between 0 and 40 and exam work between 0 and 60
+        if($data['term_work'] < 0 || $data['term_work'] > 40 || $data['exam_work'] < 0 || $data['exam_work'] > 60){
+            throw new \Exception('Term work must be between 0 and 40 and exam work must be between 0 and 60', 400);
+        }
+        CourseSemesterEnrollment::
+            where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->update([
                 'term_work' => $data['term_work'],
@@ -253,7 +258,7 @@ class CourseGradeService{
         }
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->first();
+        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
         if(!$course_user){
             throw new \Exception('You do not have access to this course', 403);
         }
@@ -262,8 +267,9 @@ class CourseGradeService{
         if(!$semester){
             throw new \Exception('Semester not found', 404);
         }
-        $course_semester_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
-            ->where('semester_id', $semester->id)
+        $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
+        $course_semester_enrollment = CourseSemesterEnrollment::
+            where('course_semester_id', $course_semester->id)
             ->update([
                 'term_work' => null,
                 'exam_work' => null,
