@@ -135,6 +135,7 @@ class CourseGradeService{
         $students = Excel::toArray([], $data['students'])[0];
         $students = array_slice($students, 1);
         $numOfMissingFields = 0;
+        $studentsRes = [];
         foreach($students as $student){
             if(!isset($student[0]) || !isset($student[1])){
                 $numOfMissingFields++;
@@ -148,10 +149,17 @@ class CourseGradeService{
                 'course_semester_id' => $course_semester->id,
                 'student_id' => $student->id,
             ]);
+            $studentsRes[] = [
+                'student_id' => $student->id,
+                'student' => [
+                    'name' => $student->name,
+                ]
+            ];
         }
-        if($course_semester_enrollment){
+
+        if(count($studentsRes) > 0){
             return [
-                'course_semester_enrollment' => $course_semester_enrollment,
+                'students' => $studentsRes,
                 'numOfMissingFields' => $numOfMissingFields,
             ];
         }
@@ -167,7 +175,7 @@ class CourseGradeService{
         }
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->first();
+        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
         if(!$course_user){
             throw new \Exception('You do not have access to this course', 403);
         }
@@ -180,8 +188,10 @@ class CourseGradeService{
         if(!$student){
             throw new \Exception('Student not found', 404);
         }
-        $course_semester_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
-            ->where('semester_id', $semester->id)
+        $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
+
+        $course_semester_enrollment = CourseSemesterEnrollment::
+            where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->delete();
         if($course_semester_enrollment){
