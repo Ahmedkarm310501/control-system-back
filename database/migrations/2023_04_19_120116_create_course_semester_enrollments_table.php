@@ -17,7 +17,7 @@ return new class extends Migration
             // $table->foreignId('course_id')->references('id')->on('courses')->constrained();
             // $table->foreignId('semester_id')->references('id')->on('semesters')->constrained();
             $table->foreignId('student_id')->references('id')->on('students')->constrained();
-            $table->foreignId('course_semester_id')->references('id')->on('course_semesters')->constrained();
+            $table->foreignId('course_semester_id')->references('id')->on('course_semesters')->constrained()->onDelete('cascade');
             $table->float('term_work')->nullable();
             $table->float('exam_work')->nullable();
             $table->unique(['course_semester_id', 'student_id'], 'cse_course_semester_student_unique');

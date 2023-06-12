@@ -126,5 +126,55 @@ class UserService
         }
         return $new_courses;
     }
-
+    public function addSemester($semesterData)
+    {
+        $semester = Semester::create($semesterData);
+        if($semester){
+            return true;
+        }else{
+            return false;
+        }
+    }
+    public function getCoursesInSemester($semester_id)
+    {
+        // get the courses id from course semester table by semester id
+        $courses_id = CourseSemester::where('semester_id',$semester_id)->get('course_id');
+        $courses = [];
+        foreach ($courses_id as $course_id){
+            $courses[] = Course::find($course_id->course_id);
+        }
+        return $courses;
+    }
+    public function editCourseSemester($courses)
+    {
+        // get leatest semester
+        $semester_id = Semester::orderBy('id','desc')->first()->id;
+        // get all courses in semester
+        $courses_in_semester = CourseSemester::where('semester_id',$semester_id)->get('course_id');
+        // check if $courses_in_semester is empty create new course semester
+        if(count($courses_in_semester) == 0){
+            foreach ($courses as $course){
+                CourseSemester::create([
+                    'course_id' => $course,
+                    'semester_id' => $semester_id,
+                ]);
+            }
+            return true;
+        }else{
+            // delete all courses in semester
+            foreach ($courses_in_semester as $course){
+                $course_semester = CourseSemester::where('course_id',$course->course_id)
+                    ->where('semester_id',$semester_id)->first();
+                $course_semester->delete();
+            }
+            // add new courses in semester
+            foreach ($courses as $course){
+                CourseSemester::create([
+                    'course_id' => $course,
+                    'semester_id' => $semester_id,
+                ]);
+            }
+            return true;
+        }
+    }
 }
