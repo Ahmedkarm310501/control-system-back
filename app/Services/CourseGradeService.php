@@ -135,6 +135,7 @@ class CourseGradeService{
         $students = Excel::toArray([], $data['students'])[0];
         $students = array_slice($students, 1);
         $numOfMissingFields = 0;
+        $studentsRes = [];
         foreach($students as $student){
             if(!isset($student[0]) || !isset($student[1])){
                 $numOfMissingFields++;
@@ -148,10 +149,17 @@ class CourseGradeService{
                 'course_semester_id' => $course_semester->id,
                 'student_id' => $student->id,
             ]);
+            $studentsRes[] = [
+                'student_id' => $student->id,
+                'student' => [
+                    'name' => $student->name,
+                ]
+            ];
         }
-        if($course_semester_enrollment){
+
+        if(count($studentsRes) > 0){
             return [
-                'course_semester_enrollment' => $course_semester_enrollment,
+                'students' => $studentsRes,
                 'numOfMissingFields' => $numOfMissingFields,
             ];
         }

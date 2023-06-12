@@ -56,7 +56,7 @@ class CourseGradeController extends Controller
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), $e->getCode());
         }
-        return $this->success($data['numOfMissingFields'],201,'Students added to course successfully');
+        return $this->success($data,201,'Students added to course successfully');
     }
 
     public function deleteStudentFromCourse(DeleteStudentFromCourseRequest $request, CourseGradeService $courseGradeService)
