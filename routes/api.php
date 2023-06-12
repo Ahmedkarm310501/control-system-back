@@ -66,6 +66,14 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     // delete user
     Route::delete('/delete-user',[UserController::class,'deleteUser']);
 
+    // add new semester
+    Route::post('/add-semester',[UserController::class,'addSemester']);
+    // get current semester
+    Route::get('/current-semester',[UserController::class,'getCurrentSemester']);
+    // get courses in semester
+    Route::get('/courses-in-semester/{semesterId}',[UserController::class,'getCoursesInSemester']);
+    // edit course semester
+    Route::post('/edit-course-semester',[UserController::class,'editCourseSemester']);
 
     Route::post('/add-course',[CourseController::class,'addCourse']);
     Route::get('/list-courses',[CourseController::class,'listCourses']);

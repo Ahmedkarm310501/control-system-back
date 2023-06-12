@@ -1,13 +1,18 @@
 <?php
 
 namespace App\Models;
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Semester extends Model
 {
+    
     use HasFactory;
+    protected $fillable = [
+        'id',
+        'term',
+        'year',
+    ];
     // public function courses()
     // {
     //     return $this->belongsToMany(Course::class, 'course_semester_enrollments', 'semester_id', 'course_id')
