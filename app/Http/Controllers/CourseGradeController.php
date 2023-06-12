@@ -52,7 +52,7 @@ class CourseGradeController extends Controller
     {
         $data = $request->validated();
         try {
-           $data=  $courseGradeService->addStudentsToCourseExcel($data, $request->user());
+            $data=  $courseGradeService->addStudentsToCourseExcel($data, $request->user());
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), $e->getCode());
         }
