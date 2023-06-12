@@ -79,14 +79,14 @@ class CourseGradeService{
     }
 
     public function addStudentToCourse($data , $user)
-    {
+    { 
         $course = Course::find($data['course_id']);
         if(!$course){
             throw new \Exception('Course not found', 404);
         }
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', $user->id)
-        ->where('course_id', $course->id)->first();
+        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
         if(!$course_user){
             throw new \Exception('You do not have access to this course', 403);
         }
@@ -102,9 +102,9 @@ class CourseGradeService{
                 'id' => $data['student_id'],
             ]);
         }
+        $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
         $course_semester_enrollment = CourseSemesterEnrollment::firstOrCreate([
-            'course_id' => $course->id,
-            'semester_id' => $data['semester_id'],
+            'course_semester_id' => $course_semester->id,
             'student_id' => $student->id,
         ]);
         if($course_semester_enrollment){
