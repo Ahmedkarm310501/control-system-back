@@ -289,7 +289,7 @@ class CourseGradeService{
         }
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->first();
+        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
         if(!$course_user){
             throw new \Exception('You do not have access to this course', 403);
         }
@@ -298,6 +298,7 @@ class CourseGradeService{
         if(!$semester){
             throw new \Exception('Semester not found', 404);
         }
+        $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
         $students = Excel::toArray([], $data['students'])[0];
         $students = array_slice($students, 1);
         $wrongFormat = [];
@@ -308,8 +309,14 @@ class CourseGradeService{
                 $index++;
                 continue;
             }
-            $course_enrollment = CourseSemesterEnrollment::where('course_id', $course->id)
-            ->where('semester_id', $semester->id)
+            // check if stud term work between 0 and 40 and exam work between 0 and 60
+            if($student[1] < 0 || $student[1] > 40 || $student[2] < 0 || $student[2] > 60){
+                $wrongFormat[] = $index;
+                $index++;
+                continue;
+            }
+            $course_enrollment = CourseSemesterEnrollment::
+            where('course_semester_id', $course_semester->id)
             ->where('student_id', $student[0])
             ->update([
                 'term_work' => $student[1],
@@ -318,8 +325,7 @@ class CourseGradeService{
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
-        ->where('course_id', $course->id)
-        ->where('semester_id', $semester->id)
+        ->where('course_semester_id', $course_semester->id)
         ->get()
         ->map(function ($enrollment) {
             if ($enrollment->term_work === null || $enrollment->exam_work === null) {
