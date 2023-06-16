@@ -3,11 +3,14 @@
 namespace App\Services;
 
 use App\Models\CourseSemesterEnrollment;
+use App\Models\CourseSemester;
 
 class DashboardService
 {
     public function part_one($course_id, $semester_id){
-        $enrollements = CourseSemesterEnrollment::where('course_id', $course_id)->where('semester_id',$semester_id)->get();
+
+        $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
+        $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->get();
         $number_of_students = count($enrollements);
         $total_grade = 0;
         $passed_students = 0;
@@ -30,7 +33,8 @@ class DashboardService
         return $graph_one;
     }
     public function part_two($course_id,$semester_id){
-        $enrollements = CourseSemesterEnrollment::where('course_id', $course_id)->where('semester_id',$semester_id)->get();
+        $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
+        $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->get();
         $passed_students = 0;
         $failed_students = 0;
         $grade_A_plus = 0;
@@ -96,7 +100,8 @@ class DashboardService
         return $graph_two;
     }
     public function part_three($course_id,$semester_id){
-        $enrollements = CourseSemesterEnrollment::where('course_id', $course_id)->where('semester_id',$semester_id)->whereRaw('term_work + exam_work < 50')->get();
+        $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
+        $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->whereRaw('term_work + exam_work < 50')->get();
         $need_one_grade = 0;
         $need_two_grade = 0;
         $need_three_grade = 0;
@@ -126,7 +131,7 @@ class DashboardService
         $number_of_students_48 = 0;
         $number_of_students_49 = 0;
         // get number of students in range of 40-49
-        $enrollements_range = CourseSemesterEnrollment::where('course_id',$course_id)->where('semester_id',$semester_id)->whereRaw('term_work + exam_work >= 40')->whereRaw('term_work + exam_work < 50')->get();
+        $enrollements_range = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->whereRaw('term_work + exam_work >= 40')->whereRaw('term_work + exam_work < 50')->get();
         foreach($enrollements_range as $enroll){
             $enroll_grade = $enroll->term_work + $enroll->exam_work;
             // turn it to int
