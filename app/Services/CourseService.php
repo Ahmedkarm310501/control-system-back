@@ -33,13 +33,32 @@ class CourseService
 
     public function getCourse($course){
         $course = Course::find($course);
-        $department = Department::find($course->department_id)->select('name')->first();
+        $rule = $course->rule;
+        $department = Department::find($course->department_id)->select('dept_code')->first();
         // dd($department);
         // $course = Course::with('department')->where('course_code', $course)->first();
         if(!$course){
             return false;
         }
         $course['deptName']  = $department->name;
-        return $course;
+        $course['rule']  = $rule;
+        $res ;
+        $res['courseID'] = $course->course_code;
+        $res['courseName'] = $course->name;
+        $res['termWork'] = $course->rule->term_work;
+        $res['examWork'] = $course->rule->exam_work;
+        $res['department'] = $department->dept_code;
+        $res['instructor'] = $course->rule->instructor;
+        $res['totalGrade'] = $course->rule->total;
+        // $res['instructor'] = $course->rule->instructor;
+        return $res;
     }
 }
+
+// courseID = 'IS123';
+//   courseNamee = 'Intro to Database Systems';
+//   termWorkk = 40;
+//   examWorkk = 60;
+//   departmentt = 'IS';
+//   instructorr = 'Ali Zidane';
+//   totalGradee = this.termWorkk + this.examWorkk

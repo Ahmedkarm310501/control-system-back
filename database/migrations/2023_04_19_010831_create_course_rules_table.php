@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->float('term_work');
             $table->float('exam_work');
+            $table->float('total');
+            // $table->float('pass_mark');
+            $table->string('instructor');
+            
             $table->timestamps();
         });
     }
