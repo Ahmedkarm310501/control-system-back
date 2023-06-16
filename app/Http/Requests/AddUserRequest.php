@@ -28,7 +28,23 @@ class AddUserRequest extends FormRequest
             'password' => 'required|string',
             'password_confirmation' => 'required|same:password',
             'national_id' => 'required|string',
-            'is_admin' => 'optional|boolean',
+            'is_admin' => 'required|boolean',
+        ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     */
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Name is required',
+            'email.required' => 'Email is required',
+            'email.unique' => 'Email already exists',
+            'password.required' => 'Password is required',
+            'password_confirmation.required' => 'Password confirmation is required',
+            'password_confirmation.same' => 'Password confirmation must match password',
+            'national_id.required' => 'National ID is required',
         ];
     }
 }
