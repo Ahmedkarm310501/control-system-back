@@ -17,8 +17,10 @@ class CourseRuleFactory extends Factory
     public function definition(): array
     {
         return [
-            'term_work' => fake()->randomFloat(2, 0, 40),
-            'exam_work' => fake()->randomFloat(2, 0, 60),
+            'term_work' => 40,
+            'exam_work' => 60,
+            'total' => 100,
+            'instructor' => fake()->name(),
         ];
     }
 }

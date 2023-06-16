@@ -11,6 +11,7 @@ use App\Models\Semester;
 use App\Models\Student;
 use App\Models\CourseSemester;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 
 class CourseGradeService{
@@ -156,11 +157,18 @@ class CourseGradeService{
                 ]
             ];
         }
+        $file = $data['students'];
+        $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+        // Store the file in the storage/app/public directory
+        $file->storeAs('public', $filename);
+        // Retrieve the file path
+        $filePath = Storage::url($filename);
 
         if(count($studentsRes) > 0){
             return [
                 'students' => $studentsRes,
                 'numOfMissingFields' => $numOfMissingFields,
+                'filePath' => $filePath,
             ];
         }
         throw new \Exception('Error adding student to course', 500);
