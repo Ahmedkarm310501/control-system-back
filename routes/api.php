@@ -47,7 +47,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('add-students-grades-excel', [CourseGradeController::class, 'addStudentsGradesExcel']);
     Route::post('delete-course-grades', [CourseGradeController::class, 'deleteCourseGrades']);
     Route::post('export-course-grades', [CourseGradeController::class, 'exportCourseGrades']);
-
+    Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
 
 });
 // miidle ware isadmin for add user
@@ -77,6 +77,6 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
 
     Route::post('/add-course',[CourseController::class,'addCourse']);
     Route::get('/list-courses',[CourseController::class,'listCourses']);
-    Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
+    
 });
 
