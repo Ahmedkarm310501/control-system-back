@@ -215,9 +215,17 @@ class CourseGradeService{
 
         $course_semester_enrollment = CourseSemesterEnrollment::
             where('course_semester_id', $course_semester->id)
-            ->where('student_id', $student->id)
-            ->delete();
+            ->where('student_id', $student->id);
+        $temp = clone $course_semester_enrollment->first();
+        $course_semester_enrollment->delete();
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
+            ->withProperties(['old' => $temp, 'new' => null])
+            ->event('DELETE_STUDENT_FROM_COURSE')
+            ->log('Deleted student from course');
+            $activity->log_name = 'COURSE_NAME';
+            $activity->save();
+
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting student from course', 500);
