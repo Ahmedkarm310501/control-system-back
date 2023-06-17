@@ -112,7 +112,7 @@ class CourseGradeService{
             $activity = activity()->causedBy(auth()->user())->performedOn($course_semester_enrollment)->
             withProperties(['old' => null, 'new' => $course_semester_enrollment])->event('ADD_STUDENT_TO_COURSE')
             ->log('Added student to course');
-            $activity->log_name = 'COURSE';
+            $activity->log_name = 'COURSE_NAME';
             $activity->save();
             return $course_semester_enrollment;
         }
@@ -170,9 +170,13 @@ class CourseGradeService{
         $filePath = Storage::url($filename);
         
         
-        activity()->causedBy($user)->performedOn($course_semester)
-        ->withProperties(['old_file' => $course_semester->stud_names, 'new_file' => $filePath])
+        $activity=activity()->causedBy($user)->performedOn($course_semester)
+        ->withProperties(['old' => $course_semester->stud_names, 'new' => $filePath])
+        ->event('ADD_STUDENTS_TO_COURSE_EXCEL')
         ->log('Added students to course');
+        $activity->log_name = 'COURSE_NAMES';
+        $activity->save();
+
         $course_semester->stud_names = $filePath;
         $course_semester->save();
         if(count($studentsRes) > 0){ 
