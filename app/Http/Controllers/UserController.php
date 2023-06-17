@@ -136,4 +136,11 @@ class UserController extends Controller
             return $this->error('Course not found', 404);
         }
     }
+    public function getUser($id ){
+        $user = User::find($id);
+        if (!$user) {
+            return $this->error('User not found', 404);
+        }
+        return $this->success($user,200,'User');
+    }
 }
