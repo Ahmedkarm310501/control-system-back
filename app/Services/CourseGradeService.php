@@ -109,6 +109,11 @@ class CourseGradeService{
             'student_id' => $student->id,
         ]);
         if($course_semester_enrollment){
+            $activity = activity()->causedBy(auth()->user())->performedOn($course_semester_enrollment)->
+            withProperties(['old' => null, 'new' => $course_semester_enrollment])->event('ADD_STUDENT_TO_COURSE')
+            ->log('Added student to course');
+            $activity->log_name = 'COURSE';
+            $activity->save();
             return $course_semester_enrollment;
         }
         throw new \Exception('Error adding student to course', 500);
