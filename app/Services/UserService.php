@@ -34,10 +34,12 @@ class UserService
     public function listUsers()
     {
         $users = User::select(['id', 'name', 'email'])->get();
-        // dont send the auth user
+        // dont send the auth user and put them in array
         $users = $users->filter(function ($value, $key) {
             return $value->id != auth()->user()->id;
-        });
+        })->values();
+        
+        
         return $users;
     }
     public function deleteUser($id)
