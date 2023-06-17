@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\CourseRule;
+use App\Models\CourseUser;
 class CourseService
 {
 
@@ -51,15 +52,38 @@ class CourseService
         $res['deptName'] = $department->name;
         $res['instructor'] = $course->rule->instructor;
         $res['totalGrade'] = $course->rule->total;
-        // $res['instructor'] = $course->rule->instructor;
         return $res;
+    }
+
+    public function editCourse($courseData){
+        if($courseData['term_work'] + $courseData['exam_work'] != $courseData['total']){
+            throw new \Exception('Term work + exam work must = total', 403);
+        }
+        $course = Course::find($courseData['course_id']);
+        if(!$course){
+            return false;
+        }
+        $course_user = CourseUser::where('course_id', $courseData['course_id'])
+        ->where('semester_id', $courseData['semester_id'])->where('user_id', auth()->user()->id)->first();
+        if(!$course_user){
+            return false;
+        }
+        $department = Department::where('dept_code', $courseData['dept_code'])->first();
+        if(!$department){
+            return false;
+        }
+        $courseRule = $course->rule;
+
+        $course->course_code = $courseData['course_code'];
+        $course->name = $courseData['course_name'];
+        $course->department_id = $department->id;
+        $courseRule->term_work = $courseData['term_work'];
+        $courseRule->exam_work = $courseData['exam_work'];
+        $courseRule->instructor = $courseData['instructor'];
+        $courseRule->total = $courseData['total'];
+        $course->save();
+        $courseRule->save();
+        return $course;
     }
 }
 
-// courseID = 'IS123';
-//   courseNamee = 'Intro to Database Systems';
-//   termWorkk = 40;
-//   examWorkk = 60;
-//   departmentt = 'IS';
-//   instructorr = 'Ali Zidane';
-//   totalGradee = this.termWorkk + this.examWorkk

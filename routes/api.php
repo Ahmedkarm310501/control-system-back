@@ -50,6 +50,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('delete-course-grades', [CourseGradeController::class, 'deleteCourseGrades']);
     Route::post('export-course-grades', [CourseGradeController::class, 'exportCourseGrades']);
     Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
+    Route::post('/edit-course', [CourseController::class, 'editCourse']);
 
 });
 // miidle ware isadmin for add user
