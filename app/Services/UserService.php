@@ -117,15 +117,24 @@ class UserService
         // get the id from course semester by course id and semester id
         $course_semester = CourseSemester::where('course_id',$user_course['course_id'])
             ->where('semester_id',$semester->id)->first();
+
+        if (!$course_semester) {
+            return false;
+        }
         
         // add to course user table the user id and course semester id
-        $course_user = CourseUser::create([
+        $course_user = CourseUser::firstOrCreate([
             'user_id' => $user_course['user_id'],
             'course_semester_id' => $course_semester->id,
             'course_id' => $user_course['course_id'],
             'semester_id' => $semester->id,
         ]);
         if($course_user){
+            $activity = activity()->causedBy(auth()->user())->performedOn($course_user)->
+            withProperties(['old' => null, 'new' => $course_user])->event('ASSIGN_USER_TO_COURSE')
+            ->log('Assign user to course');
+            $activity->log_name = 'ASSIGN_USER';
+            $activity->save();
             return true;
         }else{
             return false;
