@@ -150,6 +150,11 @@ class UserService
     {
         $semester = Semester::create($semesterData);
         if($semester){
+            $activity = activity()->causedBy(auth()->user())->performedOn($semester)->
+            withProperties(['old' => null, 'new' => $semester])->event('ADD_SEMESTER')
+            ->log('Add new semester');
+            $activity->log_name = 'SEMESTER';
+            $activity->save();
             return true;
         }else{
             return false;
