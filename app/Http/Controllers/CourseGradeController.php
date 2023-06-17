@@ -14,6 +14,8 @@ use App\Http\Requests\NumberStudentsRequest;
 use App\Services\CourseGradeService;
 use App\Http\Requests\addStudentsToCourseRequest;
 use App\Http\Requests\DeleteStudentFromCourseRequest;
+use App\Http\Requests\DeleteStudentsFromCourseRequest;
+
 use App\Http\Requests\AddStudGradeRequest;
 use App\Http\Requests\DeleteCourseGradesRequest;
 use Maatwebsite\Excel\Facades\Excel;
@@ -57,6 +59,17 @@ class CourseGradeController extends Controller
             return $this->error($e->getMessage(), $e->getCode());
         }
         return $this->success($data,201,'Students added to course successfully');
+    }
+
+    public function deleteAllStudentsFromCourse(DeleteStudentsFromCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+            $courseGradeService->deleteAllStudentsFromCourse($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        return $this->success('Students deleted from course successfully');
     }
 
     public function deleteStudentFromCourse(DeleteStudentFromCourseRequest $request, CourseGradeService $courseGradeService)
