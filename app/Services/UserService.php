@@ -21,9 +21,11 @@ class UserService
 
         if($user){
             // set log neame
-            activity()->causedBy(auth()->user())->performedOn($user)->
+            $activity = activity()->causedBy(auth()->user())->performedOn($user)->
             withProperties(['old' => null, 'new' => $user])->event('ADD_USER')
             ->log('Add new user');
+            $activity->log_name = 'USER';
+            $activity->save();
             return true;
         }else{
             return false;
@@ -40,7 +42,13 @@ class UserService
         if(!$user){
             return false;
         }
+        $temp = clone $user;
         $user = $user->delete();
+        $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
+        withProperties(['old' => $temp, 'new' => null])->event('DELETE_USER')
+        ->log('Delete user');
+        $activity->log_name = 'USER';
+        $activity->save();
         return true;
     }
     public function userProfile($id)
@@ -75,12 +83,20 @@ class UserService
         if (!$user) {
             return false;
         }
+        $temp = clone $user;
         $user->name = $userData['name'];
         $user->email = $userData['email'];
         $user->national_id = $userData['national_id'];
         $user->is_admin = $userData['is_admin'];
         $user->is_active = $userData['is_active'];
         $user->save();
+
+        $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
+        withProperties(['old' => $temp, 'new' => $user])->event('EDIT_USER')
+        ->log('Edit user');
+        $activity->log_name = 'USER';
+        $activity->save();
+        
         return true;
     }
     public function getCoursesInDepartment($department_id)
