@@ -20,6 +20,10 @@ class UserService
         $user = User::create($userData);
 
         if($user){
+            // set log neame
+            activity()->causedBy(auth()->user())->performedOn($user)->
+            withProperties(['old' => null, 'new' => $user])->event('ADD_USER')
+            ->log('Add new user');
             return true;
         }else{
             return false;

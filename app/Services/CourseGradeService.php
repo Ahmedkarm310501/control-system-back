@@ -163,8 +163,12 @@ class CourseGradeService{
         $file->storeAs('public', $filename);
         // Retrieve the file path
         $filePath = Storage::url($filename);
-
-        if(count($studentsRes) > 0){
+        
+        
+        activity()->causedBy($user)->performedOn($course_semester)->withProperties(['old_file' => $course_semester->stud_names, 'new_file' => $filePath])->log('Added students to course');
+        $course_semester->stud_names = $filePath;
+        $course_semester->save();
+        if(count($studentsRes) > 0){ 
             return [
                 'students' => $studentsRes,
                 'numOfMissingFields' => $numOfMissingFields,
