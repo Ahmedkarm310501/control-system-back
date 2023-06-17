@@ -28,7 +28,6 @@ class EditUserRequest extends FormRequest
             'national_id' => 'required|numeric',
             'is_admin' => 'required|boolean',
             'is_active' => 'required|boolean',
-            'password' => 'required',
         ];
     }
     // public function messages(){
