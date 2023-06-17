@@ -55,6 +55,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
 // miidle ware isadmin for add user
 Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/add-user',[UserController::class,'addUser']);
+    Route::get('/users/{user}',[UserController::class,'getUser']);
     // assign user to course
     Route::post('/assign-user-to-course',[UserController::class,'assignUserToCourse']);
     // get all courses in a department
