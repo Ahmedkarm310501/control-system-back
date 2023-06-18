@@ -23,7 +23,7 @@ class UserService
             // set log neame
             $activity = activity()->causedBy(auth()->user())->performedOn($user)->
             withProperties(['old' => null, 'new' => $user])->event('ADD_USER')
-            ->log('Add new user');
+            ->log('Add new user with id: '.$user->id.'' . ' and name: ' . $user->name . '');
             $activity->log_name = 'USER';
             $activity->save();
             return true;
@@ -52,7 +52,7 @@ class UserService
         $user = $user->delete();
         $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
         withProperties(['old' => $temp, 'new' => null])->event('DELETE_USER')
-        ->log('Delete user');
+        ->log('Delete user with id: '.$temp->id.'' . ' and name: ' . $temp->name . '');
         $activity->log_name = 'USER';
         $activity->save();
         return true;
@@ -99,7 +99,7 @@ class UserService
 
         $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
         withProperties(['old' => $temp, 'new' => $user])->event('EDIT_USER')
-        ->log('Edit user');
+        ->log('Edit user with id: '.$user->id.'' . ' and name: ' . $user->name . '');
         $activity->log_name = 'USER';
         $activity->save();
         
@@ -138,7 +138,7 @@ class UserService
         if($course_user){
             $activity = activity()->causedBy(auth()->user())->performedOn($course_user)->
             withProperties(['old' => null, 'new' => $course_user])->event('ASSIGN_USER_TO_COURSE')
-            ->log('Assign user to course');
+            ->log('Assign  '.$course_user->user->name.' to course : '.$course_user->course->name.'');
             $activity->log_name = 'ASSIGN_USER';
             $activity->save();
             return true;
