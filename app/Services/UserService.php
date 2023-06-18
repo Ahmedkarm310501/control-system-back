@@ -185,36 +185,81 @@ class UserService
         }
         return $courses;
     }
+    // public function editCourseSemester($courses)
+    // {
+    //     // get leatest semester
+    //     $semester_id = Semester::orderBy('id','desc')->first()->id;
+    //     // get all courses in semester
+    //     $courses_in_semester = CourseSemester::where('semester_id',$semester_id)->get('course_id');
+    //     // check if $courses_in_semester is empty create new course semester
+    //     if(count($courses_in_semester) == 0){
+    //         foreach ($courses as $course){
+    //             CourseSemester::create([
+    //                 'course_id' => $course,
+    //                 'semester_id' => $semester_id,
+    //             ]);
+    //         }
+    //         return true;
+    //     }else{
+    //         // delete all courses in semester
+    //         foreach ($courses_in_semester as $course){
+    //             $course_semester = CourseSemester::where('course_id',$course->course_id)
+    //                 ->where('semester_id',$semester_id)->first();
+    //             $course_semester->delete();
+    //         }
+    //         // add new courses in semester
+    //         foreach ($courses as $course){
+    //             CourseSemester::create([
+    //                 'course_id' => $course,
+    //                 'semester_id' => $semester_id,
+    //             ]);
+    //         }
+    //         return true;
+    //     }
+    // }
+
     public function editCourseSemester($courses)
     {
-        // get leatest semester
-        $semester_id = Semester::orderBy('id','desc')->first()->id;
-        // get all courses in semester
-        $courses_in_semester = CourseSemester::where('semester_id',$semester_id)->get('course_id');
-        // check if $courses_in_semester is empty create new course semester
-        if(count($courses_in_semester) == 0){
-            foreach ($courses as $course){
+        // Get the latest semester
+        $semester_id = Semester::orderBy('id', 'desc')->first()->id;
+        
+        // Get all courses in the current semester
+        $courses_in_semester = CourseSemester::where('semester_id', $semester_id)->get('course_id');
+        
+        // Check if $courses_in_semester is empty, create new course semesters
+        if ($courses_in_semester->isEmpty()) {
+            foreach ($courses as $course) {
                 CourseSemester::create([
                     'course_id' => $course,
                     'semester_id' => $semester_id,
                 ]);
             }
-            return true;
-        }else{
-            // delete all courses in semester
-            foreach ($courses_in_semester as $course){
-                $course_semester = CourseSemester::where('course_id',$course->course_id)
-                    ->where('semester_id',$semester_id)->first();
-                $course_semester->delete();
+        } else {
+            
+            // Add new courses to the semester
+            foreach ($courses as $course) {
+                // Check if the course is already associated with the current semester
+                $existingCourse = $courses_in_semester->firstWhere('course_id', $course);
+                
+                // If the course is not found, create a new course semester
+                if (!$existingCourse) {
+                    CourseSemester::create([
+                        'course_id' => $course,
+                        'semester_id' => $semester_id,
+                    ]);
+                }
             }
-            // add new courses in semester
-            foreach ($courses as $course){
-                CourseSemester::create([
-                    'course_id' => $course,
-                    'semester_id' => $semester_id,
-                ]);
+            // loop on all course_semester and delete the course_semester that not in the courses array
+            foreach ($courses_in_semester as $course_in_semester) {
+                if (!in_array($course_in_semester->course_id, $courses)) {
+                    $course_semester = CourseSemester::where('course_id', $course_in_semester->course_id)
+                        ->where('semester_id', $semester_id)->first();
+                    $course_semester->delete();
+                }
             }
-            return true;
+
         }
+        
+        return true;
     }
 }
