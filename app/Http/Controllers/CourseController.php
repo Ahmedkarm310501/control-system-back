@@ -64,12 +64,11 @@ class CourseController extends Controller
     }
     public function importCourses(ImportCoursesRequest $request, CourseService $courseService)
     {
-        // send the file to the service
         $file = $request->file('courses');
-        $courses = $courseService->importCourses($file);
-        if(!$courses){
-            return $this->error('Courses not found', 404);
+        $courseData = $courseService->importCourses($file);
+        if (!$courseData) {
+            return $this->error('Courses already found in table courses | missing data', 404);
         }
-        return $this->success($courses, 200 , 'all courses');
+        return $this->successMessage('Courses added successfully' , 201);
     }
 }

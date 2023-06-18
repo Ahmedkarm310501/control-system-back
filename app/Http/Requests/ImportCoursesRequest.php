@@ -26,4 +26,11 @@ class ImportCoursesRequest extends FormRequest
             'courses' => 'required|file|mimes:xlsx,xls,csv',
         ];
     }
+    public function messages(): array
+    {
+        return [
+            'courses.required' => 'Please upload a file',
+            'courses.mimes' => 'Only xlsx, xls and csv files are allowed',
+        ];
+    }
 }
