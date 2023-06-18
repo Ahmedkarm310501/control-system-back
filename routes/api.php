@@ -56,6 +56,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
 
     // activity log
     Route::get('/get-logs', [ActivityLogController::class, 'getLogs']);
+    // download file from storage
+    Route::get('/get-file/storage/{file_name}', [ActivityLogController::class, 'getFile']);
 
 });
 // miidle ware isadmin for add user

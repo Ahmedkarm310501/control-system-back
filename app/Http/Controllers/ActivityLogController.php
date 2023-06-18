@@ -28,4 +28,15 @@ class ActivityLogController extends Controller
         }
         return $this->success($activityLogs, 200 , 'all activity logs');
     }
+
+    // get file from storage
+    public function getFile($file_name)
+    {
+        $file_path = storage_path('app/public/'.$file_name);
+        if(file_exists($file_path)){
+            return response()->download($file_path);
+        }else{
+            return $this->error('File not found', 404);
+        }
+    }
 }
