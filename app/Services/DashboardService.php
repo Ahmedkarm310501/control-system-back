@@ -23,7 +23,11 @@ class DashboardService
                 $failed_students++;
             }
         }
-        $average_grade = $total_grade / count($enrollements);
+        if ($enrollements->count() == 0) {
+            $average_grade = 0;
+        } else {
+            $average_grade = $total_grade / count($enrollements);
+        }
         $graph_one = [
             'number_of_students' => $number_of_students,
             'average_grade' => $average_grade,
@@ -76,8 +80,13 @@ class DashboardService
                 $grade_F++;
             }
         }
-        $perecentage_passed = ($passed_students / count($enrollements)) * 100;
-        $perecentage_failed = ($failed_students / count($enrollements)) * 100;
+        if ($enrollements->count() == 0) {
+            $perecentage_passed = 0;
+            $perecentage_failed = 0;
+        } else {
+            $perecentage_passed = ($passed_students / count($enrollements)) * 100;
+            $perecentage_failed = ($failed_students / count($enrollements)) * 100;
+        }
         // make it 2 decimal
         $perecentage_passed = number_format((float)$perecentage_passed, 2, '.', '');
         $perecentage_failed = number_format((float)$perecentage_failed, 2, '.', '');

@@ -11,7 +11,9 @@ use App\Models\Semester;
 use App\Models\Student;
 use App\Models\CourseSemester;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CourseNamesExport;
 use Illuminate\Support\Facades\Storage;
+
 
 
 class CourseGradeService{
@@ -112,7 +114,7 @@ class CourseGradeService{
             $activity = activity()->causedBy(auth()->user())->performedOn($course_semester_enrollment)->
             withProperties(['old' => null, 'new' => $course_semester_enrollment])->event('ADD_STUDENT_TO_COURSE')
             ->log('Added student to course');
-            $activity->log_name = 'COURSE';
+            $activity->log_name = 'COURSE_NAME';
             $activity->save();
             return $course_semester_enrollment;
         }
@@ -170,9 +172,13 @@ class CourseGradeService{
         $filePath = Storage::url($filename);
         
         
-        activity()->causedBy($user)->performedOn($course_semester)
-        ->withProperties(['old_file' => $course_semester->stud_names, 'new_file' => $filePath])
+        $activity=activity()->causedBy($user)->performedOn($course_semester)
+        ->withProperties(['old' => $course_semester->stud_names, 'new' => $filePath])
+        ->event('ADD_STUDENTS_TO_COURSE_EXCEL')
         ->log('Added students to course');
+        $activity->log_name = 'COURSE_NAMES';
+        $activity->save();
+
         $course_semester->stud_names = $filePath;
         $course_semester->save();
         if(count($studentsRes) > 0){ 
@@ -211,9 +217,17 @@ class CourseGradeService{
 
         $course_semester_enrollment = CourseSemesterEnrollment::
             where('course_semester_id', $course_semester->id)
-            ->where('student_id', $student->id)
-            ->delete();
+            ->where('student_id', $student->id);
+        $temp = clone $course_semester_enrollment->first();
+        $course_semester_enrollment->delete();
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
+            ->withProperties(['old' => $temp, 'new' => null])
+            ->event('DELETE_STUDENT_FROM_COURSE')
+            ->log('Deleted student from course');
+            $activity->log_name = 'COURSE_NAME';
+            $activity->save();
+
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting student from course', 500);
@@ -238,10 +252,34 @@ class CourseGradeService{
         }
         $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
 
-        $course_semester_enrollment = CourseSemesterEnrollment::
-            where('course_semester_id', $course_semester->id)
-            ->delete();
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')->
+            where('course_semester_id', $course_semester->id);
+
+        $temp = clone $course_semester_enrollment;
+
+        $Students = [];
+        foreach($course_semester_enrollment->get() as $enrollment){
+            $Student = [];
+            $Student[] = $enrollment->student->id;
+            $Student[] = $enrollment->student->name;
+            $Students[] = $Student;
+        }
+
+        $filename = uniqid() . '.' .'xlsx';
+        Excel::store(new CourseNamesExport($Students), $filename, 'public');
+        $filePath = Storage::url($filename);
+
+        
+        
+        
+        $course_semester_enrollment->delete();
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
+            ->withProperties(['old' => $filePath, 'new' => null])
+            ->event('DELETE_ALL_STUDENTS_FROM_COURSE')
+            ->log('Deleted all students from course');
+            $activity->log_name = 'COURSE_NAME';
+            $activity->save();
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting student from course', 500);

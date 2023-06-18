@@ -77,7 +77,7 @@ class CourseGradeController extends Controller
         try {
             $courseGradeService->deleteStudentFromCourse($request->validated());
         } catch (\Exception $e) {
-            return $this->error($e->getMessage(), $e->getCode());
+            return $this->error($e->getMessage(), 500);
         }
         return $this->success('Student deleted from course successfully');
     }
