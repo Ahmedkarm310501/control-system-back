@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
-use App\Http\Requests\AddCoursesRequest;
+use App\Http\Requests\AddCourseRequest;
 use App\Http\Requests\ImportCoursesRequest;
 use App\Http\Requests\EditCourseSettingsRequest;
 use App\Services\CourseService;

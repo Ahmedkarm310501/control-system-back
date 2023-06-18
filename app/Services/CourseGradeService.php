@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\CourseSemester;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CourseNamesExport;
+use App\Exports\GradesExport;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -113,7 +114,7 @@ class CourseGradeService{
         if($course_semester_enrollment){
             $activity = activity()->causedBy(auth()->user())->performedOn($course_semester_enrollment)->
             withProperties(['old' => null, 'new' => $course_semester_enrollment])->event('ADD_STUDENT_TO_COURSE')
-            ->log('Added student to course');
+            ->log('Added student with id: '.$student->id.' and name: '.$student->name.' to : '.$course->name);
             $activity->log_name = 'COURSE_NAME';
             $activity->save();
             return $course_semester_enrollment;
@@ -175,7 +176,7 @@ class CourseGradeService{
         $activity=activity()->causedBy($user)->performedOn($course_semester)
         ->withProperties(['old' => $course_semester->stud_names, 'new' => $filePath])
         ->event('ADD_STUDENTS_TO_COURSE_EXCEL')
-        ->log('Added students to course');
+        ->log('Added student names file to course '. $course->name);
         $activity->log_name = 'COURSE_NAMES';
         $activity->save();
 
@@ -224,7 +225,7 @@ class CourseGradeService{
             $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
             ->withProperties(['old' => $temp, 'new' => null])
             ->event('DELETE_STUDENT_FROM_COURSE')
-            ->log('Deleted student from course');
+            ->log('Deleted student with id: '.$student->id.' and name: '.$student->name.' from : '.$course->name);
             $activity->log_name = 'COURSE_NAME';
             $activity->save();
 
@@ -277,7 +278,7 @@ class CourseGradeService{
             $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
             ->withProperties(['old' => $filePath, 'new' => null])
             ->event('DELETE_ALL_STUDENTS_FROM_COURSE')
-            ->log('Deleted all students from course');
+            ->log('Deleted all students from course '. $course->name);
             $activity->log_name = 'COURSE_NAME';
             $activity->save();
             return $course_semester_enrollment;
@@ -311,7 +312,7 @@ class CourseGradeService{
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->first();
-
+        $temp = clone $course_semester_enrollment;
         if(!$course_semester_enrollment){
             throw new \Exception('Student not enrolled in this course', 404);
         }
@@ -319,14 +320,23 @@ class CourseGradeService{
         if($data['term_work'] < 0 || $data['term_work'] > 40 || $data['exam_work'] < 0 || $data['exam_work'] > 60){
             throw new \Exception('Term work must be between 0 and 40 and exam work must be between 0 and 60', 400);
         }
-        CourseSemesterEnrollment::
+        $course_semester_enrollment= CourseSemesterEnrollment::
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->update([
                 'term_work' => $data['term_work'],
                 'exam_work' => $data['exam_work'],
             ]);
+        $temp_old = clone $temp;
+        $temp->term_work = $data['term_work'];
+        $temp->exam_work = $data['exam_work'];
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($temp)
+            ->withProperties(['old' => $temp_old, 'new' => $temp])
+            ->event('UPDATE_STUDENT_GRADE')
+            ->log('Updated student grade for student with id: '.$student->id.' and name: '.$student->name.' in course: '.$course->name);
+            $activity->log_name = 'COURSE_NAME';
+            $activity->save();
             return $course_semester_enrollment;
         }
         throw new \Exception('Error updating student grade', 500);
@@ -352,13 +362,50 @@ class CourseGradeService{
             throw new \Exception('Semester not found', 404);
         }
         $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
-        $course_semester_enrollment = CourseSemesterEnrollment::
-            where('course_semester_id', $course_semester->id)
+
+        $courseGrades = [];
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+        ->where('course_semester_id', $course_semester->id)
+        ->get()
+        ->map(function ($enrollment) {
+            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                $enrollment->total_grade = null;
+                $enrollment->grade = null;
+            } else {
+                $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+                $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+            }
+            return $enrollment;
+        });
+        
+        foreach($course_semester_enrollment as $enrollment){
+            $courseGrade = [];
+            $courseGrade[] = $enrollment->student->id;
+            $courseGrade[] = $enrollment->student->name;
+            $courseGrade[] = $enrollment->term_work;
+            $courseGrade[] = $enrollment->exam_work;
+            $courseGrade[] = $enrollment->total_grade;
+            $courseGrade[] = $enrollment->grade;
+            $courseGrades[] = $courseGrade;
+        }
+        
+        $filename = uniqid() . '.' .'xlsx';
+        Excel::store(new GradesExport($courseGrades), $filename, 'public');
+        $filePath = Storage::url($filename);
+
+        $course_semester_enrollment=CourseSemesterEnrollment::with('student:name,id')
+        ->where('course_semester_id', $course_semester->id)
             ->update([
                 'term_work' => null,
                 'exam_work' => null,
             ]);
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
+            ->withProperties(['old' => $filePath , 'new' =>null])
+            ->event('DELETE_COURSE_GRADES')
+            ->log('Deleted course grades for course: '.$course->name);
+            $activity->log_name = 'COURSE_GRADES';
+            $activity->save();
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting course grades', 500);
@@ -421,6 +468,23 @@ class CourseGradeService{
             }
             return $enrollment;
         });
+        $courseGrades = [];
+        foreach($course_semester_enrollment as $enrollment){
+            $courseGrade = [];
+            $courseGrade[] = $enrollment->student->id;
+            $courseGrade[] = $enrollment->student->name;
+            $courseGrade[] = $enrollment->term_work;
+            $courseGrade[] = $enrollment->exam_work;
+            $courseGrade[] = $enrollment->total_grade;
+            $courseGrade[] = $enrollment->grade;
+            $courseGrades[] = $courseGrade;
+        }
+
+        $filename = uniqid() . '.' .'xlsx';
+        Excel::store(new GradesExport($courseGrades), $filename, 'public');
+        $filePath = Storage::url($filename);
+
+
         $studWithNoGrade = false;
         foreach($course_semester_enrollment as $enrollment){
             if ($enrollment->term_work === null || $enrollment->exam_work === null) {
@@ -429,6 +493,15 @@ class CourseGradeService{
         }
         // print($course_semester_enrollment);
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
+            ->withProperties(['old' => $course_semester->stud_grades , 'new' => $filePath])
+            ->event('ADD_COURSE_GRADES')
+            ->log('Added course grades file for course: '.$course->name);
+            $activity->log_name = 'COURSE_GRADES';
+            $activity->save();
+
+            $course_semester->stud_grades = $filePath;
+            $course_semester->save();
             return [
                 'course_semester_enrollment' => $course_semester_enrollment,
                 'studWithNoGrade' => $studWithNoGrade,

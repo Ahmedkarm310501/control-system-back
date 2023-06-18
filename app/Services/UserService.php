@@ -23,7 +23,7 @@ class UserService
             // set log neame
             $activity = activity()->causedBy(auth()->user())->performedOn($user)->
             withProperties(['old' => null, 'new' => $user])->event('ADD_USER')
-            ->log('Add new user');
+            ->log('Add new user with id: '.$user->id.'' . ' and name: ' . $user->name . '');
             $activity->log_name = 'USER';
             $activity->save();
             return true;
@@ -52,7 +52,7 @@ class UserService
         $user = $user->delete();
         $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
         withProperties(['old' => $temp, 'new' => null])->event('DELETE_USER')
-        ->log('Delete user');
+        ->log('Delete user with id: '.$temp->id.'' . ' and name: ' . $temp->name . '');
         $activity->log_name = 'USER';
         $activity->save();
         return true;
@@ -99,7 +99,7 @@ class UserService
 
         $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
         withProperties(['old' => $temp, 'new' => $user])->event('EDIT_USER')
-        ->log('Edit user');
+        ->log('Edit user with id: '.$user->id.'' . ' and name: ' . $user->name . '');
         $activity->log_name = 'USER';
         $activity->save();
         
@@ -138,7 +138,7 @@ class UserService
         if($course_user){
             $activity = activity()->causedBy(auth()->user())->performedOn($course_user)->
             withProperties(['old' => null, 'new' => $course_user])->event('ASSIGN_USER_TO_COURSE')
-            ->log('Assign user to course');
+            ->log('Assign  '.$course_user->user->name.' to course : '.$course_user->course->name.'');
             $activity->log_name = 'ASSIGN_USER';
             $activity->save();
             return true;
@@ -175,6 +175,49 @@ class UserService
             return false;
         }
     }
+    public function getCoursesInSemester($semester_id)
+    {
+        // get the courses id from course semester table by semester id
+        $courses_id = CourseSemester::where('semester_id',$semester_id)->get('course_id');
+        $courses = [];
+        foreach ($courses_id as $course_id){
+            $courses[] = Course::find($course_id->course_id);
+        }
+        return $courses;
+    }
+    // public function editCourseSemester($courses)
+    // {
+    //     // get leatest semester
+    //     $semester_id = Semester::orderBy('id','desc')->first()->id;
+    //     // get all courses in semester
+    //     $courses_in_semester = CourseSemester::where('semester_id',$semester_id)->get('course_id');
+    //     // check if $courses_in_semester is empty create new course semester
+    //     if(count($courses_in_semester) == 0){
+    //         foreach ($courses as $course){
+    //             CourseSemester::create([
+    //                 'course_id' => $course,
+    //                 'semester_id' => $semester_id,
+    //             ]);
+    //         }
+    //         return true;
+    //     }else{
+    //         // delete all courses in semester
+    //         foreach ($courses_in_semester as $course){
+    //             $course_semester = CourseSemester::where('course_id',$course->course_id)
+    //                 ->where('semester_id',$semester_id)->first();
+    //             $course_semester->delete();
+    //         }
+    //         // add new courses in semester
+    //         foreach ($courses as $course){
+    //             CourseSemester::create([
+    //                 'course_id' => $course,
+    //                 'semester_id' => $semester_id,
+    //             ]);
+    //         }
+    //         return true;
+    //     }
+    // }
+
     public function editCourseSemester($courses)
     {
         // Get the latest semester

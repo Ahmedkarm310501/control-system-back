@@ -10,6 +10,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseGradeController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\GraphController;
+use App\Http\Controllers\ActivityLogController;
 
 Route::post('/login', [AuthController::class, 'login']);
 // middle ware for api auth group
@@ -52,6 +53,11 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('export-course-grades', [CourseGradeController::class, 'exportCourseGrades']);
     Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
     Route::post('/edit-course', [CourseController::class, 'editCourse']);
+
+    // activity log
+    Route::get('/get-logs', [ActivityLogController::class, 'getLogs']);
+    // download file from storage
+    Route::get('/get-file/storage/{file_name}', [ActivityLogController::class, 'getFile']);
 
 });
 // miidle ware isadmin for add user
