@@ -265,7 +265,6 @@ class CourseGradeService{
             $Students[] = $Student;
         }
 
-        // store the students in a excel file using maatwebsite/excel
         $filename = uniqid() . '.' .'xlsx';
         Excel::store(new CourseNamesExport($Students), $filename, 'public');
         $filePath = Storage::url($filename);
