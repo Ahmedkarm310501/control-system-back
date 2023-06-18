@@ -11,7 +11,9 @@ use App\Models\Semester;
 use App\Models\Student;
 use App\Models\CourseSemester;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CourseNamesExport;
 use Illuminate\Support\Facades\Storage;
+
 
 
 class CourseGradeService{
@@ -250,10 +252,35 @@ class CourseGradeService{
         }
         $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
 
-        $course_semester_enrollment = CourseSemesterEnrollment::
-            where('course_semester_id', $course_semester->id)
-            ->delete();
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')->
+            where('course_semester_id', $course_semester->id);
+
+        $temp = clone $course_semester_enrollment;
+
+        $Students = [];
+        foreach($course_semester_enrollment->get() as $enrollment){
+            $Student = [];
+            $Student[] = $enrollment->student->id;
+            $Student[] = $enrollment->student->name;
+            $Students[] = $Student;
+        }
+
+        // store the students in a excel file using maatwebsite/excel
+        $filename = uniqid() . '.' .'xlsx';
+        Excel::store(new CourseNamesExport($Students), $filename, 'public');
+        $filePath = Storage::url($filename);
+
+        
+        
+        
+        $course_semester_enrollment->delete();
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
+            ->withProperties(['old' => $filePath, 'new' => null])
+            ->event('DELETE_ALL_STUDENTS_FROM_COURSE')
+            ->log('Deleted all students from course');
+            $activity->log_name = 'COURSE_NAME';
+            $activity->save();
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting student from course', 500);
