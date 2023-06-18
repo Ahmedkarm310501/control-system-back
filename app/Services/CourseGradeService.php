@@ -311,7 +311,7 @@ class CourseGradeService{
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->first();
-
+        $temp = clone $course_semester_enrollment;
         if(!$course_semester_enrollment){
             throw new \Exception('Student not enrolled in this course', 404);
         }
@@ -319,14 +319,23 @@ class CourseGradeService{
         if($data['term_work'] < 0 || $data['term_work'] > 40 || $data['exam_work'] < 0 || $data['exam_work'] > 60){
             throw new \Exception('Term work must be between 0 and 40 and exam work must be between 0 and 60', 400);
         }
-        CourseSemesterEnrollment::
+        $course_semester_enrollment= CourseSemesterEnrollment::
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->update([
                 'term_work' => $data['term_work'],
                 'exam_work' => $data['exam_work'],
             ]);
+        $temp_old = clone $temp;
+        $temp->term_work = $data['term_work'];
+        $temp->exam_work = $data['exam_work'];
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($temp)
+            ->withProperties(['old' => $temp_old, 'new' => $temp])
+            ->event('UPDATE_STUDENT_GRADE')
+            ->log('Updated student grade');
+            $activity->log_name = 'COURSE_NAME';
+            $activity->save();
             return $course_semester_enrollment;
         }
         throw new \Exception('Error updating student grade', 500);
