@@ -1,10 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
-use App\Http\Requests\AddCourseRequest;
+use App\Http\Requests\AddCoursesRequest;
+use App\Http\Requests\ImportCoursesRequest;
 use App\Http\Requests\EditCourseSettingsRequest;
 use App\Services\CourseService;
 
@@ -61,5 +62,14 @@ class CourseController extends Controller
         }
         return $this->success($courses, 200 , 'all courses');
     }
-
+    public function importCourses(ImportCoursesRequest $request, CourseService $courseService)
+    {
+        // send the file to the service
+        $file = $request->file('courses');
+        $courses = $courseService->importCourses($file);
+        if(!$courses){
+            return $this->error('Courses not found', 404);
+        }
+        return $this->success($courses, 200 , 'all courses');
+    }
 }
