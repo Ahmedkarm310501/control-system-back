@@ -111,35 +111,29 @@ class CourseService
             'newestSemester' => $semester
         ];
     }
-    public function importCourses($courses){
-        // Assuming $courses is the file path of the Excel file
-        $data = Excel::toArray([], $courses);
+    public function importCourses($courses)
+    {
+        $courseData = Excel::toArray([], $courses)[0];
+        $courseData = array_slice($courseData, 1);
+        $isExist = false;
         
-        // Assuming the first sheet in the Excel file contains the data
-        $sheetData = $data[0];
+        foreach ($courseData as $course) {
+            // check if the course_code is not empty
+            $c = Course::where('course_code', $course[0])->first();
+                if (!$c && !empty($course[0])) {
+                    $isExist = true;
+                    $c = new Course();
+                    $c->course_code = $course[0];
+                    $c->name = $course[1] ?? '';
+                    $c->department_id = $course[2] ?? null;
+                    $c->course_rule_id = CourseRule::factory()->create()->id;
+                    $c->save();
+                }
+    }
         
-        // Assuming the column headers are "course_code", "name", and "department_id"
-        $columns = [
-            'course_code',
-            'name',
-            'department_id',
-        ];
-        
-        $courseData = [];
-        
-        // Iterate over each row of the sheet data
-        foreach ($sheetData as $row) {
-            $course = [];
-            
-            // Extract the values based on the column headers
-            foreach ($columns as $index => $column) {
-                $course[$column] = $row[$index] ?? null;
-            }
-            
-            $courseData[] = $course;
-        }
-        
-        return $courseData;
-    }    
+        return $isExist;
+    }
+    
+   
 }
 
