@@ -9,7 +9,7 @@ use App\Http\Requests\EditCourseSettingsRequest;
 use App\Services\CourseService;
 
 class CourseController extends Controller
-{ 
+{
     use HttpResponses;
 
     public function addCourse(AddCourseRequest $request, CourseService $courseService)
@@ -17,7 +17,7 @@ class CourseController extends Controller
         $course = $courseService->addCourse($request->validated());
         if(!$course){
             return $this->error('Course not added', 500);
-        } 
+        }
         return $this->successMessage('Course added successfully' , 201);
     }
 
@@ -26,7 +26,7 @@ class CourseController extends Controller
         $courses = $courseService->listCourses();
         if(!$courses){
             return $this->error('Courses not found', 404);
-        } 
+        }
         return $this->success($courses, 200 , 'all courses');
     }
 
@@ -35,7 +35,7 @@ class CourseController extends Controller
         $course = $courseService->getCourse($course);
         if(!$course){
             return $this->error('Course not found', 404);
-        } 
+        }
         return $this->success($course, 200 , 'course');
     }
 
@@ -44,7 +44,7 @@ class CourseController extends Controller
         $course = $courseService->editCourse($request->validated());
         // if(!$course){
         //     return $this->error('Course not found', 404);
-        // } 
+        // }
         // return $this->successMessage('Course edited successfully' , 200);
         try{
             $course = $courseService->editCourse($request->validated());
@@ -52,6 +52,15 @@ class CourseController extends Controller
         }catch(\Exception $e){
             return $this->error($e->getMessage(), 500);
         }
+    }
+    public function getCoursesInSemesterMerge(Request $request, CourseService $courseService)
+    {
+        $semsterid = $request->semesterId;
+        $courses = $courseService->getCoursesInSemesterMerge($semsterid);
+        if(!$courses){
+            return $this->error('Courses not found', 404);
+        }
+        return $this->success($courses, 200 , 'all courses');
     }
 
 }

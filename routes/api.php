@@ -17,6 +17,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    // get courses in semester
+    Route::get('/courses-in-semester-merge/{semesterId}', [CourseController::class, 'getCoursesInSemesterMerge']);
     ///////////////////////////user routes///////////////////////////
     // list courses assigned to user
     Route::get('/list-courses-assigned-to-user', [UserController::class, 'listCoursesAssignedToUser']);
@@ -24,7 +26,6 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/update-password', [UserController::class, 'updatePassword']);
     /////////////////////////////////////////////////////////////////
     Route::post('/logout', [AuthController::class, 'logout']);
-
     Route::get('/course-grades/{courseId}/{termId}', [CourseGradeController::class, 'getCourseGrades']);
     Route::post('add-student-to-course', [CourseGradeController::class, 'addStudentToCourse']);
     //////////////////////////graph one routes///////////////////////////////
@@ -81,6 +82,6 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
 
     Route::post('/add-course',[CourseController::class,'addCourse']);
     Route::get('/list-courses',[CourseController::class,'listCourses']);
-    
+
 });
 
