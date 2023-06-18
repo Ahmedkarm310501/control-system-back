@@ -53,10 +53,9 @@ class CourseController extends Controller
             return $this->error($e->getMessage(), 500);
         }
     }
-    public function getCoursesInSemesterMerge(Request $request, CourseService $courseService)
+    public function getCoursesInSemesterMerge(CourseService $courseService)
     {
-        $semsterid = $request->semesterId;
-        $courses = $courseService->getCoursesInSemesterMerge($semsterid);
+        $courses = $courseService->getCoursesInSemesterMerge();
         if(!$courses){
             return $this->error('Courses not found', 404);
         }

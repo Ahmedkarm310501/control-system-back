@@ -87,13 +87,13 @@ class CourseService
         $courseRule->save();
         return $course;
     }
-    public function getCoursesInSemesterMerge($semesterId){
+    public function getCoursesInSemesterMerge(){
         $Allcourses = Course::all();
         $departments = Department::all();
         // get the leatest semester
         $semester = Semester::latest()->first();
         // get the courses id from course semester table by semester id
-        $courses_id = CourseSemester::where('semester_id',$semesterId)->get('course_id');
+        $courses_id = CourseSemester::where('semester_id',$semester->id)->get('course_id');
         $coursesInSemester = [];
         foreach ($courses_id as $course_id){
             $coursesInSemester[] = Course::find($course_id->course_id);
