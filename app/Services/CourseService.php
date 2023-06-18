@@ -102,7 +102,7 @@ class CourseService
             'courses' => $Allcourses,
             'departments' => $departments,
             'coursesInSemester' => $coursesInSemester,
-            'newest semester' => $semester
+            'newestSemester' => $semester
         ];
 
     }
