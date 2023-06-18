@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\Course;
+use App\Models\CourseSemester;
+use App\Models\Semester;
 use App\Models\Department;
 use App\Models\CourseRule;
 use App\Models\CourseUser;
@@ -84,6 +86,25 @@ class CourseService
         $course->save();
         $courseRule->save();
         return $course;
+    }
+    public function getCoursesInSemesterMerge($semesterId){
+        $Allcourses = Course::all();
+        $departments = Department::all();
+        // get the leatest semester
+        $semester = Semester::latest()->first();
+        // get the courses id from course semester table by semester id
+        $courses_id = CourseSemester::where('semester_id',$semesterId)->get('course_id');
+        $coursesInSemester = [];
+        foreach ($courses_id as $course_id){
+            $coursesInSemester[] = Course::find($course_id->course_id);
+        }
+        return [
+            'courses' => $Allcourses,
+            'departments' => $departments,
+            'coursesInSemester' => $coursesInSemester,
+            'newest semester' => $semester
+        ];
+
     }
 }
 
