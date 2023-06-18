@@ -468,6 +468,23 @@ class CourseGradeService{
             }
             return $enrollment;
         });
+        $courseGrades = [];
+        foreach($course_semester_enrollment as $enrollment){
+            $courseGrade = [];
+            $courseGrade[] = $enrollment->student->id;
+            $courseGrade[] = $enrollment->student->name;
+            $courseGrade[] = $enrollment->term_work;
+            $courseGrade[] = $enrollment->exam_work;
+            $courseGrade[] = $enrollment->total_grade;
+            $courseGrade[] = $enrollment->grade;
+            $courseGrades[] = $courseGrade;
+        }
+
+        $filename = uniqid() . '.' .'xlsx';
+        Excel::store(new GradesExport($courseGrades), $filename, 'public');
+        $filePath = Storage::url($filename);
+
+
         $studWithNoGrade = false;
         foreach($course_semester_enrollment as $enrollment){
             if ($enrollment->term_work === null || $enrollment->exam_work === null) {
@@ -476,6 +493,15 @@ class CourseGradeService{
         }
         // print($course_semester_enrollment);
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
+            ->withProperties(['old' => $course_semester->stud_grades , 'new' => $filePath])
+            ->event('ADD_COURSE_GRADES')
+            ->log('Added course grades');
+            $activity->log_name = 'COURSE_GRADES';
+            $activity->save();
+
+            $course_semester->stud_grades = $filePath;
+            $course_semester->save();
             return [
                 'course_semester_enrollment' => $course_semester_enrollment,
                 'studWithNoGrade' => $studWithNoGrade,
