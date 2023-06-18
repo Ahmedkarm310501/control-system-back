@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Services;
-
+use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Course;
 use App\Models\CourseSemester;
 use App\Models\Semester;
@@ -98,13 +98,48 @@ class CourseService
         foreach ($courses_id as $course_id){
             $coursesInSemester[] = Course::find($course_id->course_id);
         }
+        $coursesNotInSemester = [];
+        foreach ($Allcourses as $course){
+            if(!in_array($course, $coursesInSemester)){
+                $coursesNotInSemester[] = $course;
+            }
+        }
         return [
-            'courses' => $Allcourses,
+            'courses' => $coursesNotInSemester,
             'departments' => $departments,
             'coursesInSemester' => $coursesInSemester,
-            'newest semester' => $semester
+            'newestSemester' => $semester
         ];
-
     }
+    public function importCourses($courses){
+        // Assuming $courses is the file path of the Excel file
+        $data = Excel::toArray([], $courses);
+        
+        // Assuming the first sheet in the Excel file contains the data
+        $sheetData = $data[0];
+        
+        // Assuming the column headers are "course_code", "name", and "department_id"
+        $columns = [
+            'course_code',
+            'name',
+            'department_id',
+        ];
+        
+        $courseData = [];
+        
+        // Iterate over each row of the sheet data
+        foreach ($sheetData as $row) {
+            $course = [];
+            
+            // Extract the values based on the column headers
+            foreach ($columns as $index => $column) {
+                $course[$column] = $row[$index] ?? null;
+            }
+            
+            $courseData[] = $course;
+        }
+        
+        return $courseData;
+    }    
 }
 
