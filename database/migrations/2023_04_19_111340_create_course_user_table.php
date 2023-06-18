@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->references('id')->on('users')->constrained()->cascadeOnDelete();
             // $table->foreignId('course_id')->references('id')->on('courses')->constrained();
-            $table->foreignId('course_semester_id')->references('id')->on('course_semesters')->constrained();
-            $table->foreignId('course_id')->references('course_id')->on('course_semesters')->constrained();
-            $table->foreignId('semester_id')->references('semester_id')->on('course_semesters')->constrained();
+            $table->foreignId('course_semester_id')->references('id')->on('course_semesters')->constrained()->cascadeOnDelete();
+            $table->foreignId('course_id')->references('course_id')->on('course_semesters')->constrained()->cascadeOnDelete();
+            $table->foreignId('semester_id')->references('semester_id')->on('course_semesters')->constrained()->cascadeOnDelete();
             $table->unique(['user_id', 'course_id', 'semester_id'], 'course_user_unique');
             $table->timestamps();
         });
