@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\CourseSemester;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\CourseNamesExport;
+use App\Exports\GradesExport;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -361,13 +362,50 @@ class CourseGradeService{
             throw new \Exception('Semester not found', 404);
         }
         $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
-        $course_semester_enrollment = CourseSemesterEnrollment::
-            where('course_semester_id', $course_semester->id)
+
+        $courseGrades = [];
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+        ->where('course_semester_id', $course_semester->id)
+        ->get()
+        ->map(function ($enrollment) {
+            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                $enrollment->total_grade = null;
+                $enrollment->grade = null;
+            } else {
+                $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+                $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+            }
+            return $enrollment;
+        });
+        
+        foreach($course_semester_enrollment as $enrollment){
+            $courseGrade = [];
+            $courseGrade[] = $enrollment->student->id;
+            $courseGrade[] = $enrollment->student->name;
+            $courseGrade[] = $enrollment->term_work;
+            $courseGrade[] = $enrollment->exam_work;
+            $courseGrade[] = $enrollment->total_grade;
+            $courseGrade[] = $enrollment->grade;
+            $courseGrades[] = $courseGrade;
+        }
+        
+        $filename = uniqid() . '.' .'xlsx';
+        Excel::store(new GradesExport($courseGrades), $filename, 'public');
+        $filePath = Storage::url($filename);
+
+        $course_semester_enrollment=CourseSemesterEnrollment::with('student:name,id')
+        ->where('course_semester_id', $course_semester->id)
             ->update([
                 'term_work' => null,
                 'exam_work' => null,
             ]);
         if($course_semester_enrollment){
+            $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
+            ->withProperties(['old' => $filePath , 'new' =>null])
+            ->event('DELETE_COURSE_GRADES')
+            ->log('Deleted course grades');
+            $activity->log_name = 'COURSE_GRADES';
+            $activity->save();
             return $course_semester_enrollment;
         }
         throw new \Exception('Error deleting course grades', 500);
