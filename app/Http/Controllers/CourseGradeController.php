@@ -27,7 +27,7 @@ class CourseGradeController extends Controller
 {
     use HttpResponses;
 
-    public function getCourseGrades($courseId, $termId, CourseGradeService $courseGradeService, Request $request) 
+    public function getCourseGrades($courseId, $termId, CourseGradeService $courseGradeService, Request $request)
     {
         try {
             $grades = $courseGradeService->getCourseGrades($courseId, $termId);
@@ -106,7 +106,7 @@ class CourseGradeController extends Controller
 
     public function addStudentsGradesExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
     {
-        $data = $request->validated(); 
+        $data = $request->validated();
         try {
             $data = $courseGradeService->addStudentsGradesExcel($data);
         } catch (\Exception $e) {
@@ -128,15 +128,6 @@ class CourseGradeController extends Controller
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), 500);
         }
-        // dd($grades);
-        // $data = [
-        //     [9, 'john@example.com', 3, 'john', 'john', 'john'],
-        //     [9, 'john@example.com', 'john', 'john', 'john', 'john'],
-        //     [9, 'john@example.com', 'john', 'john', 'john', 'john'],
-        //     [9, 'john@example.com', null, null, null, 'john'],
-        //     [9, 'john@example.com', 'john', 'john', 'john', 'john'],
-        //     [9, 'john@example.com', 'john', 'john', 9, 'john'],
-        // ];
         return Excel::download(new GradesExport($grades), 'course.xlsx');
         // return $this->success($grades,200,'Course grades exported successfully');
     }
