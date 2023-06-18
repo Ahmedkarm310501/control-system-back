@@ -18,7 +18,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
         return $request->user();
     });
     // get courses in semester
-    Route::get('/courses-in-semester-merge/{semesterId}', [CourseController::class, 'getCoursesInSemesterMerge']);
+    Route::get('/courses-in-semester-merge', [CourseController::class, 'getCoursesInSemesterMerge']);
     ///////////////////////////user routes///////////////////////////
     // list courses assigned to user
     Route::get('/list-courses-assigned-to-user', [UserController::class, 'listCoursesAssignedToUser']);
