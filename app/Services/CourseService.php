@@ -120,10 +120,9 @@ class CourseService
         foreach ($courseData as $course) {
             // check if the course_code is not empty
             $c = Course::where('course_code', $course[0])->first();
-            // check that the department is exist in the database
-            $department = Department::where('dept_code', $course[2])->first();
-
-                if (!$c && !empty($course[0]) && !empty($course[1]) && !empty($course[2]) && $department) {
+                // check if department_id is exist
+                $department_id = Department::where('id', $course[2])->first();
+                if (!$c && !empty($course[0]) && !empty($course[1]) && !empty($course[2]) && $department_id) {
                     $isExist = true;
                     $c = new Course();
                     $c->course_code = $course[0];

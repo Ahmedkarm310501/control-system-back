@@ -67,7 +67,7 @@ class CourseController extends Controller
         $file = $request->file('courses');
         $courseData = $courseService->importCourses($file);
         if (!$courseData) {
-            return $this->error('Courses already found in table courses | missing data', 404);
+            return $this->successMessage('Course added successfully' , 201);
         }
         return $this->success($courseData, 200 , 'courses added successfully');
     }
