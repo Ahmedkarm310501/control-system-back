@@ -69,6 +69,6 @@ class CourseController extends Controller
         if (!$courseData) {
             return $this->error('Courses already found in table courses | missing data', 404);
         }
-        return $this->successMessage('Courses added successfully' , 201);
+        return $this->success($courseData, 200 , 'courses added successfully');
     }
 }
