@@ -116,7 +116,7 @@ class CourseService
         $courseData = Excel::toArray([], $courses)[0];
         $courseData = array_slice($courseData, 1);
         $isExist = false;
-        
+        $Allcourses = [];
         foreach ($courseData as $course) {
             // check if the course_code is not empty
             $c = Course::where('course_code', $course[0])->first();
@@ -128,10 +128,11 @@ class CourseService
                     $c->department_id = $course[2] ?? null;
                     $c->course_rule_id = CourseRule::factory()->create()->id;
                     $c->save();
+                    $Allcourses[] = $c;
                 }
     }
         
-        return $isExist;
+        return $Allcourses;
     }
     
    
