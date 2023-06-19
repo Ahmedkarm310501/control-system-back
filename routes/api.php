@@ -18,6 +18,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    // raafa grades 
+    Route::post('/raafa-grades', [GraphController::class, 'raafaGrades']);
     // get courses in semester
     Route::get('/courses-in-semester-merge', [CourseController::class, 'getCoursesInSemesterMerge']);
     ///////////////////////////user routes///////////////////////////
