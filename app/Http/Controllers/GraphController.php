@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CompareTwoSemesterRequest;
 use App\Http\Requests\NumberStudentsRequest;
+use App\Http\Requests\RafaaGradesRequest;
 use App\Services\DashboardService;
 use App\Traits\HttpResponses;
 
@@ -45,5 +46,11 @@ class GraphController extends Controller
         $course_semester = $request->validated();
         $graph_compare_three = $courseGradeService->graphCompareThree($course_semester);
         return $this->success($graph_compare_three,200,'Graph compare three');
+    }
+    public function raafaGrades(RafaaGradesRequest $request,DashboardService $courseGradeService)
+    {
+        $raafa_details = $request->validated();
+        $raafa_update = $courseGradeService->raafaGrades($raafa_details);
+        return $this->success($raafa_update,200,'graphs updated after adding rafaa grades');
     }
 }

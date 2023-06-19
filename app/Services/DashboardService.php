@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CourseSemesterEnrollment;
 use App\Models\CourseSemester;
+use App\Models\Semester;
 
 class DashboardService
 {
@@ -226,5 +227,87 @@ class DashboardService
             'second_semester' => $second_semester,
         ];
         return $graph_compare_three;
+    }
+    public function raafaGrades($raafa_details){
+        $semester = Semester::latest()->first();
+        $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
+        $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->get();
+        $number_of_passed_students = 0;
+        $number_of_failed_students = 0;
+        foreach($enrollments as $enrollment){
+            $total_grade = $enrollment->term_work + $enrollment->exam_work;
+            if($total_grade < 50){
+                if(($total_grade + $raafa_details['number_of_grades']) > 50){
+                    $number_of_passed_students++;
+                }else{
+                    $number_of_failed_students++;
+                }
+            }else{
+                $number_of_passed_students++;
+            }
+        }
+        $grade_A_plus = 0;
+        $grade_A = 0;
+        $grade_B_plus = 0;
+        $grade_B = 0;
+        $grade_C_plus = 0;
+        $grade_C = 0;
+        $grade_D_plus = 0;
+        $grade_D = 0;
+        $grade_F = 0;
+        foreach($enrollments as $enroll){
+            if($enroll->term_work + $enroll->exam_work >= 90){
+                $grade_A_plus++;
+            }else if($enroll->term_work + $enroll->exam_work >= 85){
+                $grade_A++;
+            }else if($enroll->term_work + $enroll->exam_work >= 80){
+                $grade_B_plus++;
+            }else if($enroll->term_work + $enroll->exam_work >= 75){
+                $grade_B++;
+            }else if($enroll->term_work + $enroll->exam_work >= 70){
+                $grade_C_plus++;
+            }else if($enroll->term_work + $enroll->exam_work >= 65){
+                $grade_C++;
+            }else if($enroll->term_work + $enroll->exam_work >= 60){
+                $grade_D_plus++;
+            }else if($enroll->term_work + $enroll->exam_work >= 50){
+                $grade_D++;
+            }else{
+                if(($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades']) >= 50){
+                    $grade_D++;
+                }else{
+                    $grade_F++;
+                }
+            }
+        }
+        if ($enrollments->count() == 0) {
+            $perecentage_passed = 0;
+            $perecentage_failed = 0;
+        } else {
+            $perecentage_passed = ($number_of_passed_students / count($enrollments)) * 100;
+            $perecentage_failed = ($number_of_failed_students/ count($enrollments)) * 100;
+        }
+        // make it 2 decimal
+        $perecentage_passed = number_format((float)$perecentage_passed, 2, '.', '');
+        $perecentage_failed = number_format((float)$perecentage_failed, 2, '.', '');
+        // turn it to float
+        $perecentage_passed = (float)$perecentage_passed;
+        $perecentage_failed = (float)$perecentage_failed;
+
+        return [
+            'number_of_passed_students' => $number_of_passed_students,
+            'number_of_failed_students' => $number_of_failed_students,
+            'perecentage_passed' => $perecentage_passed,
+            'perecentage_failed' => $perecentage_failed,
+            'grade_A_plus' => $grade_A_plus,
+            'grade_A' => $grade_A,
+            'grade_B_plus' => $grade_B_plus,
+            'grade_B' => $grade_B,
+            'grade_C_plus' => $grade_C_plus,
+            'grade_C' => $grade_C,
+            'grade_D_plus' => $grade_D_plus,
+            'grade_D' => $grade_D,
+            'grade_F' => $grade_F,
+        ];
     }
 }
