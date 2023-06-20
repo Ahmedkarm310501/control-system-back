@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CourseSemesterEnrollment;
 use App\Models\CourseSemester;
+use App\Models\Course;
 use App\Models\Semester;
 
 class DashboardService
@@ -334,6 +335,9 @@ class DashboardService
         // if(!$course_semester_two){
         //     return response()->json(['error' => 'course id two not assign to semester id two'], 400);
         // }
+        // get course code from table course
+        $course_one = Course::where('id', $courses_semsesters_ids['course_id_one'])->first();
+        $course_two = Course::where('id', $courses_semsesters_ids['course_id_two'])->first();
         $course_semester_one = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_one'])->where('semester_id', $courses_semsesters_ids['semester_id_one'])->first();
         if(!$course_semester_one){
             return false;
@@ -351,6 +355,24 @@ class DashboardService
             'first_graph_two' => $first_graph_two,
             'second_graph_one' => $second_graph_one,
             'second_graph_two' => $second_graph_two,
+            'course_code_one' => $course_one->course_code,
+            'course_code_two' => $course_two->course_code,
         ];
+    }
+    public function applyRaafaGrades($raafa_details){
+        $semester = Semester::latest()->first();
+        $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
+        $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->get();
+        return $enrollments;
+        // return $enrollments_count;
+        if($raafa_details['AllOrfFailed'] == 0){
+            foreach($enrollments as $enrollment){
+                if($enrollment->term_work + $enrollment->exam_work < 50){
+                    $enrollment->exam_work += $raafa_details['number_of_gardes'];
+                    $enrollment->save();
+                }
+            }
+        }
+         return true;
     }
 }
