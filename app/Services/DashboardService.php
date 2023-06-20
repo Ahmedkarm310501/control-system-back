@@ -7,6 +7,9 @@ use App\Models\CourseSemester;
 use App\Models\Course;
 use App\Models\Semester;
 
+// impiort db
+use Illuminate\Support\Facades\DB;
+
 class DashboardService
 {
     public function part_one($course_id){
@@ -371,17 +374,20 @@ class DashboardService
     public function applyRaafaGrades($raafa_details){
         $semester = Semester::latest()->first();
         $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
-        $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->get();
-        return $enrollments;
-        // return $enrollments_count;
         if($raafa_details['AllOrfFailed'] == 0){
-            foreach($enrollments as $enrollment){
-                if($enrollment->term_work + $enrollment->exam_work < 50){
-                    $enrollment->exam_work += $raafa_details['number_of_gardes'];
-                    $enrollment->save();
-                }
-            }
+            $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->whereRaw('term_work + exam_work < 50')
+            ->update(['exam_work' => DB::raw('exam_work + ' . $raafa_details['number_of_gardes'])]);
+        }else{
+            DB::table('course_semester_enrollments')
+            ->where('course_semester_id', $course_semester_id)
+            ->update([
+                'exam_work' => DB::raw("CASE 
+                                        WHEN (term_work + exam_work + {$raafa_details['number_of_gardes']}) <= 100 THEN (exam_work + {$raafa_details['number_of_gardes']})
+                                        ELSE 60
+                                        END")
+            ]);
         }
-         return true;
+        
+        return true;
     }
 }

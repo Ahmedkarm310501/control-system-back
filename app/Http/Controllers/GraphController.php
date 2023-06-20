@@ -79,7 +79,7 @@ class GraphController extends Controller
         if($raafa_update == false){
             return $this->error('course id no assign to semester id',400);
         }
-        // return $this->successMessage('raafa grades applied successfully',200);
-        return $this->success($raafa_update,200,'graphs updated after applying rafaa grades');
+        return $this->successMessage('raafa grades applied successfully',200);
+        // return $this->success($raafa_update,200,'graphs updated after applying rafaa grades');
     }
 }
