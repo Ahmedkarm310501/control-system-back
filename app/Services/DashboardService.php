@@ -8,8 +8,10 @@ use App\Models\Semester;
 
 class DashboardService
 {
-    public function part_one($course_id, $semester_id){
+    public function part_one($course_id){
 
+        // get the latest semester id
+        $semester_id = Semester::latest()->first()->id;
         $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
         $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->get();
         $number_of_students = count($enrollements);
@@ -37,7 +39,8 @@ class DashboardService
         ];
         return $graph_one;
     }
-    public function part_two($course_id,$semester_id){
+    public function part_two($course_id){
+        $semester_id = Semester::latest()->first()->id;
         $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
         $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->get();
         $passed_students = 0;
@@ -109,7 +112,8 @@ class DashboardService
         ];
         return $graph_two;
     }
-    public function part_three($course_id,$semester_id){
+    public function part_three($course_id){
+        $semester_id = Semester::latest()->first()->id;
         $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
         $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->whereRaw('term_work + exam_work < 50')->get();
         $need_one_grade = 0;
@@ -190,15 +194,15 @@ class DashboardService
         return $graph_three;
     }
     public function graphOne($course_semester){
-        $graph_one = $this->part_one($course_semester['course_id'], $course_semester['semester_id']);
+        $graph_one = $this->part_one($course_semester['course_id']);
         return $graph_one;
     }
     public function graphTwo($course_semester){
-        $graph_two = $this->part_two($course_semester['course_id'], $course_semester['semester_id']);
+        $graph_two = $this->part_two($course_semester['course_id']);
         return $graph_two;
     }
     public function graphThree($course_semester){
-        $graph_three = $this->part_three($course_semester['course_id'], $course_semester['semester_id']);
+        $graph_three = $this->part_three($course_semester['course_id']);
         return $graph_three;
     }
     public function graphCompareOne($course_semester){

@@ -23,7 +23,7 @@ class NumberStudentsRequest extends FormRequest
     {
         return [
             'course_id' => 'required|exists:courses,id',
-            'semester_id' => 'required|exists:semesters,id',
+            
         ];
     }
     public function messages(): array
@@ -31,8 +31,6 @@ class NumberStudentsRequest extends FormRequest
         return [
             'course_id.required' => 'Course id is required',
             'course_id.exists' => 'Course id does not exist',
-            'semester_id.required' => 'Semester id is required',
-            'semester_id.exists' => 'Semester id does not exist',
         ];
     }
 }
