@@ -66,6 +66,9 @@ class GraphController extends Controller
     {
         $course_semesters = $request->validated();
         $compare_courses_semesters = $courseGradeService->compareCoursesSemesters($course_semesters);
+        if($compare_courses_semesters == false){
+            return $this->error('course id no assign to semester id',400);
+        }
         return $this->success($compare_courses_semesters,200,'compare courses semesters');
     }
 }

@@ -324,6 +324,24 @@ class DashboardService
         return $year_term;
     }
     public function compareCoursesSemesters($courses_semsesters_ids){
+        // check that the course id assign to semester id in table course_semester
+
+        // $course_semester_one = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_one'])->where('semester_id', $courses_semsesters_ids['semester_id_one'])->first();
+        // if(!$course_semester_one){
+        //     return response()->json(['error' => 'course id one not assign to semester id one'], 400);
+        // }
+        // $course_semester_two = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_two'])->where('semester_id', $courses_semsesters_ids['semester_id_two'])->first();
+        // if(!$course_semester_two){
+        //     return response()->json(['error' => 'course id two not assign to semester id two'], 400);
+        // }
+        $course_semester_one = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_one'])->where('semester_id', $courses_semsesters_ids['semester_id_one'])->first();
+        if(!$course_semester_one){
+            return false;
+        }
+        $course_semester_two = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_two'])->where('semester_id', $courses_semsesters_ids['semester_id_two'])->first();
+        if(!$course_semester_two){
+            return false;
+        }
         $first_graph_one = $this->part_one($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
         $first_graph_two = $this->part_one($courses_semsesters_ids['course_id_two'], $courses_semsesters_ids['semester_id_two']);
         $second_graph_one = $this->part_two($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
