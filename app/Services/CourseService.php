@@ -23,6 +23,13 @@ class CourseService
         $course->department_id = $department->id;
         $course->course_rule_id = CourseRule::factory()->create()->id;
         $course->save();
+
+        $activity = activity()->causedBy(auth()->user())->performedOn($course)->
+            withProperties(['old' => null, 'new' => $course])->event('ADD_COURSE')
+            ->log('Add new course with id: '.$course->course_code.'' . ' and name: ' . $course->name . '');
+            $activity->log_name = 'COURSE';
+            $activity->save();
+
         return $course;
     }
 
@@ -74,6 +81,10 @@ class CourseService
         if(!$department){
             return false;
         }
+        $tempCourse = clone $course;
+        $tempRule = clone $course->rule;
+        $tempCourse->rule = $tempRule;
+
         $courseRule = $course->rule;
 
         $course->course_code = $courseData['course_code'];
@@ -85,6 +96,13 @@ class CourseService
         $courseRule->total = $courseData['total'];
         $course->save();
         $courseRule->save();
+
+        // $activity = activity()->causedBy(auth()->user())->performedOn($course)->
+        //     withProperties(['old' => $course->getOriginal(), 'new' => $course])->event('EDIT_COURSE')
+        //     ->log('Edit course with id: '.$course->get.'' . ' and name: ' . $course->name . '');
+        //     $activity->log_name = 'COURSE';
+        //     $activity->save();
+
         return $course;
     }
     public function getCoursesInSemesterMerge(){
