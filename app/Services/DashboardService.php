@@ -328,7 +328,7 @@ class DashboardService
                 'year_term' => $semester->year_term = $semester->year . '-' . $semester->term,
             ];
             
-            $year_terms []=$year_term; 
+            $year_terms []=$year_term;
         }
         return $year_terms;
     }
