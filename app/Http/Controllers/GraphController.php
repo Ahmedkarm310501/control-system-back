@@ -7,6 +7,7 @@ use App\Http\Requests\NumberStudentsRequest;
 use App\Http\Requests\RafaaGradesRequest;
 use App\Http\Requests\courseSemetersRequest;
 use App\Http\Requests\CompareCoursesSemestersRequest;
+use App\Http\Requests\ApplyRaafaGradesRequest;
 use App\Services\DashboardService;
 use App\Traits\HttpResponses;
 
@@ -70,5 +71,15 @@ class GraphController extends Controller
             return $this->error('course id no assign to semester id',400);
         }
         return $this->success($compare_courses_semesters,200,'compare courses semesters');
+    }
+    public function applyRaafaGrades(ApplyRaafaGradesRequest $request,DashboardService $courseGradeService)
+    {
+        $raafa_details = $request->validated();
+        $raafa_update = $courseGradeService->applyRaafaGrades($raafa_details);
+        if($raafa_update == false){
+            return $this->error('course id no assign to semester id',400);
+        }
+        // return $this->successMessage('raafa grades applied successfully',200);
+        return $this->success($raafa_update,200,'graphs updated after applying rafaa grades');
     }
 }

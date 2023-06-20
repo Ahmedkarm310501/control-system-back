@@ -20,6 +20,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     });
     // raafa grades
     Route::post('/raafa-grades', [GraphController::class, 'raafaGrades']);
+    // apply raafa grades
+    Route::post('/apply-raafa-grades', [GraphController::class, 'applyRaafaGrades']);
     // get courses in semester
     Route::get('/courses-in-semester-merge', [CourseController::class, 'getCoursesInSemesterMerge']);
     ///////////////////////////user routes///////////////////////////
