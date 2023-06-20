@@ -321,11 +321,16 @@ class DashboardService
             array_push($semester_ids, $course_semester->semester_id);
         }
         $semesters = Semester::whereIn('id', $semester_ids)->get();
-        $year_term = [];
+        $year_terms = [];
         foreach($semesters as $semester){
-            $year_term[] = $semester->year_term = $semester->year . '.' . $semester->term;
+            $year_term[] = [
+                'id' => $semester->id,
+                'year_term' => $semester->year_term = $semester->year . '-' . $semester->term,
+            ];
+            
+            $year_terms []=$year_term; 
         }
-        return $year_term;
+        return $year_terms;
     }
     public function compareCoursesSemesters($courses_semsesters_ids){
         $first_graph_one = $this->part_one($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
