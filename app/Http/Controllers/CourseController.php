@@ -7,6 +7,7 @@ use App\Traits\HttpResponses;
 use App\Http\Requests\AddCourseRequest;
 use App\Http\Requests\ImportCoursesRequest;
 use App\Http\Requests\EditCourseSettingsRequest;
+use App\Http\Requests\DeleteCourseRequest;
 use App\Services\CourseService;
 
 class CourseController extends Controller
@@ -70,5 +71,15 @@ class CourseController extends Controller
             return $this->successMessage('Course added successfully' , 201);
         }
         return $this->success($courseData, 200 , 'courses added successfully');
+    }
+    public function deleteCourse(DeleteCourseRequest $request, CourseService $courseService)
+    {
+        $courseData = $request->validated();
+        $course_id = $courseData['course_id'];
+        $course = $courseService->deleteCourse($course_id);
+        if(!$course){
+            return $this->error('Course not found', 404);
+        }
+        return $this->successMessage('Course deleted successfully' , 200);
     }
 }

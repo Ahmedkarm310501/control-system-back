@@ -136,7 +136,13 @@ class CourseService
         
         return $Allcourses;
     }
-    
-   
+    public function deleteCourse($course_id){
+        $course = Course::find($course_id);
+        if(!$course){
+            return false;
+        }
+        $course->delete();
+        return true;
+    } 
 }
 
