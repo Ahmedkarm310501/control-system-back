@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\CompareTwoSemesterRequest;
 use App\Http\Requests\NumberStudentsRequest;
 use App\Http\Requests\RafaaGradesRequest;
+use App\Http\Requests\courseSemetersRequest;
+use App\Http\Requests\CompareCoursesSemestersRequest;
 use App\Services\DashboardService;
 use App\Traits\HttpResponses;
+
 
 class GraphController extends Controller
 {
@@ -52,5 +55,17 @@ class GraphController extends Controller
         $raafa_details = $request->validated();
         $raafa_update = $courseGradeService->raafaGrades($raafa_details);
         return $this->success($raafa_update,200,'graphs updated after adding rafaa grades');
+    }
+    public function getCourseSemesters(courseSemetersRequest $request,DashboardService $courseGradeService)
+    {
+        $course_id = $request->validated();
+        $course_semesters = $courseGradeService->getCourseSemesters($course_id);
+        return $this->success($course_semesters,200,'course semesters');
+    }
+    public function compareCoursesSemesters(CompareCoursesSemestersRequest $request,DashboardService $courseGradeService)
+    {
+        $course_semesters = $request->validated();
+        $compare_courses_semesters = $courseGradeService->compareCoursesSemesters($course_semesters);
+        return $this->success($compare_courses_semesters,200,'compare courses semesters');
     }
 }

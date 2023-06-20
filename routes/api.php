@@ -18,7 +18,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
-    // raafa grades 
+    // raafa grades
     Route::post('/raafa-grades', [GraphController::class, 'raafaGrades']);
     // get courses in semester
     Route::get('/courses-in-semester-merge', [CourseController::class, 'getCoursesInSemesterMerge']);
@@ -44,6 +44,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/graph-two-compare', [GraphController::class, 'graphCompareTwo']);
     // graph comapare three courses in two semesters
     Route::post('/graph-three-compare', [GraphController::class, 'graphCompareThree']);
+    // get all semesters assign to course
+    Route::post('/get-course-semesters', [GraphController::class, 'getCourseSemesters']);
 
     Route::post('add-students-to-course-excel', [CourseGradeController::class, 'addStudentsToCourseExcel']);
     Route::post('delete-student-from-course', [CourseGradeController::class, 'deleteStudentFromCourse']);
@@ -60,7 +62,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/get-logs', [ActivityLogController::class, 'getLogs']);
     // download file from storage
     Route::get('/get-file/storage/{file_name}', [ActivityLogController::class, 'getFile']);
-
+    // compare courses semesters
+    Route::post('/compare-courses-semesters', [GraphController::class, 'compareCoursesSemesters']);
 });
 // miidle ware isadmin for add user
 Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
@@ -93,6 +96,9 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
 
     Route::post('/add-course',[CourseController::class,'addCourse']);
     Route::get('/list-courses',[CourseController::class,'listCourses']);
+
+    // delete course
+    Route::post('/delete-course',[CourseController::class,'deleteCourse']);
 
 });
 

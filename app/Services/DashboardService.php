@@ -153,7 +153,7 @@ class DashboardService
             }else if($enroll_grade == 42){
                 $number_of_students_42++;
             }else if($enroll_grade == 43){
-                $number_of_students_43++;    
+                $number_of_students_43++;
             }else if($enroll_grade == 44){
                 $number_of_students_44++;
             }else if($enroll_grade == 45){
@@ -166,7 +166,7 @@ class DashboardService
                 $number_of_students_48++;
             }else if($enroll_grade == 49){
                 $number_of_students_49++;
-            }   
+            }
         }
 
 
@@ -308,6 +308,31 @@ class DashboardService
             'grade_D_plus' => $grade_D_plus,
             'grade_D' => $grade_D,
             'grade_F' => $grade_F,
+        ];
+    }
+    public function getCourseSemesters($course_id){
+        $course_semesters = CourseSemester::where('course_id', $course_id)->get();
+        $semester_ids = [];
+        foreach($course_semesters as $course_semester){
+            array_push($semester_ids, $course_semester->semester_id);
+        }
+        $semesters = Semester::whereIn('id', $semester_ids)->get();
+        $year_term = [];
+        foreach($semesters as $semester){
+            $year_term[] = $semester->year_term = $semester->year . '.' . $semester->term;
+        }
+        return $year_term;
+    }
+    public function compareCoursesSemesters($courses_semsesters_ids){
+        $first_graph_one = $this->part_one($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
+        $first_graph_two = $this->part_one($courses_semsesters_ids['course_id_two'], $courses_semsesters_ids['semester_id_two']);
+        $second_graph_one = $this->part_two($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
+        $second_graph_two = $this->part_two($courses_semsesters_ids['course_id_two'], $courses_semsesters_ids['semester_id_two']);
+        return [
+            'first_graph_one' => $first_graph_one,
+            'first_graph_two' => $first_graph_two,
+            'second_graph_one' => $second_graph_one,
+            'second_graph_two' => $second_graph_two,
         ];
     }
 }
