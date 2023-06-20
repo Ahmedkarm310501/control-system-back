@@ -355,8 +355,8 @@ class DashboardService
             'first_graph_two' => $first_graph_two,
             'second_graph_one' => $second_graph_one,
             'second_graph_two' => $second_graph_two,
-            'course_code_one' => $course_one->course_code,
-            'course_code_two' => $course_two->course_code,
+            'course_code_one' => $course_one->name,
+            'course_code_two' => $course_two->name,
         ];
     }
     public function applyRaafaGrades($raafa_details){
