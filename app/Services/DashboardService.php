@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CourseSemesterEnrollment;
 use App\Models\CourseSemester;
+use App\Models\Course;
 use App\Models\Semester;
 
 class DashboardService
@@ -333,6 +334,27 @@ class DashboardService
         return $year_terms;
     }
     public function compareCoursesSemesters($courses_semsesters_ids){
+        // check that the course id assign to semester id in table course_semester
+
+        // $course_semester_one = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_one'])->where('semester_id', $courses_semsesters_ids['semester_id_one'])->first();
+        // if(!$course_semester_one){
+        //     return response()->json(['error' => 'course id one not assign to semester id one'], 400);
+        // }
+        // $course_semester_two = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_two'])->where('semester_id', $courses_semsesters_ids['semester_id_two'])->first();
+        // if(!$course_semester_two){
+        //     return response()->json(['error' => 'course id two not assign to semester id two'], 400);
+        // }
+        // get course code from table course
+        $course_one = Course::where('id', $courses_semsesters_ids['course_id_one'])->first();
+        $course_two = Course::where('id', $courses_semsesters_ids['course_id_two'])->first();
+        $course_semester_one = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_one'])->where('semester_id', $courses_semsesters_ids['semester_id_one'])->first();
+        if(!$course_semester_one){
+            return false;
+        }
+        $course_semester_two = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_two'])->where('semester_id', $courses_semsesters_ids['semester_id_two'])->first();
+        if(!$course_semester_two){
+            return false;
+        }
         $first_graph_one = $this->part_one($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
         $first_graph_two = $this->part_one($courses_semsesters_ids['course_id_two'], $courses_semsesters_ids['semester_id_two']);
         $second_graph_one = $this->part_two($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
@@ -342,6 +364,24 @@ class DashboardService
             'first_graph_two' => $first_graph_two,
             'second_graph_one' => $second_graph_one,
             'second_graph_two' => $second_graph_two,
+            'course_code_one' => $course_one->name,
+            'course_code_two' => $course_two->name,
         ];
+    }
+    public function applyRaafaGrades($raafa_details){
+        $semester = Semester::latest()->first();
+        $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
+        $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->get();
+        return $enrollments;
+        // return $enrollments_count;
+        if($raafa_details['AllOrfFailed'] == 0){
+            foreach($enrollments as $enrollment){
+                if($enrollment->term_work + $enrollment->exam_work < 50){
+                    $enrollment->exam_work += $raafa_details['number_of_gardes'];
+                    $enrollment->save();
+                }
+            }
+        }
+         return true;
     }
 }
