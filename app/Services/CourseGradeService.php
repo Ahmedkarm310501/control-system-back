@@ -327,7 +327,7 @@ class CourseGradeService{
                 'term_work' => $data['term_work'],
                 'exam_work' => $data['exam_work'],
             ]);
-        $temp_old = clone $temp;
+        $temp_old = clone $temp::with('student:name,id')->first();
         $temp->term_work = $data['term_work'];
         $temp->exam_work = $data['exam_work'];
         if($course_semester_enrollment){
