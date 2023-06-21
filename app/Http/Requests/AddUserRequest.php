@@ -27,7 +27,7 @@ class AddUserRequest extends FormRequest
             'email' => 'required|email|unique:users',
             'password' => 'required|string',
             'password_confirmation' => 'required|same:password',
-            'national_id' => 'required|string',
+            'national_id' => 'string',
             'is_admin' => 'required|boolean',
         ];
     }
@@ -44,7 +44,7 @@ class AddUserRequest extends FormRequest
             'password.required' => 'Password is required',
             'password_confirmation.required' => 'Password confirmation is required',
             'password_confirmation.same' => 'Password confirmation must match password',
-            'national_id.required' => 'National ID is required',
+            
         ];
     }
 }
