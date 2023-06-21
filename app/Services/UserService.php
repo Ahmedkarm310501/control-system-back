@@ -156,14 +156,34 @@ class UserService
             foreach ($courses_ids as $course_id){
                 $courses[] = Course::find($course_id->course_id);
             }
-            return $courses; 
+            $new_courses = [];
+            foreach ($courses as $course){
+                $c['course_id'] = $course->id;
+                $c['course_name'] = $course->name;
+                $c['course_code'] = $course->course_code;
+                $c['term_id'] = $Semester_Id;
+                $course_semester_id = CourseSemester::where('course_id',$course->id)->where('semester_id',$Semester_Id)->first()->id;
+                $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id',$course_semester_id)->count();
+                $new_courses[] = $c;
+            }
+            return $new_courses;
         }else{
             $courses_ids = CourseUser::where('user_id',$user_id)->where('semester_id',$Semester_Id)->get('course_id');
             $courses = [];
             foreach ($courses_ids as $course_id){
                 $courses[] = Course::find($course_id->course_id);
             }
-            return $courses; 
+            $new_courses = [];
+            foreach ($courses as $course){
+                $c['course_id'] = $course->id;
+                $c['course_name'] = $course->name;
+                $c['course_code'] = $course->course_code;
+                $c['term_id'] = $Semester_Id;
+                $course_semester_id = CourseSemester::where('course_id',$course->id)->where('semester_id',$Semester_Id)->first()->id;
+                $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id',$course_semester_id)->count();
+                $new_courses[] = $c;
+            }
+            return $new_courses;
         }
         
     }
