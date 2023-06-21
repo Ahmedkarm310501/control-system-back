@@ -506,13 +506,15 @@ class CourseGradeService{
         // print($course_semester_enrollment);
         if($course_semester_enrollment){
             $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
-            ->withProperties(['old' => [
+            ->withProperties(['old' =>
+             [
                 'course_name' => $course->name,
                 'old_file' => $course_semester->stud_grades,
-            ] , [
+            ] ,'new'=> [
                 'course_name' => $course->name,
                 'new_file' => $filePath,
-            ]])
+            ]
+        ])
             ->event('ADD_COURSE_GRADES')
             ->log('Added course grades file for course: '.$course->name);
             $activity->log_name = 'COURSE_GRADES';
