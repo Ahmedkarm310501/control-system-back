@@ -87,6 +87,7 @@ class CourseService
         $course->course_code = $courseData['course_code'];
         $course->name = $courseData['course_name'];
         $course->department_id = $department->id;
+        
         $courseRule->term_work = $courseData['term_work'];
         $courseRule->exam_work = $courseData['exam_work'];
         $courseRule->instructor = $courseData['instructor'];
@@ -99,7 +100,6 @@ class CourseService
             ->log('Edit course with id: '.$course->id.'' . ' and name: ' . $course->name . '');
             $activity->log_name = 'COURSE';
             $activity->save();
-
         return $course;
     }
     public function getCoursesInSemesterMerge(){

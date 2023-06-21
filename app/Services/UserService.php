@@ -106,11 +106,14 @@ class UserService
     }
     public function getCoursesInDepartment($department_id)
     {
-        $courses = Course::where('department_id',$department_id)->get();
-        $department = Department::where('id',$department_id)->get();
-        // put department details in courses array
-        foreach ($courses as $course){
-            $course['department'] = $department;
+        $current_semester = Semester::latest()->first();
+        // get courses ids from course_semester table
+        $course_semester_ids = CourseSemester::where('semester_id', $current_semester->id)->pluck('course_id');
+        foreach($course_semester_ids as $course_semester_id){
+            $course = Course::find($course_semester_id);
+            if($course->department_id == $department_id){
+                $courses[] = $course;
+            }
         }
         return $courses;
     }
@@ -126,7 +129,6 @@ class UserService
         if (!$course_semester) {
             return false;
         }
-        
         // add to course user table the user id and course semester id
         $course_user = CourseUser::firstOrCreate([
             'user_id' => $user_course['user_id'],
@@ -145,20 +147,25 @@ class UserService
             return false;
         }
     }
-    public function listCoursesAssignedToUser($user_id ){
-        $termId = Semester::latest()->first()->id;
-        $courses = CourseUser::where('user_id',$user_id)->where('semester_id',$termId)->with('course')->get();
-        // return for each course the course_id, course_code, course_name, number_of_students
-        $new_courses = [];
-        foreach ($courses as $course){
-            $c['course_id'] = $course->course->id;
-            $c['course_code'] = $course->course->course_code;
-            $c['course_name'] = $course->course->name;
-            $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id',$course->course_semester_id)->count();
-            $c['term_id']= $termId;
-            $new_courses[] = $c;
+    public function listCoursesAssignedToUser($user_id){
+        $Semester_Id = Semester::latest()->first()->id;
+        $user = User::find($user_id);
+        if($user->is_admin == 1){
+            $courses_ids = CourseSemester::where('semester_id',$Semester_Id)->get('course_id');
+            $courses = [];
+            foreach ($courses_ids as $course_id){
+                $courses[] = Course::find($course_id->course_id);
+            }
+            return $courses; 
+        }else{
+            $courses_ids = CourseUser::where('user_id',$user_id)->where('semester_id',$Semester_Id)->get('course_id');
+            $courses = [];
+            foreach ($courses_ids as $course_id){
+                $courses[] = Course::find($course_id->course_id);
+            }
+            return $courses; 
         }
-        return $new_courses;
+        
     }
     public function addSemester($semesterData)
     {
