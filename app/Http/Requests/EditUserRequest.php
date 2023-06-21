@@ -25,7 +25,7 @@ class EditUserRequest extends FormRequest
             'id' => 'required|numeric',
             'name' => 'required',
             'email' => 'required|email',
-            'national_id' => 'string',
+            'national_id' => 'nullable|string',
             'is_admin' => 'required|boolean',
             'is_active' => 'required|boolean',
         ];

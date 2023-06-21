@@ -27,7 +27,7 @@ class AddUserRequest extends FormRequest
             'email' => 'required|email|unique:users',
             'password' => 'required|string',
             'password_confirmation' => 'required|same:password',
-            'national_id' => 'string',
+            'national_id' => 'nullable|string',
             'is_admin' => 'required|boolean',
         ];
     }
