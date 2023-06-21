@@ -81,27 +81,27 @@ class CourseService
         if(!$department){
             return false;
         }
-        $tempCourse = clone $course;
-        $tempRule = clone $course->rule;
-        $tempCourse->rule = $tempRule;
-
-        $courseRule = $course->rule;
-
+        $tempCourse = new Course();
+        $tempCourse->course_code = $course->course_code;
+        $tempCourse->name = $course->name;
+        // $tempRule = clone $course->rule;
+        // $tempCourse->rule = $tempRule;
+        // $courseRule = $course->rule;
         $course->course_code = $courseData['course_code'];
         $course->name = $courseData['course_name'];
-        $course->department_id = $department->id;
-        $courseRule->term_work = $courseData['term_work'];
-        $courseRule->exam_work = $courseData['exam_work'];
-        $courseRule->instructor = $courseData['instructor'];
-        $courseRule->total = $courseData['total'];
+        // $course->department_id = $department->id;
+        // $courseRule->term_work = $courseData['term_work'];
+        // $courseRule->exam_work = $courseData['exam_work'];
+        // $courseRule->instructor = $courseData['instructor'];
+        // $courseRule->total = $courseData['total'];
         $course->save();
-        $courseRule->save();
-
-        // $activity = activity()->causedBy(auth()->user())->performedOn($course)->
-        //     withProperties(['old' => $course->getOriginal(), 'new' => $course])->event('EDIT_COURSE')
-        //     ->log('Edit course with id: '.$course->get.'' . ' and name: ' . $course->name . '');
-        //     $activity->log_name = 'COURSE';
-        //     $activity->save();
+        // $courseRule->save();
+        
+        $activity = activity()->causedBy(auth()->user())->performedOn($course)->
+            withProperties(['old' => $tempCourse, 'new' => $course])->event('EDIT_COURSE')
+            ->log('Edit course with id: '.$course->id.'' . ' and name: ' . $course->name . '');
+            $activity->log_name = 'COURSE';
+            $activity->save();
 
         return $course;
     }

@@ -96,7 +96,6 @@ class UserService
         $user->is_admin = $userData['is_admin'];
         $user->is_active = $userData['is_active'];
         $user->save();
-
         $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
         withProperties(['old' => $temp, 'new' => $user])->event('EDIT_USER')
         ->log('Edit user with id: '.$user->id.'' . ' and name: ' . $user->name . '');

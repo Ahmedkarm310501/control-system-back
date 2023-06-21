@@ -50,6 +50,7 @@ class CourseController extends Controller
         // return $this->successMessage('Course edited successfully' , 200);
         try{
             $course = $courseService->editCourse($request->validated());
+            // return $this->success($course, 200 , 'course');
             return $this->successMessage('Course edited successfully' , 200);
         }catch(\Exception $e){
             return $this->error($e->getMessage(), 500);
