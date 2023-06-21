@@ -75,7 +75,7 @@ class CourseService
         }
         $course_user = CourseUser::where('course_id', $courseData['course_id'])
         ->where('semester_id', $courseData['semester_id'])->where('user_id', auth()->user()->id)->first();
-        if(!$course_user){
+        if(!$course_user && auth()->user()->is_admin != 1){
             return false;
         }
         $department = Department::where('dept_code', $courseData['dept_code'])->first();

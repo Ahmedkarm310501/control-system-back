@@ -30,7 +30,7 @@ class CourseGradeService{
         $course_user = CourseUser::where('user_id', auth()->user()->id)
             ->where('course_id', $course->id)->first();
         
-        if(!$course_user){
+        if(!$course_user && auth()->user()->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semester id
@@ -91,7 +91,7 @@ class CourseGradeService{
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', $user->id)
         ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user){
+        if(!$course_user && $user->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semster id
@@ -132,7 +132,7 @@ class CourseGradeService{
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', $user->id)
         ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user){
+        if(!$course_user && $user->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semster id
@@ -208,7 +208,7 @@ class CourseGradeService{
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
         ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user){
+        if(!$course_user && auth()->user()->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semster id
@@ -249,7 +249,7 @@ class CourseGradeService{
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
         ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user){
+        if(!$course_user && auth()->user()->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semster id
@@ -308,7 +308,7 @@ class CourseGradeService{
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
         ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user){
+        if(!$course_user && auth()->user()->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semster id
@@ -366,7 +366,7 @@ class CourseGradeService{
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
         ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user){
+        if(!$course_user && auth()->user()->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semster id
@@ -437,7 +437,7 @@ class CourseGradeService{
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
         ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user){
+        if(!$course_user && auth()->user()->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semster id
@@ -546,7 +546,7 @@ class CourseGradeService{
         // check if the user has access to the course
         $course_user = CourseUser::where('user_id', auth()->user()->id)
         ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user){
+        if(!$course_user && auth()->user()->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
         // get semster id
