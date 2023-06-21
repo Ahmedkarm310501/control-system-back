@@ -284,7 +284,7 @@ class CourseGradeService{
             $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
             ->withProperties(['old' => [
                 'course_name' => $course->name,
-                'old_file' => $course_semester->stud_names,
+                'old_file' => $filePath,
             ], 'new' => null])
             ->event('DELETE_ALL_STUDENTS_FROM_COURSE')
             ->log('Deleted all students from course '. $course->name);
@@ -292,6 +292,10 @@ class CourseGradeService{
             $activity->save();
             return $course_semester_enrollment;
         }
+        $course_semester->stud_names = null;
+        $course_semester->stud_grades = null;
+        $course_semester->save();
+
         throw new \Exception('Error deleting student from course', 500);
     }
 
