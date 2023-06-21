@@ -55,6 +55,9 @@ class GraphController extends Controller
     {
         $raafa_details = $request->validated();
         $raafa_update = $courseGradeService->raafaGrades($raafa_details);
+        if($raafa_update == false){
+            return $this->error('number of grades must not more than 20 grades or course id not found',400);
+        }
         return $this->success($raafa_update,200,'graphs updated after adding rafaa grades');
     }
     public function getCourseSemesters(courseSemetersRequest $request,DashboardService $courseGradeService)

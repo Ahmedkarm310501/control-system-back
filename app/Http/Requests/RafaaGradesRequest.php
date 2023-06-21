@@ -24,6 +24,7 @@ class RafaaGradesRequest extends FormRequest
         return [
             'course_id' => 'required|integer',
             'number_of_grades' => 'required|integer',
+            'AllOrFailed' => 'required|boolean',
         ];
     }
 
