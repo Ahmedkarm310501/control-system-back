@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_admin')->default(false);
             $table->boolean('is_active')->default(false);
-            $table->string('national_id')->default('');
+            $table->string('national_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
