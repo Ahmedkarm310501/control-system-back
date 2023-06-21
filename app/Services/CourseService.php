@@ -81,21 +81,18 @@ class CourseService
         if(!$department){
             return false;
         }
-        $tempCourse = new Course();
-        $tempCourse->course_code = $course->course_code;
-        $tempCourse->name = $course->name;
-        // $tempRule = clone $course->rule;
-        // $tempCourse->rule = $tempRule;
-        // $courseRule = $course->rule;
+        $tempCourse =clone $course;
+        $courseRule = CourseRule::find($course->course_rule_id);
+        
         $course->course_code = $courseData['course_code'];
         $course->name = $courseData['course_name'];
-        // $course->department_id = $department->id;
-        // $courseRule->term_work = $courseData['term_work'];
-        // $courseRule->exam_work = $courseData['exam_work'];
-        // $courseRule->instructor = $courseData['instructor'];
-        // $courseRule->total = $courseData['total'];
+        $course->department_id = $department->id;
+        $courseRule->term_work = $courseData['term_work'];
+        $courseRule->exam_work = $courseData['exam_work'];
+        $courseRule->instructor = $courseData['instructor'];
+        $courseRule->total = $courseData['total'];
         $course->save();
-        // $courseRule->save();
+        $courseRule->save();
         
         $activity = activity()->causedBy(auth()->user())->performedOn($course)->
             withProperties(['old' => $tempCourse, 'new' => $course])->event('EDIT_COURSE')

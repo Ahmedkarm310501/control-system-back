@@ -43,7 +43,7 @@ class CourseController extends Controller
 
     public function editCourse(EditCourseSettingsRequest $request, CourseService $courseService)
     {
-        $course = $courseService->editCourse($request->validated());
+        // $course = $courseService->editCourse($request->validated());
         // if(!$course){
         //     return $this->error('Course not found', 404);
         // }
