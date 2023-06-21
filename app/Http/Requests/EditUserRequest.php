@@ -25,23 +25,28 @@ class EditUserRequest extends FormRequest
             'id' => 'required|numeric',
             'name' => 'required',
             'email' => 'required|email',
-            'national_id' => 'required|numeric',
+            'national_id' => 'string',
             'is_admin' => 'required|boolean',
             'is_active' => 'required|boolean',
         ];
     }
-    // public function messages(){
-    //     return [
-    //         'id.required' => 'ID is required',
-    //         'id.numeric' => 'ID must be numeric',
-    //         'name.required' => 'Name is required',
-    //         'email.required' => 'Email is required',
-    //         'national_id.required' => 'National ID is required',
-    //         'is_admin.required' => 'Admin status is required',
-    //         'is_admin.boolean' => 'Admin status must be boolean',
-    //         'is_active.boolean' => 'Active status must be boolean',
-    //         'is_active.required' => 'Active status is required',
-    //         'password.required' => 'Password is required',
-    //     ];
-    // }
+    
+    /**
+     * Get the error messages for the defined validation rules.
+     */
+    public function messages(): array
+    {
+        return [
+            'id.required' => 'Id is required',
+            'id.numeric' => 'Id must be a number',
+            'name.required' => 'Name is required',
+            'email.required' => 'Email is required',
+            'email.email' => 'Email must be a valid email',
+            'national_id.string' => 'National id must be a string',
+            'is_admin.required' => 'Is admin is required',
+            'is_admin.boolean' => 'Is admin must be a boolean',
+            'is_active.required' => 'Is active is required',
+            'is_active.boolean' => 'Is active must be a boolean',
+        ];
+    }
 }
