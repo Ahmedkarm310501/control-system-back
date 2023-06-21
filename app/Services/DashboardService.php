@@ -261,7 +261,7 @@ class DashboardService
         foreach($enrollments as $enrollment){
             $total_grade = $enrollment->term_work + $enrollment->exam_work;
             if($total_grade < 50){
-                if(($total_grade + $raafa_details['number_of_grades']) > 50){
+                if(($total_grade + $raafa_details['number_of_grades']) >= 50){
                     $number_of_passed_students++;
                 }else{
                     $number_of_failed_students++;
