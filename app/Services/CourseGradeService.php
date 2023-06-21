@@ -174,7 +174,13 @@ class CourseGradeService{
         
         
         $activity=activity()->causedBy($user)->performedOn($course_semester)
-        ->withProperties(['old' => $course_semester->stud_names, 'new' => $filePath])
+        ->withProperties(['old' => [
+            'course_name' => $course->name,
+            'old_file' => $course_semester->stud_names,
+        ], 'new' => [
+            'course_name' => $course->name,
+            'new_file' => $filePath,
+        ]])
         ->event('ADD_STUDENTS_TO_COURSE_EXCEL')
         ->log('Added student names file to course '. $course->name);
         $activity->log_name = 'COURSE_NAMES';
@@ -276,7 +282,10 @@ class CourseGradeService{
         $course_semester_enrollment->delete();
         if($course_semester_enrollment){
             $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
-            ->withProperties(['old' => $filePath, 'new' => null])
+            ->withProperties(['old' => [
+                'course_name' => $course->name,
+                'old_file' => $course_semester->stud_names,
+            ], 'new' => null])
             ->event('DELETE_ALL_STUDENTS_FROM_COURSE')
             ->log('Deleted all students from course '. $course->name);
             $activity->log_name = 'COURSE_NAME';
@@ -401,7 +410,10 @@ class CourseGradeService{
             ]);
         if($course_semester_enrollment){
             $activity=activity()->causedBy(auth()->user())->performedOn($course_semester)
-            ->withProperties(['old' => $filePath , 'new' =>null])
+            ->withProperties(['old' => [
+                'course_name' => $course->name,
+                'old_file' => $filePath,
+            ] , 'new' =>null])
             ->event('DELETE_COURSE_GRADES')
             ->log('Deleted course grades for course: '.$course->name);
             $activity->log_name = 'COURSE_GRADES';
