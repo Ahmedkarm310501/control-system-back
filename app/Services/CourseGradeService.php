@@ -216,7 +216,7 @@ class CourseGradeService{
         }
         $course_semester = CourseSemester::where('course_id', $course->id)->where('semester_id', $semester->id)->first();
 
-        $course_semester_enrollment = CourseSemesterEnrollment::
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:id,name')->
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id);
         $temp = clone $course_semester_enrollment->first();
@@ -312,7 +312,7 @@ class CourseGradeService{
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->first();
-        $temp = clone $course_semester_enrollment;
+        $temp = clone $course_semester_enrollment::with('student:name,id')->first();
         if(!$course_semester_enrollment){
             throw new \Exception('Student not enrolled in this course', 404);
         }
@@ -327,7 +327,7 @@ class CourseGradeService{
                 'term_work' => $data['term_work'],
                 'exam_work' => $data['exam_work'],
             ]);
-        $temp_old = clone $temp;
+        $temp_old = clone $temp::with('student:name,id')->first();
         $temp->term_work = $data['term_work'];
         $temp->exam_work = $data['exam_work'];
         if($course_semester_enrollment){
