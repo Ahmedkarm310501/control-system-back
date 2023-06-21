@@ -20,7 +20,7 @@ class ActivityLogController extends Controller
         
         $activityLogs = Activity::join('users as causer', 'activity_log.causer_id', '=', 'causer.id')
         ->select('activity_log.id', 'activity_log.description', 'activity_log.causer_id','activity_log.created_at', 'causer.name as causer_name','activity_log.event', 'activity_log.properties')
-        ->get();
+        ->orderBy('activity_log.created_at', 'desc')->get();
 
         
         if(!$activityLogs){
