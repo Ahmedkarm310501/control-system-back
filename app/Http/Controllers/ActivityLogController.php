@@ -30,8 +30,10 @@ class ActivityLogController extends Controller
             return $this->success($activityLogs,200,'all Activity Logs');
         }else{
             $activityLogs = Activity::join('users as causer', 'activity_log.causer_id', '=', 'causer.id')
-            ->select('activity_log.id', 'activity_log.description', 'activity_log.causer_id','activity_log.created_at', 'causer.name as causer_name','activity_log.event', 'activity_log.properties')
-            ->where('activity_log.causer_id', auth()->user()->id);
+        ->select('activity_log.id', 'activity_log.description', 'activity_log.causer_id','activity_log.created_at', 'causer.name as causer_name','activity_log.event', 'activity_log.properties')
+        ->where('activity_log.causer_id', auth()->user()->id)
+        ->orderBy('activity_log.created_at', 'desc')
+        ->get();
             return $this->success($activityLogs,200,'all Activity Logs');
         }
     }
