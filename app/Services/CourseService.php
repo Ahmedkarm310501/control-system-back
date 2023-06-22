@@ -92,6 +92,8 @@ class CourseService
         }
         $tempCourse =clone $course;
         $courseRule = CourseRule::find($course->course_rule_id);
+        $tempCourseRule = clone $courseRule;
+        $tempCourse->course_rule = $tempCourseRule;
         
         $course->course_code = $courseData['course_code'];
         $course->name = $courseData['course_name'];
@@ -103,7 +105,7 @@ class CourseService
         $courseRule->total = $courseData['total'];
         $course->save();
         $courseRule->save();
-        
+        $course->course_rule = $courseRule;
         $activity = activity()->causedBy(auth()->user())->performedOn($course)->
             withProperties(['old' => $tempCourse, 'new' => $course])->event('EDIT_COURSE')
             ->log('Edit course with id: '.$course->id.'' . ' and name: ' . $course->name . '');
