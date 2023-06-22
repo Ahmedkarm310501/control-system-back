@@ -35,10 +35,18 @@ class CourseService
 
     public function listCourses(){
         $courses = Course::with('department')->get();
-        if(!$courses){
+        $semester = Semester::latest()->first();
+        if(!$courses ){
             return false;
         }
-        return $courses;
+        if(auth()->user()->is_admin ==1){
+            return $courses;
+        }else{
+            $courses_ids = CourseUser::where('user_id', auth()->user()->id)->where('semester_id', $semester->id)->get('course_id');
+            $courses = Course::with('department')->whereIn('id', $courses_ids)->get();
+            return $courses;
+        }
+        
     }
 
     public function getCourse($course){
