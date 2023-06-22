@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ApplyRaafaGradesRequest extends FormRequest
+class AddDepartementRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,8 @@ class ApplyRaafaGradesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'course_id' => 'required|integer',
-            'number_of_gardes' => 'required|integer|min:0',
-            'AllOrfFailed' => 'required|boolean',
+            'dept_code' => 'required|string|unique:departments,dept_code',
+            'name' => 'required|string|unique:departments,name',
         ];
     }
 }

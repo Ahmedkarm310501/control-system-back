@@ -64,7 +64,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/list-courses',[CourseController::class,'listCourses']);
     // get current semester
     Route::get('/current-semester',[UserController::class,'getCurrentSemester']);
-    
+
     // activity log
     Route::get('/get-logs', [ActivityLogController::class, 'getLogs']);
     // download file from storage
@@ -101,6 +101,11 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     
     // delete course
     Route::post('/delete-course',[CourseController::class,'deleteCourse']);
-
+    // add department 
+    Route::post('/add-department', [DepartmentController::class, 'addDepartment']);
+    // delete department
+    Route::delete('/delete-department/{id}', [DepartmentController::class, 'deleteDepartment']);
+    // edit department
+    Route::post('/edit-department', [DepartmentController::class, 'editDepartment']);
 });
 

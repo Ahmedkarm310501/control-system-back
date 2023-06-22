@@ -23,7 +23,7 @@ class RafaaGradesRequest extends FormRequest
     {
         return [
             'course_id' => 'required|integer',
-            'number_of_grades' => 'required|integer',
+            'number_of_grades' => 'required|integer|min:0',
             'AllOrFailed' => 'required|boolean',
         ];
     }
