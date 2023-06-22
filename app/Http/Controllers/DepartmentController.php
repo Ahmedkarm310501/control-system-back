@@ -14,7 +14,6 @@ class DepartmentController extends Controller
     use HttpResponses;
     public function getDepartments()
     {
-
         $departments = Department::select(['id','dept_code'])->get();
         $semester = Semester::latest()->first();
         if(!$departments){
