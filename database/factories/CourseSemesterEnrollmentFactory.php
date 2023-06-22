@@ -25,30 +25,25 @@ class CourseSemesterEnrollmentFactory extends Factory
 
         //while the unique combination is not unique, keep generating new ones
         $uniqueCompination = [
-            // 'course_id' => fake()->randomElement($course_id),
-            // 'semester_id' => fake()->randomElement($semester_id),
             'course_semester_id' => fake()->randomElement($course_semester_id),
             'student_id' => fake()->randomElement($student_id),
         ];
         while (true) {
             if (!in_array($uniqueCompination, $this->taken)) {
-                // add the unique combination to the taken array
                 $this->taken[] = $uniqueCompination;
                 break;
             }
             $uniqueCompination = [
-                // 'course_id' => fake()->randomElement($course_id),
-                // 'semester_id' => fake()->randomElement($semester_id),
                 'course_semester_id' => fake()->randomElement($course_semester_id),
                 'student_id' => fake()->randomElement($student_id),
             ];
         }
+        // print the size of the array
+        echo count($this->taken);
+        echo "\n";
         return [
-            // 'course_grade' => fake()->randomFloat(2, 0, 100),
             'term_work'=> fake()->randomFloat(2,0,40),
             'exam_work'=> fake()->randomFloat(2,0,60),
-            // 'course_id' => $uniqueCompination['course_id'],
-            // 'semester_id' => $uniqueCompination['semester_id'],
             'course_semester_id' => $uniqueCompination['course_semester_id'],
             'student_id' => $uniqueCompination['student_id'],
         ];
