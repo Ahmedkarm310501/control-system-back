@@ -9,6 +9,8 @@ use App\Models\Semester;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use App\Traits\HttpResponses;
+use App\Http\Requests\AddDepartementRequest;
+use App\Http\Requests\EditDepartementRequest;
 class DepartmentController extends Controller
 {
     use HttpResponses;
@@ -36,5 +38,34 @@ class DepartmentController extends Controller
             return $this->error('No Courses Found',404);
         }
         return $this->success($courses,200,'all Courses');
+    }
+    public function addDepartment(AddDepartementRequest $request){
+        $department = Department::create([
+            'dept_code' => $request->dept_code,
+            'name' => $request->name,
+        ]);
+        if(!$department){
+            return $this->error('Department not created',404);
+        }
+        return $this->success($department,200,'Department created successfully');
+    }
+    public function deleteDepartment(Request $request){
+        $department = Department::find($request->id);
+        if(!$department){
+            return $this->error('Department not found',404);
+        }
+        $department->delete();
+        return $this->successMessage('Department deleted successfully',200);
+    }
+    public function editDepartment(EditDepartementRequest $request){
+        $department = Department::find($request->department_id);
+        if(!$department){
+            return $this->error('Department not found',404);
+        }
+        $department->update([
+            'dept_code' => $request->dept_code,
+            'name' => $request->name,
+        ]);
+        return $this->success($department,200,'Department updated successfully');
     }
 }

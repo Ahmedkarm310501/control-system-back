@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('level')->nullable();
             // $table->foreignId('department_id')->references('id')->on('departments')->constrained()->nullable();
-            $table->foreignId('department_id')->nullable()->constrained('departments');
+            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('set null');
             $table->timestamps();
         });
     }
