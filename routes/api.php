@@ -59,7 +59,12 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('export-course-grades', [CourseGradeController::class, 'exportCourseGrades']);
     Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
     Route::post('/edit-course', [CourseController::class, 'editCourse']);
-
+    // get all departments
+    Route::get('/departments',[DepartmentController::class,'getDepartments']);
+    Route::get('/list-courses',[CourseController::class,'listCourses']);
+    // get current semester
+    Route::get('/current-semester',[UserController::class,'getCurrentSemester']);
+    
     // activity log
     Route::get('/get-logs', [ActivityLogController::class, 'getLogs']);
     // download file from storage
@@ -78,8 +83,6 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/assign-user-to-course',[UserController::class,'assignUserToCourse']);
     // get all courses in a department
     Route::get('/courses-in-department/{dept_id}', [DepartmentController::class, 'getCoursesInDepartment']);
-    // get all departments
-    Route::get('/departments',[DepartmentController::class,'getDepartments']);
     // list all users
     Route::get('/list-users',[UserController::class,'listUsers']);
     // edit user
@@ -89,16 +92,13 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
 
     // add new semester
     Route::post('/add-semester',[UserController::class,'addSemester']);
-    // get current semester
-    Route::get('/current-semester',[UserController::class,'getCurrentSemester']);
     // get courses in semester
     Route::get('/courses-in-semester/{semesterId}',[UserController::class,'getCoursesInSemester']);
     // edit course semester
     Route::post('/edit-course-semester',[UserController::class,'editCourseSemester']);
 
     Route::post('/add-course',[CourseController::class,'addCourse']);
-    Route::get('/list-courses',[CourseController::class,'listCourses']);
-
+    
     // delete course
     Route::post('/delete-course',[CourseController::class,'deleteCourse']);
 
