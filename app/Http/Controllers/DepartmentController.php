@@ -14,7 +14,10 @@ class DepartmentController extends Controller
     use HttpResponses;
     public function getDepartments()
     {
-        $departments = Department::select(['id','dept_code'])->get();
+
+
+        $departments = Department::select(['id','dept_code','name'])->get();
+
         $semester = Semester::latest()->first();
         if(!$departments){
             return $this->error('No Departments Found',404);
