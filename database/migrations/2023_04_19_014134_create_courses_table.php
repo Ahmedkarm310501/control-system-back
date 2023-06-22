@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('course_code')->unique();
             $table->string('name');
             $table->foreignId('course_rule_id')->references('id')->on('course_rules')->constrained();
-            $table->foreignId('department_id')->references('id')->on('departments')->constrained();
+            $table->foreignId('department_id')->nullable()->references('id')->on('departments')->constrained()->onDelete('set null');
             $table->timestamps();
         });
     }
