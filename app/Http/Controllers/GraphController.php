@@ -80,7 +80,7 @@ class GraphController extends Controller
         $raafa_details = $request->validated();
         $raafa_update = $courseGradeService->applyRaafaGrades($raafa_details);
         if($raafa_update == false){
-            return $this->error('course id no assign to semester id',400);
+            return $this->error(' number of grades between [1:20]',400);
         }
         return $this->successMessage('raafa grades applied successfully',200);
         // return $this->success($raafa_update,200,'graphs updated after applying rafaa grades');
