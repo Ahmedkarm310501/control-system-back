@@ -407,6 +407,9 @@ class DashboardService
         ];
     }
     public function applyRaafaGrades($raafa_details){
+        if($raafa_details['number_of_gardes'] >20){
+            return false;
+        }
         $semester = Semester::latest()->first();
         $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
         if($raafa_details['AllOrfFailed'] == 0){
@@ -417,7 +420,7 @@ class DashboardService
             ->where('course_semester_id', $course_semester_id)
             ->update([
                 'exam_work' => DB::raw("CASE 
-                WHEN (term_work + exam_work + {$raafa_details['number_of_gardes']}) <= 100 THEN (exam_work + {$raafa_details['number_of_gardes']})
+                WHEN (term_work + exam_work + {$raafa_details['number_of_gardes']}) <= 100  AND (exam_work + {$raafa_details['number_of_gardes']}) < 60 THEN (exam_work + {$raafa_details['number_of_gardes']})
                 ELSE 60
                 END")
             ]);
