@@ -189,6 +189,10 @@ class UserService
     }
     public function addSemester($semesterData)
     {
+        $semester = Semester::where('year',$semesterData['year'])->where('term',$semesterData['term'])->first();
+        if($semester){
+            throw new \Exception('Semester already exists', 422);
+        }
         $semester = Semester::create($semesterData);
         if($semester){
             $activity = activity()->causedBy(auth()->user())->performedOn($semester)->
@@ -196,9 +200,9 @@ class UserService
             ->log('Add new semester');
             $activity->log_name = 'SEMESTER';
             $activity->save();
-            return true;
+            return $semester;
         }else{
-            return false;
+            throw new \Exception('Semester not added', 422);
         }
     }
     public function getCoursesInSemester($semester_id)

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->year('year');
             $table->enum('term', ['first', 'second', 'third']);
+            $table->unique(['year', 'term'], 'semester_unique');
             $table->timestamps();
         });
     }
