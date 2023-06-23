@@ -102,12 +102,24 @@ class UserController extends Controller
     }
     public function addSemester(AddSemesterRequest $request , UserService $userService)
     {
-        $semesterData = $request->validated();
-        $semester = $userService->addSemester($semesterData);
-        if ($semester) {
-            return $this->successMessage('Semester added successfully');
-        } else {
-            return $this->error('Semester not added', 422);
+        // $semesterData = $request->validated();
+        // $semester = $userService->addSemester($semesterData);
+        // if ($semester) {
+        //     return $this->successMessage('Semester added successfully');
+        // } else {
+        //     return $this->error('Semester not added', 422);
+        // }
+        try{
+            $semesterData = $request->validated();
+            $semester = $userService->addSemester($semesterData);
+            if ($semester) {
+                return $this->successMessage('Semester added successfully');
+            } else {
+                return $this->error('Semester not added', 422);
+            }
+        }
+        catch(\Exception $e){
+            return $this->error($e->getMessage(), 422);
         }
     }
     public function getCurrentSemester(){
