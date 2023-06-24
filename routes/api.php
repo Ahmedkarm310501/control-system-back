@@ -62,6 +62,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     // get all departments
     Route::get('/departments',[DepartmentController::class,'getDepartments']);
     Route::get('/list-courses',[CourseController::class,'listCourses']);
+    Route::get('/list-courses-in-semester',[CourseController::class,'listCoursesInSemester']);
     // get current semester
     Route::get('/current-semester',[UserController::class,'getCurrentSemester']);
 
