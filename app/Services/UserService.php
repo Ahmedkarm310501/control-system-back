@@ -148,7 +148,12 @@ class UserService
         }
     }
     public function listCoursesAssignedToUser($user_id){
-        $Semester_Id = Semester::latest()->first()->id;
+        // handle if no semester exist
+        $semester = Semester::latest()->first();
+        if(!$semester){
+            return [];
+        }
+        $Semester_Id = $semester->id;
         $user = User::find($user_id);
         if($user->is_admin == 1){
             $courses_ids = CourseSemester::where('semester_id',$Semester_Id)->get('course_id');
