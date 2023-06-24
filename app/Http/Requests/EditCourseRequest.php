@@ -23,7 +23,7 @@ class EditCourseRequest extends FormRequest
     {
         return [
             // take array of course ids
-            'course_ids' => 'required|array',
+            'course_ids' => 'nullable|array',
         ];
     }
 }
