@@ -48,6 +48,22 @@ class CourseService
         }
         
     }
+    public function listCoursesInSemester(){
+        $semester = Semester::latest()->first();
+        $course_semester = CourseSemester::where('semester_id', $semester->id)->get('course_id');
+        $courses = Course::with('department')->whereIn('id', $course_semester)->get();
+        if(!$courses ){
+            return false;
+        }
+        if(auth()->user()->is_admin ==1){
+            return $courses;
+        }else{
+            $courses_ids = CourseUser::where('user_id', auth()->user()->id)->where('semester_id', $semester->id)->get('course_id');
+            $courses = Course::with('department')->whereIn('id', $courses_ids)->get();
+            return $courses;
+        }
+        
+    }
 
     public function getCourse($course){
         
