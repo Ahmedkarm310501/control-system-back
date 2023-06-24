@@ -18,32 +18,21 @@ class CourseSemesterFactory extends Factory
     public function definition(): array
     {
         $course_id = \App\Models\Course::all()->pluck('id')->toArray();
-        $semester_id = \App\Models\Semester::all()->last()->id;
+        $semester_id = \App\Models\Semester::all()->pluck('id')->toArray();
 
-        // $uniqueCompination = [
-        //     'course_id' => fake()->randomElement($course_id),
-        //     'semester_id' => fake()->randomElement($semester_id),
-        // ];
-        // while (true) {
-        //     if (!in_array($uniqueCompination, $this->taken)) {
-        //         $this->taken[] = $uniqueCompination;
-        //         break;
-        //     }
-        //     $uniqueCompination = [
-        //         'course_id' => fake()->randomElement($course_id),
-        //         'semester_id' => fake()->randomElement($semester_id),
-        //     ];
-        // }
-        $uniqueCompination;
-        while(true){
-            $uniqueCompination = [
-                'course_id' => fake()->randomElement($course_id),
-                'semester_id' => $semester_id,
-            ];
-            if(!in_array($uniqueCompination, $this->taken)){
+        $uniqueCompination = [
+            'course_id' => fake()->randomElement($course_id),
+            'semester_id' => fake()->randomElement($semester_id),
+        ];
+        while (true) {
+            if (!in_array($uniqueCompination, $this->taken)) {
                 $this->taken[] = $uniqueCompination;
                 break;
             }
+            $uniqueCompination = [
+                'course_id' => fake()->randomElement($course_id),
+                'semester_id' => fake()->randomElement($semester_id),
+            ];
         }
         
 

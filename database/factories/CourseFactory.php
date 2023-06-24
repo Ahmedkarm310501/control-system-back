@@ -24,6 +24,12 @@ class CourseFactory extends Factory
             'CS104' => 'Operating Systems',
             'IS221' => 'Database Systems',
             'CS106' => 'Artificial Intelligence',
+            'CS107' => 'Software Engineering',
+            'CS108' => 'Computer Graphics',
+            'CS109' => 'Computer Vision',
+            'CS110' => 'Computer Architecture',
+            'CS111' => 'Computer Security',
+            'CS112' => 'Computer Organization',
         ];
         $course_code = fake()->unique()->randomElement(array_keys($courses));
         
