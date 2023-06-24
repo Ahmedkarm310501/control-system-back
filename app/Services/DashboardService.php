@@ -362,7 +362,7 @@ class DashboardService
         $semesters = Semester::whereIn('id', $semester_ids)->get();
         $year_terms = [];
         foreach($semesters as $semester){
-            $year_term[] = [
+            $year_term = [
                 'id' => $semester->id,
                 'year_term' => $semester->year_term = $semester->year . '-' . $semester->term,
             ];
