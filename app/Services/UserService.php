@@ -12,6 +12,7 @@ use App\Models\User;
 use Database\Factories\CourseSemesterEnrollmentFactory;
 use Illuminate\Support\Facades\Hash;
 
+
 class UserService
 {
     public function addUser($userData)
