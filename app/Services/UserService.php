@@ -195,7 +195,7 @@ class UserService
     }
     public function addSemester($semesterData)
     {
-        if (Hash::check($semesterData['user_password'], auth()->user()->password)) {
+        if (!Hash::check($semesterData['user_password'], auth()->user()->password)) {
             throw new \Exception('Wrong password', 403);
         }
         $semester = Semester::where('year',$semesterData['year'])->where('term',$semesterData['term'])->first();
