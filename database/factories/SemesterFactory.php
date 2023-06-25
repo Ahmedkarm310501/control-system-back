@@ -14,11 +14,15 @@ class SemesterFactory extends Factory
      *
      * @return array<string, mixed>
      */
+
+    // public $taken = [];
     public function definition(): array
     {
+
         return [
-            'year' => fake()->year(),
-            'term' => fake()->randomElement(['first', 'second', 'third']),
+            // 'year' => fake()->year(), year between 2019 and 2022
+            'year' => fake()->unique()->numberBetween(2019, 2023),
+            'term' => fake()->unique()->randomElement(['first', 'second', 'third']),
         ];
     }
 }
