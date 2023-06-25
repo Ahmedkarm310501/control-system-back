@@ -12,13 +12,23 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
-    public function part_one($course_id){
+    public function part_one($course_id, $course_semester_id = null){
 
+        // dd($course_semester_id);
         // get the latest semester id
-        $semester_id = Semester::latest()->first()->id;
-        $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
+        if($course_semester_id == null){
+            $semester_id = Semester::latest()->first()->id;
+            $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
+        }else{
+
+            $course_semester = CourseSemester::find($course_semester_id);
+
+        }
+        // $semester_id = Semester::latest()->first()->id;
+        // $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
         $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->get();
         $number_of_students = count($enrollements);
+        // dd($number_of_students);
         $total_grade = 0;
         $passed_students = 0;
         $failed_students = 0;
@@ -43,9 +53,18 @@ class DashboardService
         ];
         return $graph_one;
     }
-    public function part_two($course_id){
-        $semester_id = Semester::latest()->first()->id;
-        $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
+    public function part_two($course_id, $course_semester_id = null){
+        // get the latest semester id
+        if($course_semester_id == null){
+            $semester_id = Semester::latest()->first()->id;
+            $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
+        }else{
+                
+                $course_semester = CourseSemester::find($course_semester_id);
+    
+            }
+        // $semester_id = Semester::latest()->first()->id;
+        // $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
         $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->get();
         $passed_students = 0;
         $failed_students = 0;
@@ -389,14 +408,21 @@ class DashboardService
         if(!$course_semester_one){
             return false;
         }
+        // dd($course_semester_one);
         $course_semester_two = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_two'])->where('semester_id', $courses_semsesters_ids['semester_id_two'])->first();
         if(!$course_semester_two){
             return false;
         }
-        $first_graph_one = $this->part_one($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
-        $first_graph_two = $this->part_one($courses_semsesters_ids['course_id_two'], $courses_semsesters_ids['semester_id_two']);
-        $second_graph_one = $this->part_two($courses_semsesters_ids['course_id_one'], $courses_semsesters_ids['semester_id_one']);
-        $second_graph_two = $this->part_two($courses_semsesters_ids['course_id_two'], $courses_semsesters_ids['semester_id_two']);
+        // dd($course_semester_two);
+        // dd($courses_semsesters_ids['course_id_one'],$courses_semsesters_ids['semester_id_one']);
+        $first_graph_one = $this->part_one($courses_semsesters_ids['course_id_one'], $course_semester_one->id);
+        $first_graph_two = $this->part_one($courses_semsesters_ids['course_id_two'], $course_semester_two->id);
+        $second_graph_one = $this->part_two($courses_semsesters_ids['course_id_one'], $course_semester_one->id);
+        $second_graph_two = $this->part_two($courses_semsesters_ids['course_id_two'], $course_semester_two->id);
+
+        // dd($first_graph_one);
+        // dd($first_graph_two);
+
         return [
             'first_graph_one' => $first_graph_one,
             'first_graph_two' => $first_graph_two,
