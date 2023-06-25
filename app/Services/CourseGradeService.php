@@ -243,7 +243,7 @@ class CourseGradeService{
     }
 
     public function deleteAllStudentsFromCourse($data ){
-        if (Hash::check($data['user_password'], auth()->user()->password)) {
+        if (!Hash::check($data['user_password'], auth()->user()->password)) {
             throw new \Exception('Wrong password', 403);
         }
         $course = Course::find($data['course_id']);
@@ -368,7 +368,7 @@ class CourseGradeService{
 
     public function deleteCourseGrades($data)
     {
-        if (Hash::check($data['user_password'], auth()->user()->password)) {
+        if (!Hash::check($data['user_password'], auth()->user()->password)) {
             throw new \Exception('Wrong password', 403);
         }
         $course = Course::find($data['course_id']);
