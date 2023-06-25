@@ -119,7 +119,7 @@ class UserController extends Controller
             }
         }
         catch(\Exception $e){
-            return $this->error($e->getMessage(), 422);
+            return $this->error($e->getMessage(), $e->getCode());
         }
     }
     public function getCurrentSemester(){

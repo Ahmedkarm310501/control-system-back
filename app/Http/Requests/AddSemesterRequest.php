@@ -24,6 +24,7 @@ class AddSemesterRequest extends FormRequest
         return [
             'term' => 'required|string',
             'year' => 'required|integer',
+            'user_password' => 'required|string',
         ];
     }
 }

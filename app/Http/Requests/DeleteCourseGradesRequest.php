@@ -24,6 +24,7 @@ class DeleteCourseGradesRequest extends FormRequest
         return [
             'course_id' => 'required|integer',
             'semester_id' => 'required|integer',
+            'user_password' => 'required|string',
         ];
     }
 }
