@@ -15,6 +15,7 @@ use App\Exports\CourseNamesExport;
 use App\Exports\GradesExport;
 use Illuminate\Support\Facades\Storage;
 
+use Illuminate\Support\Facades\Hash;
 
 
 class CourseGradeService{
