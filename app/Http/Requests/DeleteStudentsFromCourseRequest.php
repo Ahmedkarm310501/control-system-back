@@ -24,6 +24,7 @@ class DeleteStudentsFromCourseRequest extends FormRequest
         return [
             'course_id' => 'required|numeric',
             'semester_id' => 'required|numeric',
+            'user_password' => 'required|string',
         
         ];
     }
@@ -38,6 +39,8 @@ class DeleteStudentsFromCourseRequest extends FormRequest
             'course_id.numeric' => 'Course ID must be numeric',
             'student_id.required' => 'Student ID is required',
             'student_id.numeric' => 'Student ID must be numeric',
+            'user_password.required' => 'Password is required',
+            'user_password.string' => 'Password must be a string',
         ];
     }
 }
