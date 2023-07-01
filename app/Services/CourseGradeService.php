@@ -20,20 +20,25 @@ use Illuminate\Support\Facades\Hash;
 
 class CourseGradeService{
 
-    public function getCourseGrades($courseId, $termId)
+    public function checkCourseAccess($courseId, $user)
     {
         $course = Course::find($courseId);
-        
         if(!$course){
             throw new \Exception('Course not found', 404);
         }
         // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', auth()->user()->id)
+        $course_user = CourseUser::where('user_id', $user->id)
             ->where('course_id', $course->id)->first();
-        
-        if(!$course_user && auth()->user()->is_admin != 1){
+        if(!$course_user && $user->is_admin != 1){
             throw new \Exception('You do not have access to this course', 403);
         }
+        return $course;
+    }
+
+    public function getCourseGrades($courseId, $termId)
+    {
+        
+        $course = $this->checkCourseAccess($courseId, auth()->user());
         // get semester id
         $semester = CourseSemester::where('course_id', $course->id)
             ->where('semester_id', $termId)->first();
@@ -85,16 +90,9 @@ class CourseGradeService{
 
     public function addStudentToCourse($data , $user)
     { 
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', $user->id)
-        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user && $user->is_admin != 1){
-            throw new \Exception('You do not have access to this course', 403);
-        }
+
+
+        $course = $this->checkCourseAccess($data['course_id'], $user);
         // get semster id
         $semester = Semester::find($data['semester_id']);
         if(!$semester){
@@ -126,16 +124,8 @@ class CourseGradeService{
 
     public function addStudentsToCourseExcel($data , $user)
     {
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', $user->id)
-        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user && $user->is_admin != 1){
-            throw new \Exception('You do not have access to this course', 403);
-        }
+
+        $course = $this->checkCourseAccess($data['course_id'], $user);
         // get semster id
         $semester = Semester::find($data['semester_id']);
         if(!$semester){
@@ -202,16 +192,7 @@ class CourseGradeService{
 
     public function deleteStudentFromCourse($data )
     {
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user && auth()->user()->is_admin != 1){
-            throw new \Exception('You do not have access to this course', 403);
-        }
+        $course = $this->checkCourseAccess($data['course_id'], auth()->user());
         // get semster id
         $semester = Semester::find($data['semester_id']);
         if(!$semester){
@@ -246,16 +227,9 @@ class CourseGradeService{
         if (!Hash::check($data['user_password'], auth()->user()->password)) {
             throw new \Exception('Wrong password', 403);
         }
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user && auth()->user()->is_admin != 1){
-            throw new \Exception('You do not have access to this course', 403);
-        }
+
+
+        $course = $this->checkCourseAccess($data['course_id'], auth()->user());
         // get semster id
         $semester = Semester::find($data['semester_id']);
         if(!$semester){
@@ -305,16 +279,8 @@ class CourseGradeService{
 
     public function addOneStudentGrade($data)
     {
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user && auth()->user()->is_admin != 1){
-            throw new \Exception('You do not have access to this course', 403);
-        }
+
+        $course = $this->checkCourseAccess($data['course_id'], auth()->user());
         // get semster id
         $semester = Semester::find($data['semester_id']);
         if(!$semester){
@@ -371,16 +337,7 @@ class CourseGradeService{
         if (!Hash::check($data['user_password'], auth()->user()->password)) {
             throw new \Exception('Wrong password', 403);
         }
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user && auth()->user()->is_admin != 1){
-            throw new \Exception('You do not have access to this course', 403);
-        }
+        $course = $this->checkCourseAccess($data['course_id'], auth()->user());
         // get semster id
         $semester = Semester::find($data['semester_id']);
         if(!$semester){
@@ -442,16 +399,7 @@ class CourseGradeService{
 
     public function addStudentsGradesExcel($data)
     {
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user && auth()->user()->is_admin != 1){
-            throw new \Exception('You do not have access to this course', 403);
-        }
+        $course = $this->checkCourseAccess($data['course_id'], auth()->user());
         // get semster id
         $semester = Semester::find($data['semester_id']);
         if(!$semester){
@@ -551,16 +499,7 @@ class CourseGradeService{
 
     public function exportCourseGrades($data)
     {
-        $course = Course::find($data['course_id']);
-        if(!$course){
-            throw new \Exception('Course not found', 404);
-        }
-        // check if the user has access to the course
-        $course_user = CourseUser::where('user_id', auth()->user()->id)
-        ->where('course_id', $course->id)->where('semester_id', $data['semester_id'])->first();
-        if(!$course_user && auth()->user()->is_admin != 1){
-            throw new \Exception('You do not have access to this course', 403);
-        }
+        $course = $this->checkCourseAccess($data['course_id'], auth()->user());
         // get semster id
         $semester = Semester::find($data['semester_id']);
         if(!$semester){
