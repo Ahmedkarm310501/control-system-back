@@ -32,7 +32,7 @@ class CourseGradeController extends Controller
         try {
             $grades = $courseGradeService->getCourseGrades($courseId, $termId);
         } catch (\Exception $e) {
-            return $this->error($e->getMessage(), $e->getCode());
+            return $this->error($e->getMessage(), 500);
         }
 
         return $this->success($grades);
