@@ -59,9 +59,9 @@ class DashboardService
             $semester_id = Semester::latest()->first()->id;
             $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
         }else{
-                
+
                 $course_semester = CourseSemester::find($course_semester_id);
-    
+
             }
         // $semester_id = Semester::latest()->first()->id;
         // $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
@@ -228,33 +228,6 @@ class DashboardService
         $graph_three = $this->part_three($course_semester['course_id']);
         return $graph_three;
     }
-    public function graphCompareOne($course_semester){
-        $first_semester = $this->part_one($course_semester['course_id'], $course_semester['semester_id_one']);
-        $second_semester = $this->part_one($course_semester['course_id'], $course_semester['semester_id_two']);
-        $graph_compare_one = [
-            'first_semester' => $first_semester,
-            'second_semester' => $second_semester,
-        ];
-        return $graph_compare_one;
-    }
-    public function graphCompareTwo($course_semester){
-        $first_semester = $this->part_two($course_semester['course_id'], $course_semester['semester_id_one']);
-        $second_semester = $this->part_two($course_semester['course_id'], $course_semester['semester_id_two']);
-        $graph_compare_two = [
-            'first_semester' => $first_semester,
-            'second_semester' => $second_semester,
-        ];
-        return $graph_compare_two;
-    }
-    public function graphCompareThree($course_semester){
-        $first_semester = $this->part_three($course_semester['course_id'], $course_semester['semester_id_one']);
-        $second_semester = $this->part_three($course_semester['course_id'], $course_semester['semester_id_two']);
-        $graph_compare_three = [
-            'first_semester' => $first_semester,
-            'second_semester' => $second_semester,
-        ];
-        return $graph_compare_three;
-    }
     public function raafaGrades($raafa_details){
         $semester = Semester::latest()->first();
         $course = Course::find($raafa_details['course_id']);
@@ -385,7 +358,7 @@ class DashboardService
                 'id' => $semester->id,
                 'year_term' => $semester->year_term = $semester->year . '-' . $semester->term,
             ];
-            
+
             $year_terms []=$year_term;
         }
         return $year_terms;
@@ -445,13 +418,13 @@ class DashboardService
             DB::table('course_semester_enrollments')
             ->where('course_semester_id', $course_semester_id)
             ->update([
-                'exam_work' => DB::raw("CASE 
+                'exam_work' => DB::raw("CASE
                 WHEN (term_work + exam_work + {$raafa_details['number_of_gardes']}) <= 100  AND (exam_work + {$raafa_details['number_of_gardes']}) < 60 THEN (exam_work + {$raafa_details['number_of_gardes']})
                 ELSE 60
                 END")
             ]);
         }
-        
+
         return true;
     }
 }

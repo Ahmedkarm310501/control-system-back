@@ -40,12 +40,6 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/graph-two', [GraphController::class, 'graphTwo']);
     //graph three
     Route::post('/graph-three', [GraphController::class, 'graphThree']);
-    // graph comapare one courses in two semesters
-    Route::post('/graph-one-compare', [GraphController::class, 'graphCompareOne']);
-    // graph comapare two courses in two semesters
-    Route::post('/graph-two-compare', [GraphController::class, 'graphCompareTwo']);
-    // graph comapare three courses in two semesters
-    Route::post('/graph-three-compare', [GraphController::class, 'graphCompareThree']);
     // get all semesters assign to course
     Route::post('/get-course-semesters', [GraphController::class, 'getCourseSemesters']);
 
@@ -99,10 +93,10 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/edit-course-semester',[UserController::class,'editCourseSemester']);
 
     Route::post('/add-course',[CourseController::class,'addCourse']);
-    
+
     // delete course
     Route::post('/delete-course',[CourseController::class,'deleteCourse']);
-    // add department 
+    // add department
     Route::post('/add-department', [DepartmentController::class, 'addDepartment']);
     // delete department
     Route::delete('/delete-department/{id}', [DepartmentController::class, 'deleteDepartment']);
