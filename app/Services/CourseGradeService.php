@@ -652,4 +652,91 @@ class CourseGradeService
         throw new \Exception('Error adding student exam work to course', 500);
 
     }
+    public function checkTermWork($grade , $extraGrade){
+        $newTermWork = $grade + $extraGrade;
+        if($newTermWork > 40){
+            $newTermWork = 40;
+        }
+        return $newTermWork;
+    }
+    public function addStudentExtraGrades($data){
+        [$course, $course_user, $semester, $course_semester] =
+            $this->checkCourseAccess($data['course_id'], auth()->user(), $data['semester_id']);
+        $students = Excel::toArray([], $data['students'])[0];
+        $students = array_slice($students, 1);
+        $wrongFormat = [];
+        $index = 1;
+        foreach ($students as $student) {
+            if (!isset($student[0]) || !isset($student[1])) {
+                $wrongFormat[] = $index;
+                $index++;
+                continue;
+            }
+            // check if stud extra grade between 0 and 10
+            if ($student[1] < 0 || $student[1] > 10) {
+                $wrongFormat[] = $index;
+                $index++;
+                continue;
+            }
+            $current_enrollment = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)
+            ->where('student_id', $student[0])->first();
+
+            $course_enrollment = CourseSemesterEnrollment::
+                where('course_semester_id', $course_semester->id)
+                ->where('student_id', $student[0])
+                ->update([
+                    'term_work' => $this->checkTermWork($current_enrollment->term_work, $student[1]),
+                ]);
+            $index++;
+        }
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+            ->where('course_semester_id', $course_semester->id)
+            ->get()
+            ->map(function ($enrollment) {
+                if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                    $enrollment->total_grade = null;
+                    $enrollment->grade = null;
+                } else {
+                    $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+                    $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+                }
+                return $enrollment;
+            });
+        $courseGrades = [];
+        foreach ($course_semester_enrollment as $enrollment) {
+            $courseGrade = [];
+            $courseGrade[] = $enrollment->student->id;
+            $courseGrade[] = $enrollment->student->name;
+            $courseGrade[] = $enrollment->term_work;
+            $courseGrade[] = $enrollment->exam_work;
+            $courseGrade[] = $enrollment->total_grade;
+            $courseGrade[] = $enrollment->grade;
+            $courseGrades[] = $course;
+        }
+        $filename = uniqid(). '.'. 'xlsx';
+        Excel::store(new GradesExport($courseGrades), $filename, 'public');
+        $filePath = Storage::url($filename);
+        $studWithNoGrade = false;
+        foreach ($course_semester_enrollment as $enrollment) {
+            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                $studWithNoGrade = true;
+            }
+        }
+        if ($course_semester_enrollment) {
+            // $logMessage = 'Added course extra grade file for course: ' . $course->name;
+            // $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_extra_grade];
+            // $new = ['course_name' => $course->name, 'new_file' => $filePath];
+            // $this->addActivity('COURSE_EXTRA_GRADE', $logMessage, 'ADD_COURSE_EXTRA_GRADE', $course_semester, $old, $new);
+
+            // $course_semester->stud_extra_grade = $filePath;
+            // $course_semester->save();
+            return [
+                'course_semester_enrollment' => $course_semester_enrollment,
+                'studWithNoGrade' => $studWithNoGrade,
+                'wrongFormat' => $wrongFormat,
+            ];
+
+        }
+    }
+
 }
