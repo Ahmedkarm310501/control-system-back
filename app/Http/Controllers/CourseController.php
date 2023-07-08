@@ -31,7 +31,7 @@ class CourseController extends Controller
         }
         return $this->success($courses, 200 , 'all courses');
     }
-    
+
     public function listCoursesInSemester(CourseService $courseService)
     {
         $courses = $courseService->listCoursesInSemester();

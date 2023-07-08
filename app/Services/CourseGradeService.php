@@ -473,5 +473,21 @@ class CourseGradeService
         throw new \Exception('Error exporting course grades', 500);
 
     }
+    public function insertGrade($courseData){
+        $course_semester_id = CourseSemester::where('course_id', $courseData['course_id'])
+            ->where('semester_id', $courseData['semester_id']) ->first()->id;
+        if(!$course_semester_id){
+            return false;
+        }
+        $course_enrollment = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)
+            ->where('student_id', $courseData['student_id'])
+            ->update([
+                'exam_work' => $courseData['exam_work'],
+            ]);
+        if($course_enrollment){
+            return true;
+        }
+        return false;
+    }
 
 }
