@@ -54,11 +54,11 @@ class CourseGradeController extends Controller
     {
         $data = $request->validated();
         try {
-            $data=  $courseGradeService->addStudentsToCourseExcel($data, $request->user());
+            $data = $courseGradeService->addStudentsToCourseExcel($data, $request->user());
         } catch (\Exception $e) {
             return $this->error($e->getMessage(), $e->getCode());
         }
-        return $this->success($data,201,'Students added to course successfully');
+        return $this->success($data, 201, 'Students added to course successfully');
     }
 
     public function deleteAllStudentsFromCourse(DeleteStudentsFromCourseRequest $request, CourseGradeService $courseGradeService)
@@ -104,23 +104,8 @@ class CourseGradeController extends Controller
         return $this->success('Course grades deleted successfully');
     }
 
-    public function addStudentsGradesExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
-    {
-        $data = $request->validated();
-        try {
-            $data = $courseGradeService->addStudentsGradesExcel($data);
-        } catch (\Exception $e) {
-            return $this->error($e->getMessage(), 500);
-        }
-        if (count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] ==false )
-            return $this->success($data['course_semester_enrollment'],201,'grades added successfully');
-        else if(count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] ==true)
-            return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is some students with no grade');
-        else
-            return $this->success($data['course_semester_enrollment'],201,'grades added successfully but there is missing data at row: '.implode(', ', $data['wrongFormat']).' and there is some students with no grade');
 
-    }
-    public function exportCourseGrades(CourseGradeService $courseGradeService,ExportCourseGradesRequest $request)
+    public function exportCourseGrades(CourseGradeService $courseGradeService, ExportCourseGradesRequest $request)
     {
         $data = $request->validated();
         try {
@@ -131,11 +116,46 @@ class CourseGradeController extends Controller
         return Excel::download(new GradesExport($grades), 'course.xlsx');
         // return $this->success($grades,200,'Course grades exported successfully');
     }
-    public function insertGrade(InsertGradeRequest $request, CourseGradeService $courseService){
+    public function insertGrade(InsertGradeRequest $request, CourseGradeService $courseService)
+    {
         $grade = $courseService->insertGrade($request->validated());
-        if(!$grade){
+        if (!$grade) {
             return $this->error('course not assign to semester', 422);
         }
         return $this->successMessage('exam work  updated successfully', 201);
+    }
+
+    public function addStudentsGradesExcel(AddStudentsToCourseRequest $request, CourseGradeService $courseGradeService)
+    {
+        $data = $request->validated();
+        try {
+            $data = $courseGradeService->addStudentsGradesExcel($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        if (count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] == false)
+            return $this->success($data['course_semester_enrollment'], 201, 'grades added successfully');
+        else if (count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] == true)
+            return $this->success($data['course_semester_enrollment'], 201, 'grades added successfully but there is some students with no grade');
+        else
+            return $this->success($data['course_semester_enrollment'], 201, 'grades added successfully but there is missing data at row: ' . implode(', ', $data['wrongFormat']) . ' and there is some students with no grade');
+
+    }
+
+    public function addStudentTermWork(AddStudentsToCourseRequest $request, CourseGradeService $courseService)
+    {
+        $data = $request->validated();
+        try {
+            $data = $courseService->addStudentTermWork($data);
+        } catch (\Exception $e) {
+            return $this->error($e->getMessage(), 500);
+        }
+        if (count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] == false)
+            return $this->success($data['course_semester_enrollment'], 201, 'grades added successfully');
+        else if (count($data['wrongFormat']) == 0 && $data['studWithNoGrade'] == true)
+            return $this->success($data['course_semester_enrollment'], 201, 'grades added successfully but there is some students with no grade');
+        else
+            return $this->success($data['course_semester_enrollment'], 201, 'grades added successfully but there is missing data at row: ' . implode(', ', $data['wrongFormat']) . ' and there is some students with no grade');
+
     }
 }
