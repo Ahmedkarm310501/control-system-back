@@ -49,16 +49,18 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
 
     Route::post('add-one-student-grade', [CourseGradeController::class, 'addOneStudentGrade']);
     Route::post('add-students-grades-excel', [CourseGradeController::class, 'addStudentsGradesExcel']);
+    Route::post('add-students-term-work-excel', [CourseGradeController::class, 'addStudentTermWork']);
+
     Route::post('delete-course-grades', [CourseGradeController::class, 'deleteCourseGrades']);
     Route::post('export-course-grades', [CourseGradeController::class, 'exportCourseGrades']);
     Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
     Route::post('/edit-course', [CourseController::class, 'editCourse']);
     // get all departments
-    Route::get('/departments',[DepartmentController::class,'getDepartments']);
-    Route::get('/list-courses',[CourseController::class,'listCourses']);
-    Route::get('/list-courses-in-semester',[CourseController::class,'listCoursesInSemester']);
+    Route::get('/departments', [DepartmentController::class, 'getDepartments']);
+    Route::get('/list-courses', [CourseController::class, 'listCourses']);
+    Route::get('/list-courses-in-semester', [CourseController::class, 'listCoursesInSemester']);
     // get current semester
-    Route::get('/current-semester',[UserController::class,'getCurrentSemester']);
+    Route::get('/current-semester', [UserController::class, 'getCurrentSemester']);
 
     // activity log
     Route::get('/get-logs', [ActivityLogController::class, 'getLogs']);
@@ -76,30 +78,30 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     // import from execl file courses in database
     Route::post('/import-courses', [CourseController::class, 'importCourses']);
     // add new user
-    Route::post('/add-user',[UserController::class,'addUser']);
-    Route::get('/users/{user}',[UserController::class,'getUser']);
+    Route::post('/add-user', [UserController::class, 'addUser']);
+    Route::get('/users/{user}', [UserController::class, 'getUser']);
     // assign user to course
-    Route::post('/assign-user-to-course',[UserController::class,'assignUserToCourse']);
+    Route::post('/assign-user-to-course', [UserController::class, 'assignUserToCourse']);
     // get all courses in a department
     Route::get('/courses-in-department/{dept_id}', [DepartmentController::class, 'getCoursesInDepartment']);
     // list all users
-    Route::get('/list-users',[UserController::class,'listUsers']);
+    Route::get('/list-users', [UserController::class, 'listUsers']);
     // edit user
-    Route::post('/edit-user',[UserController::class,'editUser']);
+    Route::post('/edit-user', [UserController::class, 'editUser']);
     // delete user
-    Route::delete('/delete-user',[UserController::class,'deleteUser']);
+    Route::delete('/delete-user', [UserController::class, 'deleteUser']);
 
     // add new semester
-    Route::post('/add-semester',[UserController::class,'addSemester']);
+    Route::post('/add-semester', [UserController::class, 'addSemester']);
     // get courses in semester
-    Route::get('/courses-in-semester/{semesterId}',[UserController::class,'getCoursesInSemester']);
+    Route::get('/courses-in-semester/{semesterId}', [UserController::class, 'getCoursesInSemester']);
     // edit course semester
-    Route::post('/edit-course-semester',[UserController::class,'editCourseSemester']);
+    Route::post('/edit-course-semester', [UserController::class, 'editCourseSemester']);
 
-    Route::post('/add-course',[CourseController::class,'addCourse']);
+    Route::post('/add-course', [CourseController::class, 'addCourse']);
 
     // delete course
-    Route::post('/delete-course',[CourseController::class,'deleteCourse']);
+    Route::post('/delete-course', [CourseController::class, 'deleteCourse']);
     // add department
     Route::post('/add-department', [DepartmentController::class, 'addDepartment']);
     // delete department
@@ -107,4 +109,3 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     // edit department
     Route::post('/edit-department', [DepartmentController::class, 'editDepartment']);
 });
-

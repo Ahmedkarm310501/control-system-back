@@ -264,7 +264,7 @@ class CourseGradeService
         $course_semester_enrollment = CourseSemesterEnrollment::
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
-            ->first();  
+            ->first();
         $temp = clone $course_semester_enrollment;
         if (!$course_semester_enrollment) {
             throw new \Exception('Student not enrolled in this course', 404);
@@ -351,6 +351,61 @@ class CourseGradeService
 
     }
 
+
+
+
+    public function exportCourseGrades($data)
+    {
+        [$course, $course_user, $semester, $course_semester] =
+            $this->checkCourseAccess($data['course_id'], auth()->user(), $data['semester_id']);
+        $courseGrades = [];
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+            ->where('course_semester_id', $course_semester->id)
+            ->get()
+            ->map(function ($enrollment) {
+                if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                    $enrollment->total_grade = null;
+                    $enrollment->grade = null;
+                } else {
+                    $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+                    $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+                }
+                return $enrollment;
+            });
+        foreach ($course_semester_enrollment as $enrollment) {
+            $courseGrade = [];
+            $courseGrade[] = $enrollment->student->id;
+            $courseGrade[] = $enrollment->student->name;
+            $courseGrade[] = $enrollment->term_work;
+            $courseGrade[] = $enrollment->exam_work;
+            $courseGrade[] = $enrollment->total_grade;
+            $courseGrade[] = $enrollment->grade;
+            $courseGrades[] = $courseGrade;
+        }
+        // print($courseGrades);
+
+        if (count($courseGrades) > 0) {
+            return $courseGrades;
+        }
+        throw new \Exception('Error exporting course grades', 500);
+
+    }
+    public function insertGrade($courseData)
+    {
+        $course_semester_id = CourseSemester::where('course_id', $courseData['course_id'])
+            ->where('semester_id', $courseData['semester_id'])->first()->id;
+
+        $course_enrollment = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)
+            ->where('student_id', $courseData['student_id'])->update([
+                    'exam_work' => $courseData['exam_work'],
+                ]);
+
+        if ($course_enrollment) {
+            return true;
+        }
+
+    }
+
     public function addStudentsGradesExcel($data)
     {
         [$course, $course_user, $semester, $course_semester] =
@@ -434,13 +489,35 @@ class CourseGradeService
         throw new \Exception('Error adding student to course', 500);
 
     }
-
-
-    public function exportCourseGrades($data)
+    /// function to add student term work with excel file
+    public function addStudentTermWork($data)
     {
         [$course, $course_user, $semester, $course_semester] =
             $this->checkCourseAccess($data['course_id'], auth()->user(), $data['semester_id']);
-        $courseGrades = [];
+        $students = Excel::toArray([], $data['students'])[0];
+        $students = array_slice($students, 1);
+        $wrongFormat = [];
+        $index = 1;
+        foreach ($students as $student) {
+            if (!isset($student[0]) || !isset($student[1])) {
+                $wrongFormat[] = $index;
+                $index++;
+                continue;
+            }
+            // check if stud term work between 0 and 40
+            if ($student[1] < 0 || $student[1] > 40) {
+                $wrongFormat[] = $index;
+                $index++;
+                continue;
+            }
+            $course_enrollment = CourseSemesterEnrollment::
+                where('course_semester_id', $course_semester->id)
+                ->where('student_id', $student[0])
+                ->update([
+                    'term_work' => $student[1],
+                ]);
+            $index++;
+        }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
             ->where('course_semester_id', $course_semester->id)
             ->get()
@@ -454,6 +531,7 @@ class CourseGradeService
                 }
                 return $enrollment;
             });
+        $courseGrades = [];
         foreach ($course_semester_enrollment as $enrollment) {
             $courseGrade = [];
             $courseGrade[] = $enrollment->student->id;
@@ -463,30 +541,33 @@ class CourseGradeService
             $courseGrade[] = $enrollment->total_grade;
             $courseGrade[] = $enrollment->grade;
             $courseGrades[] = $courseGrade;
-        }
-        // print($courseGrades);
 
-        if (count($courseGrades) > 0) {
-            return $courseGrades;
         }
-        throw new \Exception('Error exporting course grades', 500);
+        $filename = uniqid() . '.' . 'xlsx';
+        Excel::store(new GradesExport($courseGrades), $filename, 'public');
+        $filePath = Storage::url($filename);
+        $studWithNoGrade = false;
+        foreach ($course_semester_enrollment as $enrollment) {
+            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                $studWithNoGrade = true;
+            }
+        }
+        if ($course_semester_enrollment) {
+            // $logMessage = 'Added course term work file for course: ' . $course->name;
+            // $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_term_work];
+            // $new = ['course_name' => $course->name, 'new_file' => $filePath];
+            // $this->addActivity('COURSE_TERM_WORK', $logMessage, 'ADD_COURSE_TERM_WORK', $course_semester, $old, $new);
+
+            // $course_semester->stud_term_work = $filePath;
+            // $course_semester->save();
+            return [
+                'course_semester_enrollment' => $course_semester_enrollment,
+                'studWithNoGrade' => $studWithNoGrade,
+                'wrongFormat' => $wrongFormat,
+            ];
+
+        }
+        throw new \Exception('Error adding student term work to course', 500);
 
     }
-
-    public function insertGrade($courseData)
-    {
-        $course_semester_id = CourseSemester::where('course_id', $courseData['course_id'])
-            ->where('semester_id', $courseData['semester_id'])->first()->id;
-
-        $course_enrollment = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)
-            ->where('student_id', $courseData['student_id'])->update([
-                    'exam_work' => $courseData['exam_work'],
-                ]);
-
-        if ($course_enrollment) {
-            return true;
-        }
-
-    }
-
 }
