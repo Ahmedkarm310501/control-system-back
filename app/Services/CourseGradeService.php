@@ -266,7 +266,6 @@ class CourseGradeService
             ->where('student_id', $student->id)
             ->first();
         $temp = clone $course_semester_enrollment;
-        // dd($temp);
         if (!$course_semester_enrollment) {
             throw new \Exception('Student not enrolled in this course', 404);
         }
@@ -566,10 +565,9 @@ class CourseGradeService
                 'studWithNoGrade' => $studWithNoGrade,
                 'wrongFormat' => $wrongFormat,
             ];
+
         }
         throw new \Exception('Error adding student term work to course', 500);
 
-
     }
-
 }
