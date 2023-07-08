@@ -69,11 +69,13 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/get-file/storage/{file_name}', [ActivityLogController::class, 'getFile']);
     // compare courses semesters
     Route::post('/compare-courses-semesters', [GraphController::class, 'compareCoursesSemesters']);
+
+    // student courses
+    Route::post('/student-courses', [CourseController::class, 'studentCourses']);
 });
 // miidle ware isadmin for add user
 Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
-    // student courses
-    Route::post('/student-courses', [CourseController::class, 'studentCourses']);
+
     // insert grade
     Route::post('/insert-grade', [CourseGradeController::class, 'insertGrade']);
     // import from execl file courses in database
