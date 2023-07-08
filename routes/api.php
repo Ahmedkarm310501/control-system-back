@@ -51,7 +51,7 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
     Route::post('add-students-grades-excel', [CourseGradeController::class, 'addStudentsGradesExcel']);
     Route::post('add-students-term-work-excel', [CourseGradeController::class, 'addStudentTermWork']);
     Route::post('add-students-exam-work-excel', [CourseGradeController::class, 'addStudentExamWork']);
-
+    Route::post('add-students-extra-grades-excel', [CourseGradeController::class, 'addStudentExtraGrades']);
     Route::post('delete-course-grades', [CourseGradeController::class, 'deleteCourseGrades']);
     Route::post('export-course-grades', [CourseGradeController::class, 'exportCourseGrades']);
     Route::get('/courses/{course}', [CourseController::class, 'getCourse']);
