@@ -8,6 +8,7 @@ use App\Http\Requests\AddCourseRequest;
 use App\Http\Requests\ImportCoursesRequest;
 use App\Http\Requests\EditCourseSettingsRequest;
 use App\Http\Requests\DeleteCourseRequest;
+use App\Http\Requests\StudentCoursesRequest;
 use App\Services\CourseService;
 
 class CourseController extends Controller
@@ -93,5 +94,14 @@ class CourseController extends Controller
             return $this->error('Course not found', 404);
         }
         return $this->successMessage('Course deleted successfully' , 200);
+    }
+    public function studentCourses(StudentCoursesRequest $request, CourseService $courseService)
+    {
+        $student_id = $request->validated();
+        $courses = $courseService->studentCourses($student_id);
+        if(!$courses){
+            return $this->error('Courses not found', 404);
+        }
+        return $this->success($courses, 200 , 'all courses');
     }
 }
