@@ -8,6 +8,8 @@ use App\Models\Semester;
 use App\Models\Department;
 use App\Models\CourseRule;
 use App\Models\CourseUser;
+use App\Models\CourseSemesterEnrollment;
+use App\Models\Student;
 class CourseService
 {
 
@@ -46,7 +48,7 @@ class CourseService
             $courses = Course::with('department')->whereIn('id', $courses_ids)->get();
             return $courses;
         }
-        
+
     }
     public function listCoursesInSemester(){
         $semester = Semester::latest()->first();
@@ -62,11 +64,11 @@ class CourseService
             $courses = Course::with('department')->whereIn('id', $courses_ids)->get();
             return $courses;
         }
-        
+
     }
 
     public function getCourse($course){
-        
+
         $course = Course::find($course);
         $rule = $course->rule;
         $department = Department::find($course->department_id);
@@ -74,7 +76,7 @@ class CourseService
         if(!$course){
             return false;
         }
-        
+
         $course['deptName']  = $department->name;
         $course['rule']  = $rule;
         $res ;
@@ -110,11 +112,11 @@ class CourseService
         $courseRule = CourseRule::find($course->course_rule_id);
         $tempCourseRule = clone $courseRule;
         $tempCourse->course_rule = $tempCourseRule;
-        
+
         $course->course_code = $courseData['course_code'];
         $course->name = $courseData['course_name'];
         $course->department_id = $department->id;
-        
+
         $courseRule->term_work = $courseData['term_work'];
         $courseRule->exam_work = $courseData['exam_work'];
         $courseRule->instructor = $courseData['instructor'];
@@ -175,7 +177,7 @@ class CourseService
                     $Allcourses[] = $c;
                 }
     }
-        
+
         return $Allcourses;
     }
     public function deleteCourse($course_id){
@@ -185,6 +187,54 @@ class CourseService
         }
         $course->delete();
         return true;
-    } 
+    }
+    public function calcGrade($grade)
+    {
+        if ($grade >= 90)
+            return 'A+';
+        elseif ($grade >= 85)
+            return 'A';
+        elseif ($grade >= 80)
+            return 'B+';
+        elseif ($grade >= 75)
+            return 'B';
+        elseif ($grade >= 70)
+            return 'C+';
+        elseif ($grade >= 65)
+            return 'C';
+        elseif ($grade >= 60)
+            return 'D+';
+        elseif ($grade >= 50)
+            return 'D';
+        else
+            return 'F';
+    }
+    public function studentCourses($student_id){
+    // get all course semester enrollments from table CourseSemesterEnrollment table by student id
+    $enrollments = CourseSemesterEnrollment::where('student_id', $student_id)->get();
+    $student = Student::where('id', $student_id)->first();
+    $courses = [];
+    foreach ($enrollments as $enrollment){
+        $course_semester = CourseSemester::where('id', $enrollment->course_semester_id)->first();
+        $course = Course::find($course_semester->course_id);
+        $semester = Semester::find($course_semester->semester_id);
+        $total = $enrollment->exam_work + $enrollment->term_work;
+        $grade = $this->calcGrade($total);
+        $courses[] = [
+        'course_name' => $course->name,
+        'semster_id' => $semester->id,
+        'semester_year' => $semester->year,
+        'semester_term' => $semester->term,
+        'term_work' => $enrollment->term_work,
+        'exam_work' => $enrollment->exam_work,
+        'total_work' => $total,
+        'grade' => $grade,
+        ];
+    }
+    return [
+      'student_name' => $student->name,
+        'courses' => $courses
+    ];
+    }
 }
 
