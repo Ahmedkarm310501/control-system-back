@@ -69,6 +69,8 @@ Route::Group(['middleware' => 'auth:sanctum'], function () {
 });
 // miidle ware isadmin for add user
 Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
+    // student courses
+    Route::post('/student-courses', [CourseController::class, 'studentCourses']);
     // insert grade
     Route::post('/insert-grade', [CourseGradeController::class, 'insertGrade']);
     // import from execl file courses in database
