@@ -264,9 +264,8 @@ class CourseGradeService
         $course_semester_enrollment = CourseSemesterEnrollment::
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
-            ->first();
+            ->first();  
         $temp = clone $course_semester_enrollment;
-        // dd($temp);
         if (!$course_semester_enrollment) {
             throw new \Exception('Student not enrolled in this course', 404);
         }
@@ -474,6 +473,7 @@ class CourseGradeService
 
     }
     public function insertGrade($courseData){
+
         $course_semester_id = CourseSemester::where('course_id', $courseData['course_id'])
             ->where('semester_id', $courseData['semester_id']) ->first()->id;
         if(!$course_semester_id){
