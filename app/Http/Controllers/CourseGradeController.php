@@ -15,7 +15,7 @@ use App\Services\CourseGradeService;
 use App\Http\Requests\addStudentsToCourseRequest;
 use App\Http\Requests\DeleteStudentFromCourseRequest;
 use App\Http\Requests\DeleteStudentsFromCourseRequest;
-
+use App\Http\Requests\InsertGradeRequest;
 use App\Http\Requests\AddStudGradeRequest;
 use App\Http\Requests\DeleteCourseGradesRequest;
 use Maatwebsite\Excel\Facades\Excel;
@@ -130,5 +130,12 @@ class CourseGradeController extends Controller
         }
         return Excel::download(new GradesExport($grades), 'course.xlsx');
         // return $this->success($grades,200,'Course grades exported successfully');
+    }
+    public function insertGrade(InsertGradeRequest $request, CourseGradeService $courseService){
+        $grade = $courseService->insertGrade($request->validated());
+        if(!$grade){
+            return $this->error('course not assign to semester', 422);
+        }
+        return $this->successMessage('exam work  updated successfully', 201);
     }
 }
