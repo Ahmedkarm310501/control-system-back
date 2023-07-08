@@ -412,8 +412,8 @@ class DashboardService
         $semester = Semester::latest()->first();
         $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
         if($raafa_details['AllOrfFailed'] == 0){
-            $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->whereRaw('term_work + exam_work < 50')
-            ->update(['exam_work' => DB::raw('exam_work + ' . $raafa_details['number_of_gardes'])]);
+            $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->whereRaw('term_work + exam_work < 50')->where('exam_work', '>=', 18)
+            ->update(['term_work' => DB::raw("CASE WHEN (term_work + {$raafa_details['number_of_gardes']}) <=40 THEN (term_work + {$raafa_details['number_of_gardes']}) ELSE 40 END")]);
         }else{
             DB::table('course_semester_enrollments')
             ->where('course_semester_id', $course_semester_id)
