@@ -570,4 +570,86 @@ class CourseGradeService
         throw new \Exception('Error adding student term work to course', 500);
 
     }
+
+    public function addStudentExamWork($data)
+    {
+        [$course, $course_user, $semester, $course_semester] =
+            $this->checkCourseAccess($data['course_id'], auth()->user(), $data['semester_id']);
+        $students = Excel::toArray([], $data['students'])[0];
+        $students = array_slice($students, 1);
+        $wrongFormat = [];
+        $index = 1;
+        foreach ($students as $student) {
+            if (!isset($student[0]) || !isset($student[1])) {
+                $wrongFormat[] = $index;
+                $index++;
+                continue;
+            }
+            // check if stud exam work between 0 and 60
+            if ($student[1] < 0 || $student[1] > 60) {
+                $wrongFormat[] = $index;
+                $index++;
+                continue;
+            }
+            $course_enrollment = CourseSemesterEnrollment::
+                where('course_semester_id', $course_semester->id)
+                ->where('student_id', $student[0])
+                ->update([
+                    'exam_work' => $student[1],
+                ]);
+            $index++;
+        }
+        $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
+            ->where('course_semester_id', $course_semester->id)
+            ->get()
+            ->map(function ($enrollment) {
+                if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                    $enrollment->total_grade = null;
+                    $enrollment->grade = null;
+                } else {
+                    $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
+                    $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+                }
+                return $enrollment;
+            });
+        $courseGrades = [];
+        foreach ($course_semester_enrollment as $enrollment) {
+            $courseGrade = [];
+            $courseGrade[] = $enrollment->student->id;
+            $courseGrade[] = $enrollment->student->name;
+            $courseGrade[] = $enrollment->term_work;
+            $courseGrade[] = $enrollment->exam_work;
+            $courseGrade[] = $enrollment->total_grade;
+            $courseGrade[] = $enrollment->grade;
+            $courseGrades[] = $courseGrade;
+
+
+        }
+        $filename = uniqid() . '.' . 'xlsx';
+        Excel::store(new GradesExport($courseGrades), $filename, 'public');
+        $filePath = Storage::url($filename);
+        $studWithNoGrade = false;
+        foreach ($course_semester_enrollment as $enrollment) {
+            if ($enrollment->term_work === null || $enrollment->exam_work === null) {
+                $studWithNoGrade = true;
+            }
+        }
+        if ($course_semester_enrollment) {
+            // $logMessage = 'Added course exam work file for course: ' . $course->name;
+            // $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_exam_work];
+            // $new = ['course_name' => $course->name, 'new_file' => $filePath];
+            // $this->addActivity('COURSE_EXAM_WORK', $logMessage, 'ADD_COURSE_EXAM_WORK', $course_semester, $old, $new);
+
+            // $course_semester->stud_exam_work = $filePath;
+            // $course_semester->save();
+            return [
+                'course_semester_enrollment' => $course_semester_enrollment,
+                'studWithNoGrade' => $studWithNoGrade,
+                'wrongFormat' => $wrongFormat,
+            ];
+
+        }
+        throw new \Exception('Error adding student exam work to course', 500);
+
+    }
 }
