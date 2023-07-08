@@ -62,7 +62,7 @@ class CourseGradeService
         [$course, $course_user, $semester, $course_semester] =
             $this->checkCourseAccess($courseId, auth()->user(), $termId);
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
-            ->where('course_semester_id', $semester->id)
+            ->where('course_semester_id', $course_semester->id)
             ->get()
             ->map(function ($enrollment) {
                 if ($enrollment->term_work === null || $enrollment->exam_work === null) {
@@ -473,21 +473,20 @@ class CourseGradeService
         throw new \Exception('Error exporting course grades', 500);
 
     }
-    public function insertGrade($courseData){
+    public function insertGrade($courseData)
+    {
         $course_semester_id = CourseSemester::where('course_id', $courseData['course_id'])
-            ->where('semester_id', $courseData['semester_id']) ->first()->id;
-        if(!$course_semester_id){
-            return false;
-        }
+            ->where('semester_id', $courseData['semester_id'])->first()->id;
+
         $course_enrollment = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)
-            ->where('student_id', $courseData['student_id'])
-            ->update([
-                'exam_work' => $courseData['exam_work'],
-            ]);
-        if($course_enrollment){
+            ->where('student_id', $courseData['student_id'])->update([
+                    'exam_work' => $courseData['exam_work'],
+                ]);
+
+        if ($course_enrollment) {
             return true;
         }
-        return false;
+
     }
 
 }
