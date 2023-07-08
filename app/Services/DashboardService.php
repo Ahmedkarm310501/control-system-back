@@ -145,16 +145,18 @@ class DashboardService
         $need_four_grade = 0;
         $need_five_grade = 0;
         foreach($enrollements as $enroll){
-            if(($enroll->term_work + $enroll->exam_work)+1 >= 50){
-                $need_one_grade++;
-            }else if(($enroll->term_work + $enroll->exam_work)+2 >= 50){
-                $need_two_grade++;
-            }else if(($enroll->term_work + $enroll->exam_work)+3 >= 50){
-                $need_three_grade++;
-            }else if(($enroll->term_work + $enroll->exam_work)+4 >= 50){
-                $need_four_grade++;
-            }else if(($enroll->term_work + $enroll->exam_work)+5 >= 50){
-                $need_five_grade++;
+            if($enroll->exam_work >=18){
+                if(($enroll->term_work + $enroll->exam_work)+1 >= 50){
+                    $need_one_grade++;
+                }else if(($enroll->term_work + $enroll->exam_work)+2 >= 50){
+                    $need_two_grade++;
+                }else if(($enroll->term_work + $enroll->exam_work)+3 >= 50){
+                    $need_three_grade++;
+                }else if(($enroll->term_work + $enroll->exam_work)+4 >= 50){
+                    $need_four_grade++;
+                }else if(($enroll->term_work + $enroll->exam_work)+5 >= 50){
+                    $need_five_grade++;
+                }
             }
         }
         $number_of_students_40 = 0;
@@ -412,8 +414,22 @@ class DashboardService
         $semester = Semester::latest()->first();
         $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
         if($raafa_details['AllOrfFailed'] == 0){
-            $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->whereRaw('term_work + exam_work < 50')->where('exam_work', '>=', 18)
-            ->update(['term_work' => DB::raw("CASE WHEN (term_work + {$raafa_details['number_of_gardes']}) <=40 THEN (term_work + {$raafa_details['number_of_gardes']}) ELSE 40 END")]);
+            $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)
+            ->whereRaw('term_work + exam_work < 50')
+            ->where('exam_work', '>=', 18)
+            ->update([
+            'term_work' => DB::raw("
+            CASE
+                WHEN (term_work + exam_work + {$raafa_details['number_of_gardes']}) >= 50
+                THEN CASE
+                        WHEN (term_work + {$raafa_details['number_of_gardes']}) > 40
+                        THEN 40
+                        ELSE (term_work + {$raafa_details['number_of_gardes']})
+                    END
+                ELSE term_work
+            END
+        ")
+    ]);
         }else{
             DB::table('course_semester_enrollments')
             ->where('course_semester_id', $course_semester_id)
