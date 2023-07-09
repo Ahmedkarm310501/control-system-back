@@ -20,15 +20,15 @@ class UserService
         $userData['password'] = bcrypt($userData['password']);
         $user = User::create($userData);
 
-        if($user){
+        if ($user) {
             // set log neame
             $activity = activity()->causedBy(auth()->user())->performedOn($user)->
-            withProperties(['old' => null, 'new' => $user])->event('ADD_USER')
-            ->log('Add new user with id: '.$user->id.'' . ' and name: ' . $user->name . '');
+                withProperties(['old' => null, 'new' => $user])->event('ADD_USER')
+                ->log('Add new user with id: ' . $user->id . '' . ' and name: ' . $user->name . '');
             $activity->log_name = 'USER';
             $activity->save();
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -39,21 +39,21 @@ class UserService
         $users = $users->filter(function ($value, $key) {
             return $value->id != auth()->user()->id;
         })->values();
-        
-        
+
+
         return $users;
     }
     public function deleteUser($id)
     {
         $user = User::find($id);
-        if(!$user){
+        if (!$user) {
             return false;
         }
         $temp = clone $user;
         $user = $user->delete();
         $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
-        withProperties(['old' => $temp, 'new' => null])->event('DELETE_USER')
-        ->log('Delete user with id: '.$temp->id.'' . ' and name: ' . $temp->name . '');
+            withProperties(['old' => $temp, 'new' => null])->event('DELETE_USER')
+            ->log('Delete user with id: ' . $temp->id . '' . ' and name: ' . $temp->name . '');
         $activity->log_name = 'USER';
         $activity->save();
         return true;
@@ -98,11 +98,11 @@ class UserService
         $user->is_active = $userData['is_active'];
         $user->save();
         $activity = activity()->causedBy(auth()->user())->performedOn($temp)->
-        withProperties(['old' => $temp, 'new' => $user])->event('EDIT_USER')
-        ->log('Edit user with id: '.$user->id.'' . ' and name: ' . $user->name . '');
+            withProperties(['old' => $temp, 'new' => $user])->event('EDIT_USER')
+            ->log('Edit user with id: ' . $user->id . '' . ' and name: ' . $user->name . '');
         $activity->log_name = 'USER';
         $activity->save();
-        
+
         return true;
     }
     public function getCoursesInDepartment($department_id)
@@ -110,9 +110,9 @@ class UserService
         $current_semester = Semester::latest()->first();
         // get courses ids from course_semester table
         $course_semester_ids = CourseSemester::where('semester_id', $current_semester->id)->pluck('course_id');
-        foreach($course_semester_ids as $course_semester_id){
+        foreach ($course_semester_ids as $course_semester_id) {
             $course = Course::find($course_semester_id);
-            if($course->department_id == $department_id){
+            if ($course->department_id == $department_id) {
                 $courses[] = $course;
             }
         }
@@ -122,10 +122,10 @@ class UserService
     {
         // get the leatest semester from table semesters
         $semester = Semester::latest()->first();
-        
+
         // get the id from course semester by course id and semester id
-        $course_semester = CourseSemester::where('course_id',$user_course['course_id'])
-            ->where('semester_id',$semester->id)->first();
+        $course_semester = CourseSemester::where('course_id', $user_course['course_id'])
+            ->where('semester_id', $semester->id)->first();
 
         if (!$course_semester) {
             return false;
@@ -137,89 +137,92 @@ class UserService
             'course_id' => $user_course['course_id'],
             'semester_id' => $semester->id,
         ]);
-        if($course_user){
+        if ($course_user) {
             $activity = activity()->causedBy(auth()->user())->performedOn($course_user)->
-            withProperties(['old' => null, 'new' => $course_user])->event('ASSIGN_USER_TO_COURSE')
-            ->log('Assign  '.$course_user->user->name.' to course : '.$course_user->course->name.'');
+                withProperties(['old' => null, 'new' => $course_user])->event('ASSIGN_USER_TO_COURSE')
+                ->log('Assign  ' . $course_user->user->name . ' to course : ' . $course_user->course->name . '');
             $activity->log_name = 'ASSIGN_USER';
             $activity->save();
             return true;
-        }else{
+        } else {
             return false;
         }
     }
-    public function listCoursesAssignedToUser($user_id){
+    public function listCoursesAssignedToUser($user_id)
+    {
         // handle if no semester exist
         $semester = Semester::latest()->first();
-        if(!$semester){
+        if (!$semester) {
             return [];
         }
         $Semester_Id = $semester->id;
         $user = User::find($user_id);
-        if($user->is_admin == 1){
-            $courses_ids = CourseSemester::where('semester_id',$Semester_Id)->get('course_id');
+        if ($user->is_admin == 1) {
+            $courses_ids = CourseSemester::where('semester_id', $Semester_Id)->get('course_id');
             $courses = [];
-            foreach ($courses_ids as $course_id){
+            foreach ($courses_ids as $course_id) {
                 $courses[] = Course::find($course_id->course_id);
             }
             $new_courses = [];
-            foreach ($courses as $course){
+            foreach ($courses as $course) {
                 $c['course_id'] = $course->id;
                 $c['course_name'] = $course->name;
                 $c['course_code'] = $course->course_code;
                 $c['term_id'] = $Semester_Id;
-                $course_semester_id = CourseSemester::where('course_id',$course->id)->where('semester_id',$Semester_Id)->first()->id;
-                $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id',$course_semester_id)->count();
+                $c['dept_code'] = $course->department->dept_code;
+                $course_semester_id = CourseSemester::where('course_id', $course->id)->where('semester_id', $Semester_Id)->first()->id;
+                $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->count();
                 $new_courses[] = $c;
             }
             return $new_courses;
-        }else{
-            $courses_ids = CourseUser::where('user_id',$user_id)->where('semester_id',$Semester_Id)->get('course_id');
+        } else {
+            $courses_ids = CourseUser::where('user_id', $user_id)->where('semester_id', $Semester_Id)->get('course_id');
             $courses = [];
-            foreach ($courses_ids as $course_id){
+            foreach ($courses_ids as $course_id) {
                 $courses[] = Course::find($course_id->course_id);
             }
             $new_courses = [];
-            foreach ($courses as $course){
+            foreach ($courses as $course) {
                 $c['course_id'] = $course->id;
                 $c['course_name'] = $course->name;
                 $c['course_code'] = $course->course_code;
                 $c['term_id'] = $Semester_Id;
-                $course_semester_id = CourseSemester::where('course_id',$course->id)->where('semester_id',$Semester_Id)->first()->id;
-                $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id',$course_semester_id)->count();
+                $c['dept_code'] = $course->department->dept_code;
+                $course_semester_id = CourseSemester::where('course_id', $course->id)->where('semester_id', $Semester_Id)->first()->id;
+                $c['number_of_students'] = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)->count();
                 $new_courses[] = $c;
             }
             return $new_courses;
         }
-        
+
     }
     public function addSemester($semesterData)
     {
         if (!Hash::check($semesterData['user_password'], auth()->user()->password)) {
             throw new \Exception('Wrong password', 403);
         }
-        $semester = Semester::where('year',$semesterData['year'])->where('term',$semesterData['term'])->first();
-        if($semester){
+        $semester = Semester::where('year', $semesterData['year'])->where('term', $semesterData['term'])->first();
+        if ($semester) {
             throw new \Exception('Semester already exists', 422);
         }
         $semester = Semester::create($semesterData);
-        if($semester){
+        if ($semester) {
             $activity = activity()->causedBy(auth()->user())->performedOn($semester)->
-            withProperties(['old' => null, 'new' => $semester])->event('ADD_SEMESTER')
-            ->log('Add new semester');
+                withProperties(['old' => null, 'new' => $semester])->event('ADD_SEMESTER')
+                ->log('Add new semester');
             $activity->log_name = 'SEMESTER';
             $activity->save();
             return $semester;
-        }else{
+        } else {
             throw new \Exception('Semester not added', 422);
         }
     }
     public function getCoursesInSemester($semester_id)
     {
         // get the courses id from course semester table by semester id
-        $courses_id = CourseSemester::where('semester_id',$semester_id)->get('course_id');
+        $courses_id = CourseSemester::where('semester_id', $semester_id)->get('course_id');
         $courses = [];
-        foreach ($courses_id as $course_id){
+        foreach ($courses_id as $course_id) {
             $courses[] = Course::find($course_id->course_id);
         }
         return $courses;
@@ -228,10 +231,10 @@ class UserService
     {
         // Get the latest semester
         $semester_id = Semester::orderBy('id', 'desc')->first()->id;
-        
+
         // Get all courses in the current semester
         $courses_in_semester = CourseSemester::where('semester_id', $semester_id)->get('course_id');
-        
+
         // Check if $courses_in_semester is empty, create new course semesters
         if ($courses_in_semester->isEmpty()) {
             foreach ($courses as $course) {
@@ -241,12 +244,12 @@ class UserService
                 ]);
             }
         } else {
-            
+
             // Add new courses to the semester
             foreach ($courses as $course) {
                 // Check if the course is already associated with the current semester
                 $existingCourse = $courses_in_semester->firstWhere('course_id', $course);
-                
+
                 // If the course is not found, create a new course semester
                 if (!$existingCourse) {
                     CourseSemester::create([
@@ -265,9 +268,9 @@ class UserService
             }
 
         }
-        
+
         return true;
     }
-    
+
 
 }

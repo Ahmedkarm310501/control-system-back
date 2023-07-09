@@ -221,7 +221,7 @@ class CourseGradeService
         [$course, $course_user, $semester, $course_semester] =
             $this->checkCourseAccess($data['course_id'], auth()->user(), $data['semester_id']);
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')->
-        where('course_semester_id', $course_semester->id);
+            where('course_semester_id', $course_semester->id);
 
         $temp = clone $course_semester_enrollment;
 
@@ -279,9 +279,9 @@ class CourseGradeService
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->update([
-                    'term_work' => $data['term_work'],
-                    'exam_work' => $data['exam_work'],
-                ]);
+                'term_work' => $data['term_work'],
+                'exam_work' => $data['exam_work'],
+            ]);
         // $temp_old = clone $temp::with('student:name,id')->first();
         $temp_old = clone $temp;
         $temp->term_work = $data['term_work'];
@@ -340,9 +340,9 @@ class CourseGradeService
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
             ->where('course_semester_id', $course_semester->id)
             ->update([
-                    'term_work' => null,
-                    'exam_work' => null,
-                ]);
+                'term_work' => null,
+                'exam_work' => null,
+            ]);
         if ($course_semester_enrollment) {
             $logMessage = 'Deleted course grades for course: ' . $course->name;
             $old = ['course_name' => $course->name, 'old_file' => $filePath];
@@ -399,8 +399,8 @@ class CourseGradeService
 
         $course_enrollment = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)
             ->where('student_id', $courseData['student_id'])->update([
-            'exam_work' => $courseData['exam_work'],
-        ]);
+                    'exam_work' => $courseData['exam_work'],
+                ]);
 
         if ($course_enrollment) {
             return true;
@@ -432,9 +432,9 @@ class CourseGradeService
                 where('course_semester_id', $course_semester->id)
                 ->where('student_id', $student[0])
                 ->update([
-                        'term_work' => $student[1],
-                        'exam_work' => $student[2],
-                    ]);
+                    'term_work' => $student[1],
+                    'exam_work' => $student[2],
+                ]);
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
@@ -516,8 +516,8 @@ class CourseGradeService
                 where('course_semester_id', $course_semester->id)
                 ->where('student_id', $student[0])
                 ->update([
-                        'term_work' => $student[1],
-                    ]);
+                    'term_work' => $student[1],
+                ]);
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
@@ -597,8 +597,8 @@ class CourseGradeService
                 where('course_semester_id', $course_semester->id)
                 ->where('student_id', $student[0])
                 ->update([
-                        'exam_work' => $student[1],
-                    ]);
+                    'exam_work' => $student[1],
+                ]);
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
@@ -654,11 +654,11 @@ class CourseGradeService
         throw new \Exception('Error adding student exam work to course', 500);
 
     }
-    public function checkTermWork($grade, $extraGrade)
+    public function checkExamWork($grade, $extraGrade)
     {
         $newTermWork = $grade + $extraGrade;
-        if ($newTermWork > 40) {
-            $newTermWork = 40;
+        if ($newTermWork > 60) {
+            $newTermWork = 60;
         }
         return $newTermWork;
     }
@@ -689,8 +689,8 @@ class CourseGradeService
                 where('course_semester_id', $course_semester->id)
                 ->where('student_id', $student[0])
                 ->update([
-                        'term_work' => $this->checkTermWork($current_enrollment->term_work, $student[1]),
-                    ]);
+                    'exam_work' => $this->checkExamWork($current_enrollment->exam_work, $student[1]),
+                ]);
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
