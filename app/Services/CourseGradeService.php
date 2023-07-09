@@ -70,7 +70,7 @@ class CourseGradeService
                     $enrollment->grade = null;
                 } else {
                     $enrollment->total_grade = $enrollment->term_work + $enrollment->exam_work;
-                    $enrollment->grade = $this->calcGrade($enrollment->total_grade);
+                    $enrollment->grade = $this->calcGrade($enrollment->total_grade, $enrollment->exam_work);
                 }
                 return $enrollment;
             });
@@ -82,8 +82,10 @@ class CourseGradeService
         return $course_semester_enrollment;
     }
 
-    public function calcGrade($grade)
+    public function calcGrade($grade, $examWork = null)
     {
+        if ($examWork != null && $examWork < 18)
+            return 'F';
         if ($grade >= 90)
             return 'A+';
         elseif ($grade >= 85)
@@ -219,7 +221,7 @@ class CourseGradeService
         [$course, $course_user, $semester, $course_semester] =
             $this->checkCourseAccess($data['course_id'], auth()->user(), $data['semester_id']);
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')->
-            where('course_semester_id', $course_semester->id);
+        where('course_semester_id', $course_semester->id);
 
         $temp = clone $course_semester_enrollment;
 
@@ -277,9 +279,9 @@ class CourseGradeService
             where('course_semester_id', $course_semester->id)
             ->where('student_id', $student->id)
             ->update([
-                'term_work' => $data['term_work'],
-                'exam_work' => $data['exam_work'],
-            ]);
+                    'term_work' => $data['term_work'],
+                    'exam_work' => $data['exam_work'],
+                ]);
         // $temp_old = clone $temp::with('student:name,id')->first();
         $temp_old = clone $temp;
         $temp->term_work = $data['term_work'];
@@ -338,9 +340,9 @@ class CourseGradeService
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
             ->where('course_semester_id', $course_semester->id)
             ->update([
-                'term_work' => null,
-                'exam_work' => null,
-            ]);
+                    'term_work' => null,
+                    'exam_work' => null,
+                ]);
         if ($course_semester_enrollment) {
             $logMessage = 'Deleted course grades for course: ' . $course->name;
             $old = ['course_name' => $course->name, 'old_file' => $filePath];
@@ -397,8 +399,8 @@ class CourseGradeService
 
         $course_enrollment = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)
             ->where('student_id', $courseData['student_id'])->update([
-                    'exam_work' => $courseData['exam_work'],
-                ]);
+            'exam_work' => $courseData['exam_work'],
+        ]);
 
         if ($course_enrollment) {
             return true;
@@ -430,9 +432,9 @@ class CourseGradeService
                 where('course_semester_id', $course_semester->id)
                 ->where('student_id', $student[0])
                 ->update([
-                    'term_work' => $student[1],
-                    'exam_work' => $student[2],
-                ]);
+                        'term_work' => $student[1],
+                        'exam_work' => $student[2],
+                    ]);
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
@@ -514,8 +516,8 @@ class CourseGradeService
                 where('course_semester_id', $course_semester->id)
                 ->where('student_id', $student[0])
                 ->update([
-                    'term_work' => $student[1],
-                ]);
+                        'term_work' => $student[1],
+                    ]);
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
@@ -595,8 +597,8 @@ class CourseGradeService
                 where('course_semester_id', $course_semester->id)
                 ->where('student_id', $student[0])
                 ->update([
-                    'exam_work' => $student[1],
-                ]);
+                        'exam_work' => $student[1],
+                    ]);
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
@@ -652,14 +654,16 @@ class CourseGradeService
         throw new \Exception('Error adding student exam work to course', 500);
 
     }
-    public function checkTermWork($grade , $extraGrade){
+    public function checkTermWork($grade, $extraGrade)
+    {
         $newTermWork = $grade + $extraGrade;
-        if($newTermWork > 40){
+        if ($newTermWork > 40) {
             $newTermWork = 40;
         }
         return $newTermWork;
     }
-    public function addStudentExtraGrades($data){
+    public function addStudentExtraGrades($data)
+    {
         [$course, $course_user, $semester, $course_semester] =
             $this->checkCourseAccess($data['course_id'], auth()->user(), $data['semester_id']);
         $students = Excel::toArray([], $data['students'])[0];
@@ -679,14 +683,14 @@ class CourseGradeService
                 continue;
             }
             $current_enrollment = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)
-            ->where('student_id', $student[0])->first();
+                ->where('student_id', $student[0])->first();
 
             $course_enrollment = CourseSemesterEnrollment::
                 where('course_semester_id', $course_semester->id)
                 ->where('student_id', $student[0])
                 ->update([
-                    'term_work' => $this->checkTermWork($current_enrollment->term_work, $student[1]),
-                ]);
+                        'term_work' => $this->checkTermWork($current_enrollment->term_work, $student[1]),
+                    ]);
             $index++;
         }
         $course_semester_enrollment = CourseSemesterEnrollment::with('student:name,id')
@@ -713,7 +717,7 @@ class CourseGradeService
             $courseGrade[] = $enrollment->grade;
             $courseGrades[] = $course;
         }
-        $filename = uniqid(). '.'. 'xlsx';
+        $filename = uniqid() . '.' . 'xlsx';
         Excel::store(new GradesExport($courseGrades), $filename, 'public');
         $filePath = Storage::url($filename);
         $studWithNoGrade = false;
