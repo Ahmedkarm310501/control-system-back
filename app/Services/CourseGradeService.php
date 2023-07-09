@@ -555,13 +555,13 @@ class CourseGradeService
             }
         }
         if ($course_semester_enrollment) {
-            // $logMessage = 'Added course term work file for course: ' . $course->name;
-            // $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_term_work];
-            // $new = ['course_name' => $course->name, 'new_file' => $filePath];
-            // $this->addActivity('COURSE_TERM_WORK', $logMessage, 'ADD_COURSE_TERM_WORK', $course_semester, $old, $new);
+            $logMessage = 'Added course term work file for course: ' . $course->name;
+            $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_term_work];
+            $new = ['course_name' => $course->name, 'new_file' => $filePath];
+            $this->addActivity('COURSE_TERM_WORK', $logMessage, 'ADD_COURSE_TERM_WORK', $course_semester, $old, $new);
 
-            // $course_semester->stud_term_work = $filePath;
-            // $course_semester->save();
+            $course_semester->stud_term_work = $filePath;
+            $course_semester->save();
             return [
                 'course_semester_enrollment' => $course_semester_enrollment,
                 'studWithNoGrade' => $studWithNoGrade,
@@ -637,13 +637,13 @@ class CourseGradeService
             }
         }
         if ($course_semester_enrollment) {
-            // $logMessage = 'Added course exam work file for course: ' . $course->name;
-            // $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_exam_work];
-            // $new = ['course_name' => $course->name, 'new_file' => $filePath];
-            // $this->addActivity('COURSE_EXAM_WORK', $logMessage, 'ADD_COURSE_EXAM_WORK', $course_semester, $old, $new);
+            $logMessage = 'Added course exam work file for course: ' . $course->name;
+            $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_exam_work];
+            $new = ['course_name' => $course->name, 'new_file' => $filePath];
+            $this->addActivity('COURSE_EXAM_WORK', $logMessage, 'ADD_COURSE_EXAM_WORK', $course_semester, $old, $new);
 
-            // $course_semester->stud_exam_work = $filePath;
-            // $course_semester->save();
+            $course_semester->stud_exam_work = $filePath;
+            $course_semester->save();
             return [
                 'course_semester_enrollment' => $course_semester_enrollment,
                 'studWithNoGrade' => $studWithNoGrade,
@@ -727,13 +727,13 @@ class CourseGradeService
             }
         }
         if ($course_semester_enrollment) {
-            // $logMessage = 'Added course extra grade file for course: ' . $course->name;
-            // $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_extra_grade];
-            // $new = ['course_name' => $course->name, 'new_file' => $filePath];
-            // $this->addActivity('COURSE_EXTRA_GRADE', $logMessage, 'ADD_COURSE_EXTRA_GRADE', $course_semester, $old, $new);
+            $logMessage = 'Added course extra grade file for course: ' . $course->name;
+            $old = ['course_name' => $course->name, 'old_file' => $course_semester->stud_extra_grade];
+            $new = ['course_name' => $course->name, 'new_file' => $filePath];
+            $this->addActivity('COURSE_EXTRA_GRADE', $logMessage, 'ADD_COURSE_EXTRA_GRADE', $course_semester, $old, $new);
 
-            // $course_semester->stud_extra_grade = $filePath;
-            // $course_semester->save();
+            $course_semester->stud_extra_grade = $filePath;
+            $course_semester->save();
             return [
                 'course_semester_enrollment' => $course_semester_enrollment,
                 'studWithNoGrade' => $studWithNoGrade,
