@@ -715,7 +715,7 @@ class CourseGradeService
             $courseGrade[] = $enrollment->exam_work;
             $courseGrade[] = $enrollment->total_grade;
             $courseGrade[] = $enrollment->grade;
-            $courseGrades[] = $course;
+            $courseGrades[] = $courseGrade;
         }
         $filename = uniqid() . '.' . 'xlsx';
         Excel::store(new GradesExport($courseGrades), $filename, 'public');
