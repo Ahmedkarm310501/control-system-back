@@ -12,14 +12,15 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
-    public function part_one($course_id, $course_semester_id = null){
+    public function part_one($course_id, $course_semester_id = null)
+    {
 
         // dd($course_semester_id);
         // get the latest semester id
-        if($course_semester_id == null){
+        if ($course_semester_id == null) {
             $semester_id = Semester::latest()->first()->id;
-            $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
-        }else{
+            $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id', $semester_id)->first();
+        } else {
 
             $course_semester = CourseSemester::find($course_semester_id);
 
@@ -32,11 +33,11 @@ class DashboardService
         $total_grade = 0;
         $passed_students = 0;
         $failed_students = 0;
-        foreach($enrollements as $enroll){
+        foreach ($enrollements as $enroll) {
             $total_grade += $enroll->term_work + $enroll->exam_work;
-            if($enroll->term_work + $enroll->exam_work >= 50){
+            if ($enroll->term_work + $enroll->exam_work >= 50 && $enroll->exam_work >= 18) {
                 $passed_students++;
-            }else{
+            } else {
                 $failed_students++;
             }
         }
@@ -53,16 +54,17 @@ class DashboardService
         ];
         return $graph_one;
     }
-    public function part_two($course_id, $course_semester_id = null){
+    public function part_two($course_id, $course_semester_id = null)
+    {
         // get the latest semester id
-        if($course_semester_id == null){
+        if ($course_semester_id == null) {
             $semester_id = Semester::latest()->first()->id;
-            $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
-        }else{
+            $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id', $semester_id)->first();
+        } else {
 
-                $course_semester = CourseSemester::find($course_semester_id);
+            $course_semester = CourseSemester::find($course_semester_id);
 
-            }
+        }
         // $semester_id = Semester::latest()->first()->id;
         // $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
         $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->get();
@@ -77,32 +79,37 @@ class DashboardService
         $grade_D_plus = 0;
         $grade_D = 0;
         $grade_F = 0;
-        foreach($enrollements as $enroll){
-            if($enroll->term_work + $enroll->exam_work >= 90){
+        foreach ($enrollements as $enroll) {
+            if ($enroll->exam_work < 18) {
+                $failed_students++;
+                $grade_F++;
+                continue;
+            }
+            if ($enroll->term_work + $enroll->exam_work >= 90) {
                 $passed_students++;
                 $grade_A_plus++;
-            }else if($enroll->term_work + $enroll->exam_work >= 85){
+            } else if ($enroll->term_work + $enroll->exam_work >= 85) {
                 $passed_students++;
                 $grade_A++;
-            }else if($enroll->term_work + $enroll->exam_work >= 80){
+            } else if ($enroll->term_work + $enroll->exam_work >= 80) {
                 $passed_students++;
                 $grade_B_plus++;
-            }else if($enroll->term_work + $enroll->exam_work >= 75){
+            } else if ($enroll->term_work + $enroll->exam_work >= 75) {
                 $passed_students++;
                 $grade_B++;
-            }else if($enroll->term_work + $enroll->exam_work >= 70){
+            } else if ($enroll->term_work + $enroll->exam_work >= 70) {
                 $passed_students++;
                 $grade_C_plus++;
-            }else if($enroll->term_work + $enroll->exam_work >= 65){
+            } else if ($enroll->term_work + $enroll->exam_work >= 65) {
                 $passed_students++;
                 $grade_C++;
-            }else if($enroll->term_work + $enroll->exam_work >= 60){
+            } else if ($enroll->term_work + $enroll->exam_work >= 60) {
                 $passed_students++;
                 $grade_D_plus++;
-            }else if($enroll->term_work + $enroll->exam_work >= 50){
+            } else if ($enroll->term_work + $enroll->exam_work >= 50) {
                 $passed_students++;
                 $grade_D++;
-            }else{
+            } else {
                 $failed_students++;
                 $grade_F++;
             }
@@ -115,11 +122,11 @@ class DashboardService
             $perecentage_failed = ($failed_students / count($enrollements)) * 100;
         }
         // make it 2 decimal
-        $perecentage_passed = number_format((float)$perecentage_passed, 2, '.', '');
-        $perecentage_failed = number_format((float)$perecentage_failed, 2, '.', '');
+        $perecentage_passed = number_format((float) $perecentage_passed, 2, '.', '');
+        $perecentage_failed = number_format((float) $perecentage_failed, 2, '.', '');
         // turn it to float
-        $perecentage_passed = (float)$perecentage_passed;
-        $perecentage_failed = (float)$perecentage_failed;
+        $perecentage_passed = (float) $perecentage_passed;
+        $perecentage_failed = (float) $perecentage_failed;
         $graph_two = [
             'perecentage_passed' => $perecentage_passed,
             'perecentage_failed' => $perecentage_failed,
@@ -135,26 +142,27 @@ class DashboardService
         ];
         return $graph_two;
     }
-    public function part_three($course_id){
+    public function part_three($course_id)
+    {
         $semester_id = Semester::latest()->first()->id;
-        $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id',$semester_id)->first();
+        $course_semester = CourseSemester::where('course_id', $course_id)->where('semester_id', $semester_id)->first();
         $enrollements = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->whereRaw('term_work + exam_work < 50')->get();
         $need_one_grade = 0;
         $need_two_grade = 0;
         $need_three_grade = 0;
         $need_four_grade = 0;
         $need_five_grade = 0;
-        foreach($enrollements as $enroll){
-            if($enroll->exam_work >=18){
-                if(($enroll->term_work + $enroll->exam_work)+1 >= 50){
+        foreach ($enrollements as $enroll) {
+            if ($enroll->exam_work >= 18) {
+                if (($enroll->term_work + $enroll->exam_work) + 1 >= 50) {
                     $need_one_grade++;
-                }else if(($enroll->term_work + $enroll->exam_work)+2 >= 50){
+                } else if (($enroll->term_work + $enroll->exam_work) + 2 >= 50) {
                     $need_two_grade++;
-                }else if(($enroll->term_work + $enroll->exam_work)+3 >= 50){
+                } else if (($enroll->term_work + $enroll->exam_work) + 3 >= 50) {
                     $need_three_grade++;
-                }else if(($enroll->term_work + $enroll->exam_work)+4 >= 50){
+                } else if (($enroll->term_work + $enroll->exam_work) + 4 >= 50) {
                     $need_four_grade++;
-                }else if(($enroll->term_work + $enroll->exam_work)+5 >= 50){
+                } else if (($enroll->term_work + $enroll->exam_work) + 5 >= 50) {
                     $need_five_grade++;
                 }
             }
@@ -171,29 +179,29 @@ class DashboardService
         $number_of_students_49 = 0;
         // get number of students in range of 40-49
         $enrollements_range = CourseSemesterEnrollment::where('course_semester_id', $course_semester->id)->whereRaw('term_work + exam_work >= 40')->whereRaw('term_work + exam_work < 50')->get();
-        foreach($enrollements_range as $enroll){
+        foreach ($enrollements_range as $enroll) {
             $enroll_grade = $enroll->term_work + $enroll->exam_work;
             // turn it to int
-            $enroll_grade = (int)$enroll_grade;
-            if($enroll_grade == 40){
+            $enroll_grade = (int) $enroll_grade;
+            if ($enroll_grade == 40) {
                 $number_of_students_40++;
-            }else if($enroll_grade == 41){
+            } else if ($enroll_grade == 41) {
                 $number_of_students_41++;
-            }else if($enroll_grade == 42){
+            } else if ($enroll_grade == 42) {
                 $number_of_students_42++;
-            }else if($enroll_grade == 43){
+            } else if ($enroll_grade == 43) {
                 $number_of_students_43++;
-            }else if($enroll_grade == 44){
+            } else if ($enroll_grade == 44) {
                 $number_of_students_44++;
-            }else if($enroll_grade == 45){
+            } else if ($enroll_grade == 45) {
                 $number_of_students_45++;
-            }else if($enroll_grade == 46){
+            } else if ($enroll_grade == 46) {
                 $number_of_students_46++;
-            }else if($enroll_grade == 47){
+            } else if ($enroll_grade == 47) {
                 $number_of_students_47++;
-            }else if($enroll_grade == 48){
+            } else if ($enroll_grade == 48) {
                 $number_of_students_48++;
-            }else if($enroll_grade == 49){
+            } else if ($enroll_grade == 49) {
                 $number_of_students_49++;
             }
         }
@@ -218,22 +226,26 @@ class DashboardService
         ];
         return $graph_three;
     }
-    public function graphOne($course_semester){
+    public function graphOne($course_semester)
+    {
         $graph_one = $this->part_one($course_semester['course_id']);
         return $graph_one;
     }
-    public function graphTwo($course_semester){
+    public function graphTwo($course_semester)
+    {
         $graph_two = $this->part_two($course_semester['course_id']);
         return $graph_two;
     }
-    public function graphThree($course_semester){
+    public function graphThree($course_semester)
+    {
         $graph_three = $this->part_three($course_semester['course_id']);
         return $graph_three;
     }
-    public function raafaGrades($raafa_details){
+    public function raafaGrades($raafa_details)
+    {
         $semester = Semester::latest()->first();
         $course = Course::find($raafa_details['course_id']);
-        if(!$course){
+        if (!$course) {
             return false;
         }
         $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
@@ -249,69 +261,69 @@ class DashboardService
         $grade_D_plus = 0;
         $grade_D = 0;
         $grade_F = 0;
-        if($raafa_details['number_of_grades'] >20){
+        if ($raafa_details['number_of_grades'] > 20) {
             return false;
         }
-        foreach($enrollments as $enrollment){
+        foreach ($enrollments as $enrollment) {
             $total_grade = $enrollment->term_work + $enrollment->exam_work;
-            if($total_grade < 50){
-                if(($total_grade + $raafa_details['number_of_grades']) >= 50){
+            if ($total_grade < 50) {
+                if (($total_grade + $raafa_details['number_of_grades']) >= 50) {
                     $number_of_passed_students++;
-                }else{
+                } else {
                     $number_of_failed_students++;
                 }
-            }else{
+            } else {
                 $number_of_passed_students++;
             }
         }
-        if($raafa_details['AllOrFailed']==0){
-            foreach($enrollments as $enroll){
-                if($enroll->term_work + $enroll->exam_work >= 90){
+        if ($raafa_details['AllOrFailed'] == 0) {
+            foreach ($enrollments as $enroll) {
+                if ($enroll->term_work + $enroll->exam_work >= 90) {
                     $grade_A_plus++;
-                }else if($enroll->term_work + $enroll->exam_work >= 85){
+                } else if ($enroll->term_work + $enroll->exam_work >= 85) {
                     $grade_A++;
-                }else if($enroll->term_work + $enroll->exam_work >= 80){
+                } else if ($enroll->term_work + $enroll->exam_work >= 80) {
                     $grade_B_plus++;
-                }else if($enroll->term_work + $enroll->exam_work >= 75){
+                } else if ($enroll->term_work + $enroll->exam_work >= 75) {
                     $grade_B++;
-                }else if($enroll->term_work + $enroll->exam_work >= 70){
+                } else if ($enroll->term_work + $enroll->exam_work >= 70) {
                     $grade_C_plus++;
-                }else if($enroll->term_work + $enroll->exam_work >= 65){
+                } else if ($enroll->term_work + $enroll->exam_work >= 65) {
                     $grade_C++;
-                }else if($enroll->term_work + $enroll->exam_work >= 60){
+                } else if ($enroll->term_work + $enroll->exam_work >= 60) {
                     $grade_D_plus++;
-                }else if($enroll->term_work + $enroll->exam_work >= 50){
+                } else if ($enroll->term_work + $enroll->exam_work >= 50) {
                     $grade_D++;
-                }else{
-                    if(($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades']) >= 50){
+                } else {
+                    if (($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades']) >= 50) {
                         $grade_D++;
-                    }else{
+                    } else {
                         $grade_F++;
                     }
                 }
             }
-        }else{
-            foreach($enrollments as $enroll){
-                if($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 90){
+        } else {
+            foreach ($enrollments as $enroll) {
+                if ($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 90) {
                     $grade_A_plus++;
-                }else if($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades']  >= 85){
+                } else if ($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 85) {
                     $grade_A++;
-                }else if($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 80){
+                } else if ($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 80) {
                     $grade_B_plus++;
-                }else if($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 75){
+                } else if ($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 75) {
                     $grade_B++;
-                }else if($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 70){
+                } else if ($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 70) {
                     $grade_C_plus++;
-                }else if($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 65){
+                } else if ($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 65) {
                     $grade_C++;
-                }else if($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 60){
+                } else if ($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 60) {
                     $grade_D_plus++;
-                }else if($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 50){
+                } else if ($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades'] >= 50) {
                     $grade_D++;
-                }else{
-                    if(($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades']) >= 50){
+                } else {
+                    if (($enroll->term_work + $enroll->exam_work + $raafa_details['number_of_grades']) >= 50) {
                         $grade_D++;
-                    }else{
+                    } else {
                         $grade_F++;
                     }
                 }
@@ -322,14 +334,14 @@ class DashboardService
             $perecentage_failed = 0;
         } else {
             $perecentage_passed = ($number_of_passed_students / count($enrollments)) * 100;
-            $perecentage_failed = ($number_of_failed_students/ count($enrollments)) * 100;
+            $perecentage_failed = ($number_of_failed_students / count($enrollments)) * 100;
         }
         // make it 2 decimal
-        $perecentage_passed = number_format((float)$perecentage_passed, 2, '.', '');
-        $perecentage_failed = number_format((float)$perecentage_failed, 2, '.', '');
+        $perecentage_passed = number_format((float) $perecentage_passed, 2, '.', '');
+        $perecentage_failed = number_format((float) $perecentage_failed, 2, '.', '');
         // turn it to float
-        $perecentage_passed = (float)$perecentage_passed;
-        $perecentage_failed = (float)$perecentage_failed;
+        $perecentage_passed = (float) $perecentage_passed;
+        $perecentage_failed = (float) $perecentage_failed;
 
         return [
             'number_of_passed_students' => $number_of_passed_students,
@@ -347,25 +359,27 @@ class DashboardService
             'grade_F' => $grade_F,
         ];
     }
-    public function getCourseSemesters($course_id){
+    public function getCourseSemesters($course_id)
+    {
         $course_semesters = CourseSemester::where('course_id', $course_id)->get();
         $semester_ids = [];
-        foreach($course_semesters as $course_semester){
+        foreach ($course_semesters as $course_semester) {
             array_push($semester_ids, $course_semester->semester_id);
         }
         $semesters = Semester::whereIn('id', $semester_ids)->get();
         $year_terms = [];
-        foreach($semesters as $semester){
+        foreach ($semesters as $semester) {
             $year_term = [
                 'id' => $semester->id,
                 'year_term' => $semester->year_term = $semester->year . '-' . $semester->term,
             ];
 
-            $year_terms []=$year_term;
+            $year_terms[] = $year_term;
         }
         return $year_terms;
     }
-    public function compareCoursesSemesters($courses_semsesters_ids){
+    public function compareCoursesSemesters($courses_semsesters_ids)
+    {
         // check that the course id assign to semester id in table course_semester
 
         // $course_semester_one = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_one'])->where('semester_id', $courses_semsesters_ids['semester_id_one'])->first();
@@ -380,12 +394,12 @@ class DashboardService
         $course_one = Course::where('id', $courses_semsesters_ids['course_id_one'])->first();
         $course_two = Course::where('id', $courses_semsesters_ids['course_id_two'])->first();
         $course_semester_one = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_one'])->where('semester_id', $courses_semsesters_ids['semester_id_one'])->first();
-        if(!$course_semester_one){
+        if (!$course_semester_one) {
             return false;
         }
         // dd($course_semester_one);
         $course_semester_two = CourseSemester::where('course_id', $courses_semsesters_ids['course_id_two'])->where('semester_id', $courses_semsesters_ids['semester_id_two'])->first();
-        if(!$course_semester_two){
+        if (!$course_semester_two) {
             return false;
         }
         // dd($course_semester_two);
@@ -407,18 +421,19 @@ class DashboardService
             'course_code_two' => $course_two->name,
         ];
     }
-    public function applyRaafaGrades($raafa_details){
-        if($raafa_details['number_of_gardes'] >20){
+    public function applyRaafaGrades($raafa_details)
+    {
+        if ($raafa_details['number_of_gardes'] > 20) {
             return false;
         }
         $semester = Semester::latest()->first();
         $course_semester_id = CourseSemester::where('course_id', $raafa_details['course_id'])->where('semester_id', $semester->id)->first()->id;
-        if($raafa_details['AllOrfFailed'] == 0){
+        if ($raafa_details['AllOrfFailed'] == 0) {
             $enrollments = CourseSemesterEnrollment::where('course_semester_id', $course_semester_id)
-            ->whereRaw('term_work + exam_work < 50')
-            ->where('exam_work', '>=', 18)
-            ->update([
-            'term_work' => DB::raw("
+                ->whereRaw('term_work + exam_work < 50')
+                ->where('exam_work', '>=', 18)
+                ->update([
+                    'term_work' => DB::raw("
             CASE
                 WHEN (term_work + exam_work + {$raafa_details['number_of_gardes']}) >= 50
                 THEN CASE
@@ -429,16 +444,16 @@ class DashboardService
                 ELSE term_work
             END
         ")
-    ]);
-        }else{
+                ]);
+        } else {
             DB::table('course_semester_enrollments')
-            ->where('course_semester_id', $course_semester_id)
-            ->update([
-                'exam_work' => DB::raw("CASE
+                ->where('course_semester_id', $course_semester_id)
+                ->update([
+                    'exam_work' => DB::raw("CASE
                 WHEN (term_work + exam_work + {$raafa_details['number_of_gardes']}) <= 100  AND (exam_work + {$raafa_details['number_of_gardes']}) < 60 THEN (exam_work + {$raafa_details['number_of_gardes']})
                 ELSE 60
                 END")
-            ]);
+                ]);
         }
 
         return true;
