@@ -19,6 +19,7 @@ class CourseRuleFactory extends Factory
         return [
             'term_work' => 40,
             'exam_work' => 60,
+            'exam_pass_mark' => 18,
             'total' => 100,
             'instructor' => fake()->name(),
         ];

@@ -30,9 +30,10 @@ class EditCourseSettingsRequest extends FormRequest
             'exam_work' => 'required|numeric',
             'total' => 'required|numeric',
             'instructor' => 'required|string',
+            'passMark' => 'required|numeric',
             'semester_id' => 'required|numeric'
         ];
-       
+
     }
 
     /**
@@ -54,7 +55,11 @@ class EditCourseSettingsRequest extends FormRequest
             'total.numeric' => 'Total must be numeric',
             'instructor.required' => 'Instructor is required',
             'semester_id.required' => 'Semester ID is required',
-            'semester_id.numeric' => 'Semester ID must be numeric'
+            'semester_id.numeric' => 'Semester ID must be numeric',
+            'passMark.required' => 'Pass Mark is required',
+
+
+
         ];
     }
 }
