@@ -143,30 +143,41 @@ class UserService
         // get the leatest semester from table semesters
         $semester = Semester::latest()->first();
 
-        // get the id from course semester by course id and semester id
-        $course_semester = CourseSemester::where('course_id', $user_course['course_id'])
-            ->where('semester_id', $semester->id)->first();
+        foreach ($user_course['course_ids'] as $course) {
+            // check that course exist in this semseter
+            $course_semester = CourseSemester::where('course_id', $course)
+                ->where('semester_id', $semester->id)->first();
+            if (!$course_semester) {
+                continue;
+            }
+            $course_user = CourseUser::firstOrCreate([
+                'user_id' => $user_course['user_id'],
+                'course_semester_id' => $course_semester->id,
+                'course_id' => $course,
+                'semester_id' => $semester->id,
+            ]);
+        }
+        // delete user courses that is not in the list
+        $user_courses = CourseUser::where('user_id', $user_course['user_id'])
+            ->where('semester_id', $semester->id)->get();
+        // dd($user_course['course_ids']);
+        foreach ($user_courses as $user_course_enrolled) {
+            if (!in_array($user_course_enrolled->course_id, $user_course['course_ids'])) {
+                $user_course_enrolled->delete();
+            }
+        }
 
-        if (!$course_semester) {
-            return false;
-        }
-        // add to course user table the user id and course semester id
-        $course_user = CourseUser::firstOrCreate([
-            'user_id' => $user_course['user_id'],
-            'course_semester_id' => $course_semester->id,
-            'course_id' => $user_course['course_id'],
-            'semester_id' => $semester->id,
-        ]);
-        if ($course_user) {
-            $activity = activity()->causedBy(auth()->user())->performedOn($course_user)->
-                withProperties(['old' => null, 'new' => $course_user])->event('ASSIGN_USER_TO_COURSE')
-                ->log('Assign  ' . $course_user->user->name . ' to course : ' . $course_user->course->name . '');
-            $activity->log_name = 'ASSIGN_USER';
-            $activity->save();
-            return true;
-        } else {
-            return false;
-        }
+        // if ($course_user) {
+        //     $activity = activity()->causedBy(auth()->user())->performedOn($course_user)->
+        //         withProperties(['old' => null, 'new' => $course_user])->event('ASSIGN_USER_TO_COURSE')
+        //         ->log('Assign  ' . $course_user->user->name . ' to course : ' . $course_user->course->name . '');
+        //     $activity->log_name = 'ASSIGN_USER';
+        //     $activity->save();
+        //     return true;
+        // } else {
+        //     return false;
+        // }
+        return true;
     }
     public function listCoursesAssignedToUser($user_id)
     {
