@@ -88,6 +88,9 @@ Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::post('/assign-user-to-course', [UserController::class, 'assignUserToCourse']);
     // get all courses in a department
     Route::get('/courses-in-department/{dept_id}', [DepartmentController::class, 'getCoursesInDepartment']);
+
+    // get all courses in a department for user by id
+    Route::get('/courses-in-department-for-user/{dept_id}/{user_id}', [DepartmentController::class, 'getCoursesInDepartmentForUser']);
     // list all users
     Route::get('/list-users', [UserController::class, 'listUsers']);
     // edit user
