@@ -118,6 +118,26 @@ class UserService
         }
         return $courses;
     }
+    // get courses in department for user
+    public function getCoursesInDepartmentForUser($department_id, $user_id)
+    {
+        $current_semester = Semester::latest()->first();
+        // get courses ids from course_semester table
+        $course_semester_ids = CourseSemester::where('semester_id', $current_semester->id)->pluck('course_id');
+        $user_courses = CourseUser::where('user_id', $user_id)->where('semester_id', $current_semester->id)->get();
+        foreach ($course_semester_ids as $course_semester_id) {
+            $course = Course::find($course_semester_id);
+            if ($course->department_id == $department_id) {
+                if ($user_courses->contains('course_id', $course->id)) {
+                    $course->is_enrolled = true;
+                } else {
+                    $course->is_enrolled = false;
+                }
+                $courses[] = $course;
+            }
+        }
+        return $courses;
+    }
     public function assignUserToCourse($user_course)
     {
         // get the leatest semester from table semesters
