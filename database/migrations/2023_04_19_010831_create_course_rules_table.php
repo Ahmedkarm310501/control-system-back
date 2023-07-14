@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,9 +15,9 @@ return new class extends Migration
             $table->float('term_work');
             $table->float('exam_work');
             $table->float('total');
-            // $table->float('pass_mark');
+            $table->float('exam_pass_mark');
             $table->string('instructor');
-            
+
             $table->timestamps();
         });
     }

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+
 use Maatwebsite\Excel\Facades\Excel;
 use App\Models\Course;
 use App\Models\CourseSemester;
@@ -10,13 +11,15 @@ use App\Models\CourseRule;
 use App\Models\CourseUser;
 use App\Models\CourseSemesterEnrollment;
 use App\Models\Student;
+
 class CourseService
 {
 
-    public function addCourse($courseData){
+    public function addCourse($courseData)
+    {
         // get the department id
         $department = Department::where('dept_code', $courseData['dept_code'])->first();
-        if(!$department){
+        if (!$department) {
             return false;
         }
         $course = new Course();
@@ -28,38 +31,40 @@ class CourseService
 
         $activity = activity()->causedBy(auth()->user())->performedOn($course)->
             withProperties(['old' => null, 'new' => $course])->event('ADD_COURSE')
-            ->log('Add new course with id: '.$course->course_code.'' . ' and name: ' . $course->name . '');
-            $activity->log_name = 'COURSE';
-            $activity->save();
+            ->log('Add new course with id: ' . $course->course_code . '' . ' and name: ' . $course->name . '');
+        $activity->log_name = 'COURSE';
+        $activity->save();
 
         return $course;
     }
 
-    public function listCourses(){
+    public function listCourses()
+    {
         $courses = Course::with('department')->get();
         $semester = Semester::latest()->first();
-        if(!$courses ){
+        if (!$courses) {
             return false;
         }
-        if(auth()->user()->is_admin ==1){
+        if (auth()->user()->is_admin == 1) {
             return $courses;
-        }else{
+        } else {
             $courses_ids = CourseUser::where('user_id', auth()->user()->id)->where('semester_id', $semester->id)->get('course_id');
             $courses = Course::with('department')->whereIn('id', $courses_ids)->get();
             return $courses;
         }
 
     }
-    public function listCoursesInSemester(){
+    public function listCoursesInSemester()
+    {
         $semester = Semester::latest()->first();
         $course_semester = CourseSemester::where('semester_id', $semester->id)->get('course_id');
         $courses = Course::with('department')->whereIn('id', $course_semester)->get();
-        if(!$courses ){
+        if (!$courses) {
             return false;
         }
-        if(auth()->user()->is_admin ==1){
+        if (auth()->user()->is_admin == 1) {
             return $courses;
-        }else{
+        } else {
             $courses_ids = CourseUser::where('user_id', auth()->user()->id)->where('semester_id', $semester->id)->get('course_id');
             $courses = Course::with('department')->whereIn('id', $courses_ids)->get();
             return $courses;
@@ -67,19 +72,20 @@ class CourseService
 
     }
 
-    public function getCourse($course){
+    public function getCourse($course)
+    {
 
         $course = Course::find($course);
         $rule = $course->rule;
         $department = Department::find($course->department_id);
 
-        if(!$course){
+        if (!$course) {
             return false;
         }
 
-        $course['deptName']  = $department->name;
-        $course['rule']  = $rule;
-        $res ;
+        $course['deptName'] = $department->name;
+        $course['rule'] = $rule;
+        $res;
         $res['courseID'] = $course->course_code;
         $res['courseName'] = $course->name;
         $res['termWork'] = $course->rule->term_work;
@@ -88,27 +94,29 @@ class CourseService
         $res['deptName'] = $department->name;
         $res['instructor'] = $course->rule->instructor;
         $res['totalGrade'] = $course->rule->total;
+        $res['passMark'] = $course->rule->exam_pass_mark;
         return $res;
     }
 
-    public function editCourse($courseData){
-        if($courseData['term_work'] + $courseData['exam_work'] != $courseData['total']){
+    public function editCourse($courseData)
+    {
+        if ($courseData['term_work'] + $courseData['exam_work'] != $courseData['total']) {
             throw new \Exception('Term work + exam work must = total', 403);
         }
         $course = Course::find($courseData['course_id']);
-        if(!$course){
+        if (!$course) {
             return false;
         }
         $course_user = CourseUser::where('course_id', $courseData['course_id'])
-        ->where('semester_id', $courseData['semester_id'])->where('user_id', auth()->user()->id)->first();
-        if(!$course_user && auth()->user()->is_admin != 1){
+            ->where('semester_id', $courseData['semester_id'])->where('user_id', auth()->user()->id)->first();
+        if (!$course_user && auth()->user()->is_admin != 1) {
             return false;
         }
         $department = Department::where('dept_code', $courseData['dept_code'])->first();
-        if(!$department){
+        if (!$department) {
             return false;
         }
-        $tempCourse =clone $course;
+        $tempCourse = clone $course;
         $courseRule = CourseRule::find($course->course_rule_id);
         $tempCourseRule = clone $courseRule;
         $tempCourse->course_rule = $tempCourseRule;
@@ -121,30 +129,32 @@ class CourseService
         $courseRule->exam_work = $courseData['exam_work'];
         $courseRule->instructor = $courseData['instructor'];
         $courseRule->total = $courseData['total'];
+        $courseRule->exam_pass_mark = $courseData['passMark'];
         $course->save();
         $courseRule->save();
         $course->course_rule = $courseRule;
         $activity = activity()->causedBy(auth()->user())->performedOn($course)->
             withProperties(['old' => $tempCourse, 'new' => $course])->event('EDIT_COURSE')
-            ->log('Edit course with id: '.$course->id.'' . ' and name: ' . $course->name . '');
-            $activity->log_name = 'COURSE';
-            $activity->save();
+            ->log('Edit course with id: ' . $course->id . '' . ' and name: ' . $course->name . '');
+        $activity->log_name = 'COURSE';
+        $activity->save();
         return $course;
     }
-    public function getCoursesInSemesterMerge(){
+    public function getCoursesInSemesterMerge()
+    {
         $Allcourses = Course::all();
         $departments = Department::all();
         // get the leatest semester
         $semester = Semester::latest()->first();
         // get the courses id from course semester table by semester id
-        $courses_id = CourseSemester::where('semester_id',$semester->id)->get('course_id');
+        $courses_id = CourseSemester::where('semester_id', $semester->id)->get('course_id');
         $coursesInSemester = [];
-        foreach ($courses_id as $course_id){
+        foreach ($courses_id as $course_id) {
             $coursesInSemester[] = Course::find($course_id->course_id);
         }
         $coursesNotInSemester = [];
-        foreach ($Allcourses as $course){
-            if(!in_array($course, $coursesInSemester)){
+        foreach ($Allcourses as $course) {
+            if (!in_array($course, $coursesInSemester)) {
                 $coursesNotInSemester[] = $course;
             }
         }
@@ -164,25 +174,26 @@ class CourseService
         foreach ($courseData as $course) {
             // check if the course_code is not empty
             $c = Course::where('course_code', $course[0])->first();
-                // check if department_id is exist
-                $department_id = Department::where('id', $course[2])->first();
-                if (!$c && !empty($course[0]) && !empty($course[1]) && !empty($course[2]) && $department_id) {
-                    $isExist = true;
-                    $c = new Course();
-                    $c->course_code = $course[0];
-                    $c->name = $course[1] ?? '';
-                    $c->department_id = $course[2] ?? null;
-                    $c->course_rule_id = CourseRule::factory()->create()->id;
-                    $c->save();
-                    $Allcourses[] = $c;
-                }
-    }
+            // check if department_id is exist
+            $department_id = Department::where('id', $course[2])->first();
+            if (!$c && !empty($course[0]) && !empty($course[1]) && !empty($course[2]) && $department_id) {
+                $isExist = true;
+                $c = new Course();
+                $c->course_code = $course[0];
+                $c->name = $course[1] ?? '';
+                $c->department_id = $course[2] ?? null;
+                $c->course_rule_id = CourseRule::factory()->create()->id;
+                $c->save();
+                $Allcourses[] = $c;
+            }
+        }
 
         return $Allcourses;
     }
-    public function deleteCourse($course_id){
+    public function deleteCourse($course_id)
+    {
         $course = Course::find($course_id);
-        if(!$course){
+        if (!$course) {
             return false;
         }
         $course->delete();
@@ -209,32 +220,32 @@ class CourseService
         else
             return 'F';
     }
-    public function studentCourses($student_id){
-    // get all course semester enrollments from table CourseSemesterEnrollment table by student id
-    $enrollments = CourseSemesterEnrollment::where('student_id', $student_id)->get();
-    $student = Student::where('id', $student_id)->first();
-    $courses = [];
-    foreach ($enrollments as $enrollment){
-        $course_semester = CourseSemester::where('id', $enrollment->course_semester_id)->first();
-        $course = Course::find($course_semester->course_id);
-        $semester = Semester::find($course_semester->semester_id);
-        $total = $enrollment->exam_work + $enrollment->term_work;
-        $grade = $this->calcGrade($total);
-        $courses[] = [
-        'course_name' => $course->name,
-        'semster_id' => $semester->id,
-        'semester_year' => $semester->year,
-        'semester_term' => $semester->term,
-        'term_work' => $enrollment->term_work,
-        'exam_work' => $enrollment->exam_work,
-        'total_work' => $total,
-        'grade' => $grade,
+    public function studentCourses($student_id)
+    {
+        // get all course semester enrollments from table CourseSemesterEnrollment table by student id
+        $enrollments = CourseSemesterEnrollment::where('student_id', $student_id)->get();
+        $student = Student::where('id', $student_id)->first();
+        $courses = [];
+        foreach ($enrollments as $enrollment) {
+            $course_semester = CourseSemester::where('id', $enrollment->course_semester_id)->first();
+            $course = Course::find($course_semester->course_id);
+            $semester = Semester::find($course_semester->semester_id);
+            $total = $enrollment->exam_work + $enrollment->term_work;
+            $grade = $this->calcGrade($total);
+            $courses[] = [
+                'course_name' => $course->name,
+                'semster_id' => $semester->id,
+                'semester_year' => $semester->year,
+                'semester_term' => $semester->term,
+                'term_work' => $enrollment->term_work,
+                'exam_work' => $enrollment->exam_work,
+                'total_work' => $total,
+                'grade' => $grade,
+            ];
+        }
+        return [
+            'student_name' => $student->name,
+            'courses' => $courses
         ];
     }
-    return [
-      'student_name' => $student->name,
-        'courses' => $courses
-    ];
-    }
 }
-
