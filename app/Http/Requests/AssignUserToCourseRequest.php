@@ -23,7 +23,7 @@ class AssignUserToCourseRequest extends FormRequest
     {
         return [
             'user_id' => 'required|integer',
-            'course_id' => 'required|integer',
+            'course_ids' => 'required|array',
         ];
     }
     public function messages(): array
@@ -31,8 +31,9 @@ class AssignUserToCourseRequest extends FormRequest
         return [
             'user_id.required' => 'User Id is required',
             'user_id.integer' => 'User Id must be an integer',
-            'course_id.required' => 'Course Id is required',
-            'course_id.integer' => 'Course Id must be an integer',
+            'course_ids.required' => 'Course Ids are required',
+            'course_ids.array' => 'Course Ids must be an array',
+
         ];
     }
 }
